@@ -55,7 +55,7 @@ enum StorageKey {
 #[near_bindgen]
 impl Contract {
     #[init]
-    pub fn new_default_meta(owner_id: ValidAccountId) -> Self {
+    pub fn init_contract(owner_id: ValidAccountId) -> Self {
         Self::new(
             owner_id,
             NFTContractMetadata {
@@ -88,24 +88,12 @@ impl Contract {
     }
 
     // Obtener cantidad de tokens creaos
-    pub fn get_tokens(&self) -> u64 {
+    pub fn get_number_burritos(&self) -> u64 {
         self.nTokens
     }
 
-    // Obtener token por su id
-    pub fn get_token(&self, token_id: TokenId) -> TokenMetadata {
-        let mut metadata = self
-            .tokens
-            .token_metadata_by_id
-            .as_ref()
-            .and_then(|by_id| by_id.get(&token_id))
-            .unwrap();
-
-        metadata
-    }
-
-    // Obtener token por su id nuevo formato
-    pub fn get_tokenJson(&self, token_id: TokenId) -> Burrito {
+    // Obtener burrito
+    pub fn get_burrito(&self, token_id: TokenId) -> Burrito {
         let mut metadata = self
             .tokens
             .token_metadata_by_id
@@ -129,9 +117,28 @@ impl Contract {
 
     }
 
+    // Modificar burrito
+    pub fn update_burrito(&mut self, token_id: TokenId, extra: String) -> TokenMetadata {
+        let mut metadata = self
+            .tokens
+            .token_metadata_by_id
+            .as_ref()
+            .and_then(|by_id| by_id.get(&token_id))
+            .unwrap();
+        
+        metadata.extra = Some(extra);
+
+        self.tokens
+            .token_metadata_by_id
+            .as_mut()
+            .and_then(|by_id| by_id.insert(&token_id, &metadata));
+
+        metadata
+    }
+
     // Minar un nuevo token
     #[payable]
-    pub fn nft_mint(
+    pub fn new_burrito(
         &mut self,
         token_id: TokenId,
         receiver_id: ValidAccountId,
@@ -140,6 +147,8 @@ impl Contract {
         self.nTokens += 1;
         self.tokens.mint(token_id, receiver_id, Some(token_metadata))
     }
+
+    // get_burritos_owner
 
 }
 

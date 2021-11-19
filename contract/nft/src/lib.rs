@@ -148,7 +148,112 @@ impl Contract {
         self.tokens.mint(token_id, receiver_id, Some(token_metadata))
     }
 
-    // get_burritos_owner
+    // Pelear
+    pub fn fight_burritos(&self, token_id_burrito1: TokenId, token_id_burrito2: TokenId) -> Burrito {
+        // Obtener metadata burrito 1
+        let mut metadata_burrito1 = self
+            .tokens
+            .token_metadata_by_id
+            .as_ref()
+            .and_then(|by_id| by_id.get(&token_id_burrito1))
+            .unwrap();
+
+        // Obtener metadata burrito 2
+        let mut metadata_burrito2 = self
+            .tokens
+            .token_metadata_by_id
+            .as_ref()
+            .and_then(|by_id| by_id.get(&token_id_burrito2))
+            .unwrap();
+        
+        // Crear json
+        let newextradata_burrito1 = str::replace(&metadata_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
+        let newextradata_burrito2 = str::replace(&metadata_burrito2.extra.as_ref().unwrap().to_string(), "'", "\"");
+        let extradatajson_burrito1: Extras = serde_json::from_str(&newextradata_burrito1).unwrap();
+        let extradatajson_burrito2: Extras = serde_json::from_str(&newextradata_burrito2).unwrap();
+
+        // Crear estructura burrito 1
+        let burrito1 = Burrito {
+            name : metadata_burrito1.title.as_ref().unwrap().to_string(),
+            description : metadata_burrito1.description.as_ref().unwrap().to_string(),
+            hp : extradatajson_burrito1.hp,
+            attack : extradatajson_burrito1.attack,
+            defense : extradatajson_burrito1.defense,
+            speed : extradatajson_burrito1.speed
+        };
+
+        // Crear estructura burrito 2
+        let burrito2 = Burrito {
+            name : metadata_burrito2.title.as_ref().unwrap().to_string(),
+            description : metadata_burrito2.description.as_ref().unwrap().to_string(),
+            hp : extradatajson_burrito2.hp,
+            attack : extradatajson_burrito2.attack,
+            defense : extradatajson_burrito2.defense,
+            speed : extradatajson_burrito2.speed
+        };
+
+        let logname1 = format!("Nombre Burrito 1: {}", metadata_burrito1.title.as_ref().unwrap().to_string() );
+        env::log(logname1.as_bytes());
+        
+        let logname2 = format!("Nombre Burrito 2: {}", metadata_burrito2.title.as_ref().unwrap().to_string() );
+        env::log(logname2.as_bytes());
+
+        // Variable que almacenará al ganador
+        let winner : Burrito;
+
+        // Verificar cuál burrito tiene mayor velocidad
+        if burrito1.speed > burrito2.speed {
+            // Verificar cuál burrito tiene mayor ataque
+            if burrito1.attack > burrito2.attack {
+                winner = burrito1;
+            } else if burrito2.attack > burrito1.attack{
+                winner = burrito2;
+            } else {
+                let prom_burrito1 = (burrito1.hp.parse::<i32>().unwrap() + burrito1.attack.parse::<i32>().unwrap() + burrito1.defense.parse::<i32>().unwrap() + burrito1.speed.parse::<i32>().unwrap())/4;
+                let prom_burrito2 = (burrito2.hp.parse::<i32>().unwrap() + burrito2.attack.parse::<i32>().unwrap() + burrito2.defense.parse::<i32>().unwrap() + burrito2.speed.parse::<i32>().unwrap())/4;
+                if prom_burrito1 > prom_burrito2 {
+                    winner = burrito1;
+                } else {
+                    winner = burrito2;
+                }
+            }
+        } else if burrito2.speed > burrito1.speed {
+            // Verificar cuál burrito tiene mayor ataque
+            if burrito2.attack > burrito1.attack {
+                winner = burrito2;
+            } else if burrito1.attack > burrito2.attack{
+                winner = burrito1;
+            } else {
+                let prom_burrito1 = (burrito1.hp.parse::<i32>().unwrap() + burrito1.attack.parse::<i32>().unwrap() + burrito1.defense.parse::<i32>().unwrap() + burrito1.speed.parse::<i32>().unwrap())/4;
+                let prom_burrito2 = (burrito2.hp.parse::<i32>().unwrap() + burrito2.attack.parse::<i32>().unwrap() + burrito2.defense.parse::<i32>().unwrap() + burrito2.speed.parse::<i32>().unwrap())/4;
+                if prom_burrito1 > prom_burrito2 {
+                    winner = burrito1;
+                } else {
+                    winner = burrito2;
+                }
+            }
+        } else {
+            let prom_burrito1 = (burrito1.hp.parse::<i32>().unwrap() + burrito1.attack.parse::<i32>().unwrap() + burrito1.defense.parse::<i32>().unwrap() + burrito1.speed.parse::<i32>().unwrap())/4;
+            let prom_burrito2 = (burrito2.hp.parse::<i32>().unwrap() + burrito2.attack.parse::<i32>().unwrap() + burrito2.defense.parse::<i32>().unwrap() + burrito2.speed.parse::<i32>().unwrap())/4;
+
+            if prom_burrito1 > prom_burrito2 {
+                // Verificar cuál burrito tiene mayor ataque
+                if burrito1.attack >= burrito2.attack {
+                    winner = burrito1;
+                } else {
+                    winner = burrito2;
+                }
+            } else {
+                if burrito2.attack >= burrito1.attack {
+                    winner = burrito2;
+                } else {
+                    winner = burrito1;
+                }
+            }
+        }
+
+        winner
+    }
 
 }
 

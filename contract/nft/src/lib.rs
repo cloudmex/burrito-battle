@@ -1,9 +1,7 @@
 //Implementación de los standards NFT de near
-extern crate rand;
 use near_contract_standards::non_fungible_token::metadata::{
     NFTContractMetadata, NonFungibleTokenMetadataProvider, TokenMetadata, NFT_METADATA_SPEC,
 };
-
 use near_contract_standards::non_fungible_token::{Token, TokenId};
 use near_contract_standards::non_fungible_token::NonFungibleToken;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
@@ -14,8 +12,6 @@ use near_sdk::{
     env, near_bindgen, AccountId, BorshStorageKey, PanicOnDefault,
     Promise, PromiseOrValue,};
 near_sdk::setup_alloc!();
-use rand::thread_rng;
-use rand::Rng;
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
 pub struct Contract {
@@ -206,50 +202,100 @@ impl Contract {
         let mut winner : i32 = 0;
         let mut old_defense_burrito1 = burrito1.defense.parse::<f32>().unwrap();
         let mut old_defense_burrito2 = burrito2.defense.parse::<f32>().unwrap();
-        
-
+        let mut rands1: u8 = 0;
+        let mut rands2: u8 = 0;
+        let mut randa1: u8 = 0;
+        let mut randa2: u8 = 0;
         loop {
+                // Generar números aleatorios para multiplicadores de velocidad y ataque
+                rands1 = *env::random_seed().get(0).unwrap();
+                rands2 = *env::random_seed().get(1).unwrap();
+                randa1 = *env::random_seed().get(2).unwrap();
+                randa2 = *env::random_seed().get(3).unwrap();
+
+                let mut speed_mult1: f32 = 0.0;
+                let mut speed_mult2: f32 = 0.0;
+                let mut attack_mult1: f32 = 0.0;
+                let mut attack_mult2: f32 = 0.0;
+
+                if rands1 < 10 {
+                    speed_mult1 = rands1 as f32 * 0.1;
+                }
+                if rands1 >= 10 && rands1 < 100 {
+                    speed_mult1 = rands1 as f32 * 0.01;
+                }
+                if rands1 >= 100 && rands1 < 255 {
+                    speed_mult1 = rands1 as f32 * 0.001;
+                }
+                if rands2 < 10 {
+                    speed_mult2 = rands2 as f32 * 0.1;
+                }
+                if rands2 >= 10 && rands2 < 100 {
+                    speed_mult2 = rands2 as f32 * 0.01;
+                }
+                if rands2 >= 100 && rands2 < 255 {
+                    speed_mult2 = rands2 as f32 * 0.001;
+                }
+                if randa1 < 10 {
+                    attack_mult1 = randa1 as f32 * 0.1;
+                }
+                if randa1 >= 10 && randa1 < 100 {
+                    attack_mult1 = randa1 as f32 * 0.01;
+                }
+                if randa1 >= 100 && randa1 < 255 {
+                    attack_mult1 = randa1 as f32 * 0.001;
+                }
+                if randa2 < 10 {
+                    attack_mult2 = randa2 as f32 * 0.1;
+                }
+                if randa2 >= 10 && randa2 < 100 {
+                    attack_mult2 = randa2 as f32 * 0.01;
+                }
+                if randa2 >= 100 && randa2 < 255 {
+                    attack_mult2 = randa2 as f32 * 0.001;
+                }
+
                 // Verificar cuál burrito tiene mayor velocidad
-                if burrito1.speed.parse::<f32>().unwrap() > burrito2.speed.parse::<f32>().unwrap() {
-                    let attackb1 = format!("Ataque Burrito 1: {}", burrito1.attack.parse::<f32>().unwrap().to_string() );
-                    env::log(attackb1.as_bytes());
-                    old_defense_burrito2 = old_defense_burrito2 - burrito1.attack.parse::<f32>().unwrap();
-                    let defenserb2 = format!("Defensa Restante Burrito 2: {}", old_defense_burrito2.to_string() );
-                    env::log(defenserb2.as_bytes());
+                if (burrito1.speed.parse::<f32>().unwrap()*speed_mult1) > (burrito2.speed.parse::<f32>().unwrap()*speed_mult2) {
+                    // let attackb1 = format!("Ataque Burrito 1: {}", (burrito1.attack.parse::<f32>().unwrap()*attack_mult1).to_string() );
+                    // env::log(attackb1.as_bytes());
+                    old_defense_burrito2 = old_defense_burrito2 - (burrito1.attack.parse::<f32>().unwrap()*attack_mult1);
+                    // let defenserb2 = format!("Defensa Restante Burrito 2: {}", old_defense_burrito2.to_string() );
+                    // env::log(defenserb2.as_bytes());
                     if old_defense_burrito2 < 0.0 {
                         winner = 1;
                     }
                     if winner == 0 {
-                        let attackb2 = format!("Ataque Burrito 2: {}", burrito2.attack.parse::<f32>().unwrap().to_string() );
-                        env::log(attackb2.as_bytes());
-                        old_defense_burrito1 = old_defense_burrito1 - burrito2.attack.parse::<f32>().unwrap();
-                        let defenserb1 = format!("Defensa Restante Burrito 1: {}", old_defense_burrito1.to_string() );
-                        env::log(defenserb1.as_bytes());
+                        // let attackb2 = format!("Ataque Burrito 2: {}", (burrito2.attack.parse::<f32>().unwrap()*attack_mult2).to_string() );
+                        // env::log(attackb2.as_bytes());
+                        old_defense_burrito1 = old_defense_burrito1 - (burrito2.attack.parse::<f32>().unwrap()*attack_mult2);
+                        // let defenserb1 = format!("Defensa Restante Burrito 1: {}", old_defense_burrito1.to_string() );
+                        // env::log(defenserb1.as_bytes());
                         if old_defense_burrito1 < 0.0 {
                             winner = 2;
                         }
                     }
-                } 
-                if burrito2.speed.parse::<f32>().unwrap() > burrito1.speed.parse::<f32>().unwrap() {
-                    let attackb2 = format!("Ataque Burrito 2: {}", burrito2.attack.parse::<f32>().unwrap().to_string() );
-                    env::log(attackb2.as_bytes());
-                    old_defense_burrito1 = old_defense_burrito1 - burrito2.attack.parse::<f32>().unwrap();
-                    let defenserb1 = format!("Defensa Restante Burrito 1: {}", old_defense_burrito1.to_string() );
-                    env::log(defenserb1.as_bytes());
+                } else {
+                    // let attackb2 = format!("Ataque Burrito 2: {}", (burrito2.attack.parse::<f32>().unwrap()*attack_mult2).to_string() );
+                    // env::log(attackb2.as_bytes());
+                    old_defense_burrito1 = old_defense_burrito1 - (burrito2.attack.parse::<f32>().unwrap()*attack_mult2);
+                    // let defenserb1 = format!("Defensa Restante Burrito 1: {}", old_defense_burrito1.to_string() );
+                    // env::log(defenserb1.as_bytes());
                     if old_defense_burrito1 < 0.0 {
                         winner = 2;
                     }
                     if winner == 0 {
-                        let attackb1 = format!("Ataque Burrito 1: {}", burrito1.attack.parse::<f32>().unwrap().to_string() );
-                        env::log(attackb1.as_bytes());
-                        old_defense_burrito2 = old_defense_burrito2 - burrito1.attack.parse::<f32>().unwrap();
-                        let defenserb2 = format!("Defensa Restante Burrito 2: {}", old_defense_burrito2.to_string() );
-                        env::log(defenserb2.as_bytes());
+                        // let attackb1 = format!("Ataque Burrito 1: {}", (burrito1.attack.parse::<f32>().unwrap()*attack_mult1).to_string() );
+                        // env::log(attackb1.as_bytes());
+                        old_defense_burrito2 = old_defense_burrito2 - (burrito1.attack.parse::<f32>().unwrap()*attack_mult1);
+                        // let defenserb2 = format!("Defensa Restante Burrito 2: {}", old_defense_burrito2.to_string() );
+                        // env::log(defenserb2.as_bytes());
                         if old_defense_burrito2 < 0.0 {
                             winner = 1;
                         }
                     }
-                } 
+                }
+
                 if winner != 0 {
                     break;
                 }

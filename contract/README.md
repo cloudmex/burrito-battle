@@ -43,7 +43,7 @@ near call $ID new_burrito '{"token_id": "1", "receiver_id": "'$ID'", "token_meta
 
 near call $ID new_burrito '{"token_id": "2", "receiver_id": "'$ID'", "token_metadata": { "title": "Mega Burrito", "description": "This is a mega burrito", "media": "","extra":"{'"'hp'":"'5'","'attack'":"'15'","'defense'":"'10'","'speed'":"'20'"}'"}}' --accountId $ID --deposit 0.1
 
-near call $ID update_burrito '{"token_id": "1", "extra":"{'"'hp'":"'5'","'attack'":"'25'","'defense'":"'50'","'speed'":"'20'"}'"}' --accountId $ID 
+near call $ID update_burrito '{"token_id": "2", "extra":"{'"'hp'":"'5'","'attack'":"'25'","'defense'":"'50'","'speed'":"'20'"}'"}' --accountId $ID 
 
 
 

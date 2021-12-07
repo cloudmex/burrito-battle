@@ -39,16 +39,13 @@ Crear nuevo token:
     "speed":"10"
 '}"
 
-near call $ID new_burrito '{"token_id": "1", "receiver_id": "'$ID'", "token_metadata": { "title": "Mr Burrito", "description": "This is a burrito", "media": "","extra":"{'"'hp'":"'5'","'attack'":"'15'","'defense'":"'10'","'speed'":"'20'"}'","'level'":"'1'","'fight_win'":"'0'"}'"}'"}}' --accountId $ID --deposit 0.1
 
-near call $ID new_burrito '{"token_id": "2", "receiver_id": "'$ID'", "token_metadata": { "title": "Mega Burrito", "description": "This is a mega burrito", "media": "","extra":"{'"'hp'":"'5'","'attack'":"'15'","'defense'":"'10'","'speed'":"'20'"}'"}}' --accountId $ID --deposit 0.1
+near call $ID new_burrito '{"token_id": "4", "receiver_id": "'yairnava.testnet'", "token_metadata": { "title": "X Burrito", "description": "This is a mega burrito", "media": "","extra":"{'"'hp'":"'5'","'attack'":"'15'","'defense'":"'10'","'speed'":"'20'"}'"}}' --accountId yairnava.testnet --deposit 0.1
 
-near call $ID update_burrito '{"token_id": "2", "extra":"{'"'hp'":"'5'","'attack'":"'25'","'defense'":"'50'","'speed'":"'20'"}'"}' --accountId $ID 
+near call $ID update_burrito '{"token_id": "4", "extra":"{'"'hp'":"'5'","'attack'":"'15'","'defense'":"'10'","'speed'":"'20'","'win'":"'0'"}'"}' --accountId $ID 
 
+near call $ID get_burrito '{"token_id": "3"}' --accountId $ID
 
+near call $ID get_burrito '{"token_id": "4"}' --accountId $ID
 
-near call $ID get_burrito '{"token_id": "1"}' --accountId $ID
-
-near call $ID get_burrito '{"token_id": "2"}' --accountId $ID
-
-near call $ID fight_burritos '{"token_id_burrito1": "1","token_id_burrito2": "2"}' --accountId $ID
+near call $ID fight_burritos '{"token_id_burrito1": "3","token_id_burrito2": "4"}' --accountId $ID

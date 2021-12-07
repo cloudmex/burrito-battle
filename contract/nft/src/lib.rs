@@ -31,15 +31,17 @@ pub struct Burrito {
     attack : String,
     defense : String,
     speed : String,
+    win : String
 }
 
-#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
+#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Debug)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Extras {
     hp : String,
     attack : String,
     defense : String,
     speed : String,
+    win : String
 }
 
 #[derive(BorshSerialize, BorshStorageKey)]
@@ -109,7 +111,8 @@ impl Contract {
             hp : extradatajson.hp,
             attack : extradatajson.attack,
             defense : extradatajson.defense,
-            speed : extradatajson.speed
+            speed : extradatajson.speed,
+            win : extradatajson.win
         };
 
         burrito
@@ -150,7 +153,7 @@ impl Contract {
     // Pelear
     pub fn fight_burritos(&mut self, token_id_burrito1: TokenId, token_id_burrito2: TokenId) -> Burrito {
         // Obtener metadata burrito 1
-        let metadata_burrito1 = self
+        let mut metadata_burrito1 = self
             .tokens
             .token_metadata_by_id
             .as_ref()
@@ -158,7 +161,7 @@ impl Contract {
             .unwrap();
 
         // Obtener metadata burrito 2
-        let metadata_burrito2 = self
+        let mut metadata_burrito2 = self
             .tokens
             .token_metadata_by_id
             .as_ref()
@@ -168,28 +171,35 @@ impl Contract {
         // Crear json
         let newextradata_burrito1 = str::replace(&metadata_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
         let newextradata_burrito2 = str::replace(&metadata_burrito2.extra.as_ref().unwrap().to_string(), "'", "\"");
-        let extradatajson_burrito1: Extras = serde_json::from_str(&newextradata_burrito1).unwrap();
-        let extradatajson_burrito2: Extras = serde_json::from_str(&newextradata_burrito2).unwrap();
+        let mut extradatajson_burrito1: Extras = serde_json::from_str(&newextradata_burrito1).unwrap();
+        let mut extradatajson_burrito2: Extras = serde_json::from_str(&newextradata_burrito2).unwrap();
 
         // Crear estructura burrito 1
         let burrito1 = Burrito {
             name : metadata_burrito1.title.as_ref().unwrap().to_string(),
             description : metadata_burrito1.description.as_ref().unwrap().to_string(),
-            hp : extradatajson_burrito1.hp,
-            attack : extradatajson_burrito1.attack,
-            defense : extradatajson_burrito1.defense,
-            speed : extradatajson_burrito1.speed
+            hp : extradatajson_burrito1.hp.clone(),
+            attack : extradatajson_burrito1.attack.clone(),
+            defense : extradatajson_burrito1.defense.clone(),
+            speed : extradatajson_burrito1.speed.clone(),
+            win : extradatajson_burrito1.win.clone()
+
         };
 
         // Crear estructura burrito 2
         let burrito2 = Burrito {
             name : metadata_burrito2.title.as_ref().unwrap().to_string(),
             description : metadata_burrito2.description.as_ref().unwrap().to_string(),
-            hp : extradatajson_burrito2.hp,
-            attack : extradatajson_burrito2.attack,
-            defense : extradatajson_burrito2.defense,
-            speed : extradatajson_burrito2.speed
+            hp : extradatajson_burrito2.hp.clone(),
+            attack : extradatajson_burrito2.attack.clone(),
+            defense : extradatajson_burrito2.defense.clone(),
+            speed : extradatajson_burrito2.speed.clone(),
+            win : extradatajson_burrito2.win.clone()
         };
+
+        // Validamos que ambos burritos tengan vidas para combatir
+        assert!(burrito1.hp.parse::<u8>().unwrap() > 0, "{} no tiene vidas para combatir",metadata_burrito1.title.as_ref().unwrap().to_string());
+        assert!(burrito2.hp.parse::<u8>().unwrap() > 0, "{} no tiene vidas para combatir",metadata_burrito2.title.as_ref().unwrap().to_string());
 
         let logname1 = format!("Nombre Burrito 1: {}", metadata_burrito1.title.as_ref().unwrap().to_string() );
         env::log(logname1.as_bytes());
@@ -199,6 +209,8 @@ impl Contract {
 
         // Variable que almacenará al ganador
         let burrito_winner : Burrito;
+
+        //let burrito_winner : Burrito;
         let mut winner : i32 = 0;
         let mut old_defense_burrito1 = burrito1.defense.parse::<f32>().unwrap();
         let mut old_defense_burrito2 = burrito2.defense.parse::<f32>().unwrap();
@@ -302,9 +314,57 @@ impl Contract {
         }
 
         if winner == 1 {
-            burrito_winner = burrito1
+            burrito_winner = burrito1;
+
+            let new_hp_burrito2 = burrito2.hp.parse::<u8>().unwrap()-1;
+            extradatajson_burrito2.hp = new_hp_burrito2.to_string();
+
+            let mut extra_string_burrito2 = serde_json::to_string(&extradatajson_burrito2).unwrap();
+            extra_string_burrito2 = str::replace(&extra_string_burrito2, "\"", "'");
+            metadata_burrito2.extra = Some(extra_string_burrito2.clone());
+
+            self.tokens
+                .token_metadata_by_id
+                .as_mut()
+                .and_then(|by_id| by_id.insert(&token_id_burrito2, &metadata_burrito2));
+
+            let new_win_burrito1 = burrito_winner.win.parse::<u8>().unwrap()+1;
+            extradatajson_burrito1.win = new_win_burrito1.to_string();
+
+            let mut extra_string_burrito1 = serde_json::to_string(&extradatajson_burrito1).unwrap();
+            extra_string_burrito1 = str::replace(&extra_string_burrito1, "\"", "'");
+            metadata_burrito1.extra = Some(extra_string_burrito1.clone());
+
+            self.tokens
+                .token_metadata_by_id
+                .as_mut()
+                .and_then(|by_id| by_id.insert(&token_id_burrito1, &metadata_burrito1));
         } else {
-            burrito_winner = burrito2
+            burrito_winner = burrito2;
+
+            let new_hp_burrito1 = burrito1.hp.parse::<u8>().unwrap()-1;
+            extradatajson_burrito1.hp = new_hp_burrito1.to_string();
+
+            let mut extra_string_burrito1 = serde_json::to_string(&extradatajson_burrito1).unwrap();
+            extra_string_burrito1 = str::replace(&extra_string_burrito1, "\"", "'");
+            metadata_burrito1.extra = Some(extra_string_burrito1.clone());
+
+            self.tokens
+                .token_metadata_by_id
+                .as_mut()
+                .and_then(|by_id| by_id.insert(&token_id_burrito1, &metadata_burrito1));
+
+            let new_win_burrito2 = burrito_winner.win.parse::<u8>().unwrap()+1;
+            extradatajson_burrito2.win = new_win_burrito2.to_string();
+
+            let mut extra_string_burrito2 = serde_json::to_string(&extradatajson_burrito2).unwrap();
+            extra_string_burrito2 = str::replace(&extra_string_burrito2, "\"", "'");
+            metadata_burrito2.extra = Some(extra_string_burrito2.clone());
+
+            self.tokens
+                .token_metadata_by_id
+                .as_mut()
+                .and_then(|by_id| by_id.insert(&token_id_burrito2, &metadata_burrito2));
         }
 
         burrito_winner

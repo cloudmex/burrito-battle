@@ -1474,6 +1474,13 @@ checksum = "7843ec2de400bcbc6a6328c958dc38e5359da6e93e72e37bc5246bf1ae776389"
 [[package]]
 name = "near-contract-standards"
 version = "3.2.0"
+dependencies = [
+ "near-sdk",
+]
+
+[[package]]
+name = "near-contract-standards"
+version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e7421d0a5c7aeb57b37a0cf3a71a7aefbbdc7727f9811d9dd86fa55e4f0de4d3"
 dependencies = [
@@ -1806,7 +1813,7 @@ dependencies = [
 name = "non-fungible-token"
 version = "1.1.0"
 dependencies = [
- "near-contract-standards",
+ "near-contract-standards 3.2.0",
  "near-sdk",
  "serde_json",
 ]
@@ -1815,7 +1822,7 @@ dependencies = [
 name = "non-fungible-token-wrapper"
 version = "0.0.2"
 dependencies = [
- "near-contract-standards",
+ "near-contract-standards 3.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "near-sdk",
  "near-sdk-sim",
  "non-fungible-token",

@@ -19,13 +19,13 @@ Una vez definida la prioridad se comienza con los ataques, el burrito con la pri
 La batalla continua con la siguiente pelea donde se repite todo el proceso anterior, el ganador de la batalla es el que logre ganar 3 de 5 peleas.
 
 #### Típos de burritos
-| VS | Fuego(1) | Agua(1) | Planta(1) | Eléctrico(1) | Volador(1) |
+| VS | Fuego🔥| Agua💧 | Planta🌱 | Eléctrico⚡ | Volador💨 |
 | --- | --- | --- | --- | --- | --- |
-| Fuego(2) | 0% | +25%(1) | +25%(2) | 0% | 0% |
-| Agua(2) | +25%(2) | 0% | 0% | 0% | +25%(1) |
-| Planta(2) | +25%(1) | 0% | 0% | +25%(2) | 0% |
-| Eléctrico(2) | 0% | 0% | +25%(1) | 0% | +25%(2) |
-| Volador(2) | 0% | +25%(2) | 0% | +25%(1) | 0% |
+| Fuego🔥 | 0% | 💧+25% | 🔥+25% | 0% | 0% |
+| Agua💧 | 💧+25% | 0% | 0% | 0% | 💨+25% |
+| Planta🌱 | 🔥+25% | 0% | 0% | 🌱+25% | 0% |
+| Eléctrico⚡ | 0% | 0% | 🌱+25% | 0% | ⚡+25% |
+| Volador💨  | 0% | +25%💨 | 0% | ⚡+25% | 0% |
 
 ## Instalación 🔧 
 

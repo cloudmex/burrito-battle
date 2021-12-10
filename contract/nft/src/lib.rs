@@ -27,6 +27,7 @@ const DATA_IMAGE_SVG_NEAR_ICON: &str = "data:image/svg+xml,%3Csvg xmlns='http://
 pub struct Burrito {
     name : String,
     description : String,
+    burrito_type : String,
     hp : String,
     attack : String,
     defense : String,
@@ -37,6 +38,7 @@ pub struct Burrito {
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Debug)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Extras {
+    burrito_type: String,
     hp : String,
     attack : String,
     defense : String,
@@ -108,6 +110,7 @@ impl Contract {
         let burrito = Burrito {
             name : metadata.title.as_ref().unwrap().to_string(),
             description : metadata.description.as_ref().unwrap().to_string(),
+            burrito_type : extradatajson.burrito_type,
             hp : extradatajson.hp,
             attack : extradatajson.attack,
             defense : extradatajson.defense,
@@ -140,14 +143,119 @@ impl Contract {
 
     // Minar un nuevo token
     #[payable]
-    pub fn new_burrito(
-        &mut self,
-        token_id: TokenId,
-        receiver_id: ValidAccountId,
-        token_metadata: TokenMetadata,
-    ) -> Token {
+    pub fn new_burrito(&mut self,token_id: TokenId,receiver_id: ValidAccountId,token_metadata: TokenMetadata) -> Token {
         self.n_tokens += 1;
-        self.tokens.mint(token_id, receiver_id, Some(token_metadata))
+        let mut newtoken = token_metadata;
+
+        let mut burrito_data = Extras {
+            hp : "5".to_string(),
+            attack : "".to_string(),
+            defense : "".to_string(),
+            speed : "".to_string(),
+            win : "0".to_string(),
+            burrito_type : "".to_string()
+        };
+
+        // Generar estadísticas random
+
+        let rand_attack = *env::random_seed().get(0).unwrap();
+        let rand_defense = *env::random_seed().get(1).unwrap();
+        let rand_speed = *env::random_seed().get(2).unwrap();
+        let rand_type = *env::random_seed().get(3).unwrap();
+
+        let mut attack: u8 = 0;
+        let mut defense: u8 = 0;
+        let mut speed: u8 = 0;
+        let mut burrito_type: String = "".to_string();
+
+        // Obtener ataque aleatorio
+        if rand_attack >= 0 &&  rand_attack <= 70 {
+            attack = 5;
+        }
+        if rand_attack >= 71 &&  rand_attack <= 130 {
+            attack = 6;
+        }
+        if rand_attack >= 131 &&  rand_attack <= 180 {
+            attack = 7;
+        }
+        if rand_attack >= 181 &&  rand_attack <= 220 {
+            attack = 8;
+        }
+        if rand_attack >= 221 &&  rand_attack <= 250 {
+            attack = 9;
+        }
+        if rand_attack >= 251 &&  rand_attack <= 255 {
+            attack = 10;
+        }
+
+        // Obtener defensa aleatoria
+        if rand_defense >= 0 &&  rand_defense <= 70 {
+            defense = 5;
+        }
+        if rand_defense >= 71 &&  rand_defense <= 130 {
+            defense = 6;
+        }
+        if rand_defense >= 131 &&  rand_defense <= 180 {
+            defense = 7;
+        }
+        if rand_defense >= 181 &&  rand_defense <= 220 {
+            defense = 8;
+        }
+        if rand_defense >= 221 &&  rand_defense <= 250 {
+            defense = 9;
+        }
+        if rand_defense >= 251 &&  rand_defense <= 255 {
+            defense = 10;
+        }
+
+        // Obtener velociad aleatoria
+        if rand_speed >= 0 &&  rand_speed <= 70 {
+            speed = 5;
+        }
+        if rand_speed >= 71 &&  rand_speed <= 130 {
+            speed = 6;
+        }
+        if rand_speed >= 131 &&  rand_speed <= 180 {
+            speed = 7;
+        }
+        if rand_speed >= 181 &&  rand_speed <= 220 {
+            speed = 8;
+        }
+        if rand_speed >= 221 &&  rand_speed <= 250 {
+            speed = 9;
+        }
+        if rand_speed >= 251 &&  rand_speed <= 255 {
+            speed = 10;
+        }
+
+        // Obtener tipo
+        if rand_type >= 0 &&  rand_type <= 51 {
+            burrito_type = "Fuego".to_string();
+        }
+        if rand_type >= 52 &&  rand_type <= 102 {
+            burrito_type = "Agua".to_string();
+        }
+        if rand_type >= 103 &&  rand_type <= 153 {
+            burrito_type = "Planta".to_string();
+        }
+        if rand_type >= 154 &&  rand_type <= 204 {
+            burrito_type = "Eléctrico".to_string();
+        }
+        if rand_type >= 205 &&  rand_type <= 255 {
+            burrito_type = "Volador".to_string();
+        }
+
+        // Asignamos valores a las estadisticas del burrito
+        burrito_data.attack = attack.to_string();
+        burrito_data.defense = defense.to_string();
+        burrito_data.speed = speed.to_string();
+        burrito_data.burrito_type = burrito_type.to_string();
+
+        let mut extra_data_string = serde_json::to_string(&burrito_data).unwrap();
+        extra_data_string = str::replace(&extra_data_string, "\"", "'");
+        newtoken.extra = Some(extra_data_string);
+
+        self.tokens.mint(token_id, receiver_id, Some(newtoken))
     }
 
     // Pelear
@@ -178,6 +286,7 @@ impl Contract {
         let burrito1 = Burrito {
             name : metadata_burrito1.title.as_ref().unwrap().to_string(),
             description : metadata_burrito1.description.as_ref().unwrap().to_string(),
+            burrito_type : extradatajson_burrito1.burrito_type.clone(),
             hp : extradatajson_burrito1.hp.clone(),
             attack : extradatajson_burrito1.attack.clone(),
             defense : extradatajson_burrito1.defense.clone(),
@@ -190,6 +299,7 @@ impl Contract {
         let burrito2 = Burrito {
             name : metadata_burrito2.title.as_ref().unwrap().to_string(),
             description : metadata_burrito2.description.as_ref().unwrap().to_string(),
+            burrito_type : extradatajson_burrito2.burrito_type.clone(),
             hp : extradatajson_burrito2.hp.clone(),
             attack : extradatajson_burrito2.attack.clone(),
             defense : extradatajson_burrito2.defense.clone(),

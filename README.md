@@ -82,7 +82,7 @@ Obtener datos de un token:
 
 Crear nuevo token:
 
-    near call $ID new_burrito '{"token_id": "4", "receiver_id": "'yairnava.testnet'", "token_metadata": { "title": "X Burrito", "description": "This is a mega burrito", "media": "","extra":"{'"'hp'":"'5'","'attack'":"'15'","'defense'":"'10'","'speed'":"'20'","'win'":"'0'"}'"}}' --accountId yairnava.testnet --deposit 0.1
+    near call $ID new_burrito '{"token_id": "26", "receiver_id": "'yairnava2.testnet'", "token_metadata": { "title": "X Burrito", "description": "This is a burrito", "media": "","extra":""}}' --accountId yairnava.testnet --deposit 0.1
 
 Modificar token:
 

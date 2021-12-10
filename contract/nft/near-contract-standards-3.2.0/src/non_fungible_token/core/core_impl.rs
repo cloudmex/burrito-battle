@@ -140,11 +140,6 @@ impl NonFungibleToken {
                     extra: None,
                     reference: None,
                     reference_hash: None,
-                    price: Some("1".to_string()),
-                    culture: Some("a".repeat(64)),
-                    country: Some("a".repeat(64)),
-                    creator: Some("a".repeat(64)),
-                    on_sale: Some(true),
                 },
             );
         }

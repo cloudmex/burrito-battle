@@ -339,6 +339,8 @@ impl Contract {
                 let mut speed_mult2: f32 = 0.0;
                 let mut attack_mult1: f32 = 0.0;
                 let mut attack_mult2: f32 = 0.0;
+                let mut type_mult1: f32 = 0.0;
+                let mut type_mult2: f32 = 0.0;
 
                 if rands1 < 10 {
                     speed_mult1 = rands1 as f32 * 0.1;
@@ -379,39 +381,95 @@ impl Contract {
 
                 // Verificar cuál burrito tiene mayor velocidad
                 if (burrito1.speed.parse::<f32>().unwrap()*speed_mult1) > (burrito2.speed.parse::<f32>().unwrap()*speed_mult2) {
-                    // let attackb1 = format!("Ataque Burrito 1: {}", (burrito1.attack.parse::<f32>().unwrap()*attack_mult1).to_string() );
-                    // env::log(attackb1.as_bytes());
-                    old_defense_burrito2 = old_defense_burrito2 - (burrito1.attack.parse::<f32>().unwrap()*attack_mult1);
-                    // let defenserb2 = format!("Defensa Restante Burrito 2: {}", old_defense_burrito2.to_string() );
-                    // env::log(defenserb2.as_bytes());
+                    //Obtener multiplicador de tipo
+                    if(burrito1.burrito_type == "Fuego" && burrito2.burrito_type == "Planta"){
+                        type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                    }
+                    if(burrito1.burrito_type == "Agua" && burrito2.burrito_type == "Fuego"){
+                        type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                    }
+                    if(burrito1.burrito_type == "Planta" && burrito2.burrito_type == "Eléctrico"){
+                        type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                    }
+                    if(burrito1.burrito_type == "Eléctrico" && burrito2.burrito_type == "Volador"){
+                        type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                    }
+                    if(burrito1.burrito_type == "Volador" && burrito2.burrito_type == "Agua"){
+                        type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                    }
+
+                    old_defense_burrito2 = old_defense_burrito2 - ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)+type_mult1);
+                    type_mult1 = 0.0;
                     if old_defense_burrito2 < 0.0 {
                         winner = 1;
                     }
                     if winner == 0 {
-                        // let attackb2 = format!("Ataque Burrito 2: {}", (burrito2.attack.parse::<f32>().unwrap()*attack_mult2).to_string() );
-                        // env::log(attackb2.as_bytes());
-                        old_defense_burrito1 = old_defense_burrito1 - (burrito2.attack.parse::<f32>().unwrap()*attack_mult2);
-                        // let defenserb1 = format!("Defensa Restante Burrito 1: {}", old_defense_burrito1.to_string() );
-                        // env::log(defenserb1.as_bytes());
+                        //Obtener multiplicador de tipo
+                        if(burrito2.burrito_type == "Fuego" && burrito1.burrito_type == "Planta"){
+                            type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        }
+                        if(burrito2.burrito_type == "Agua" && burrito1.burrito_type == "Fuego"){
+                            type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        }
+                        if(burrito2.burrito_type == "Planta" && burrito1.burrito_type == "Eléctrico"){
+                            type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        }
+                        if(burrito2.burrito_type == "Eléctrico" && burrito1.burrito_type == "Volador"){
+                            type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        }
+                        if(burrito2.burrito_type == "Volador" && burrito1.burrito_type == "Agua"){
+                            type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        }
+                        
+                        old_defense_burrito1 = old_defense_burrito1 - ((burrito2.attack.parse::<f32>().unwrap()*attack_mult2)+type_mult2);
+                        type_mult2 = 0.0;
                         if old_defense_burrito1 < 0.0 {
                             winner = 2;
                         }
                     }
                 } else {
-                    // let attackb2 = format!("Ataque Burrito 2: {}", (burrito2.attack.parse::<f32>().unwrap()*attack_mult2).to_string() );
-                    // env::log(attackb2.as_bytes());
-                    old_defense_burrito1 = old_defense_burrito1 - (burrito2.attack.parse::<f32>().unwrap()*attack_mult2);
-                    // let defenserb1 = format!("Defensa Restante Burrito 1: {}", old_defense_burrito1.to_string() );
-                    // env::log(defenserb1.as_bytes());
+                    //Obtener multiplicador de tipo
+                    if(burrito2.burrito_type == "Fuego" && burrito1.burrito_type == "Planta"){
+                        type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                    }
+                    if(burrito2.burrito_type == "Agua" && burrito1.burrito_type == "Fuego"){
+                        type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                    }
+                    if(burrito2.burrito_type == "Planta" && burrito1.burrito_type == "Eléctrico"){
+                        type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                    }
+                    if(burrito2.burrito_type == "Eléctrico" && burrito1.burrito_type == "Volador"){
+                        type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                    }
+                    if(burrito2.burrito_type == "Volador" && burrito1.burrito_type == "Agua"){
+                        type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                    }
+
+                    old_defense_burrito1 = old_defense_burrito1 - ((burrito2.attack.parse::<f32>().unwrap()*attack_mult2)+type_mult2);
+                    type_mult2 = 0.0;
                     if old_defense_burrito1 < 0.0 {
                         winner = 2;
                     }
                     if winner == 0 {
-                        // let attackb1 = format!("Ataque Burrito 1: {}", (burrito1.attack.parse::<f32>().unwrap()*attack_mult1).to_string() );
-                        // env::log(attackb1.as_bytes());
-                        old_defense_burrito2 = old_defense_burrito2 - (burrito1.attack.parse::<f32>().unwrap()*attack_mult1);
-                        // let defenserb2 = format!("Defensa Restante Burrito 2: {}", old_defense_burrito2.to_string() );
-                        // env::log(defenserb2.as_bytes());
+                        //Obtener multiplicador de tipo
+                        if(burrito1.burrito_type == "Fuego" && burrito2.burrito_type == "Planta"){
+                            type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        }
+                        if(burrito1.burrito_type == "Agua" && burrito2.burrito_type == "Fuego"){
+                            type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        }
+                        if(burrito1.burrito_type == "Planta" && burrito2.burrito_type == "Eléctrico"){
+                            type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        }
+                        if(burrito1.burrito_type == "Eléctrico" && burrito2.burrito_type == "Volador"){
+                            type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        }
+                        if(burrito1.burrito_type == "Volador" && burrito2.burrito_type == "Agua"){
+                            type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        }
+
+                        old_defense_burrito2 = old_defense_burrito2 - ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)+type_mult1);
+                        type_mult1 = 0.0;
                         if old_defense_burrito2 < 0.0 {
                             winner = 1;
                         }

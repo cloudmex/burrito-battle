@@ -46,6 +46,14 @@ pub struct Extras {
     win : String
 }
 
+#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Debug)]
+#[serde(crate = "near_sdk::serde")]
+pub struct ExtraAccesorie {
+    attack : String,
+    defense : String,
+    speed : String
+}
+
 #[derive(BorshSerialize, BorshStorageKey)]
 enum StorageKey {
     NonFungibleToken,
@@ -259,13 +267,40 @@ impl Contract {
     }
 
     // Pelear
-    pub fn fight_burritos(&mut self, token_id_burrito1: TokenId, token_id_burrito2: TokenId) -> Burrito {
+    pub fn fight_burritos(&mut self, 
+        token_id_burrito1: TokenId, accesorio1_id_burrito1: TokenId, accesorio2_id_burrito1: TokenId, accesorio3_id_burrito1: TokenId, 
+        token_id_burrito2: TokenId, accesorio1_id_burrito2: TokenId, accesorio2_id_burrito2: TokenId, accesorio3_id_burrito2: TokenId) -> Burrito {
+
         // Obtener metadata burrito 1
         let mut metadata_burrito1 = self
             .tokens
             .token_metadata_by_id
             .as_ref()
             .and_then(|by_id| by_id.get(&token_id_burrito1))
+            .unwrap();
+
+        // Obtener metadata accesorio 1 burrito 1
+        let mut metadata_accesorio1_burrito1 = self
+            .tokens
+            .token_metadata_by_id
+            .as_ref()
+            .and_then(|by_id| by_id.get(&accesorio1_id_burrito1))
+            .unwrap();
+
+        // Obtener metadata accesorio 2 burrito 1
+        let mut metadata_accesorio2_burrito1 = self
+            .tokens
+            .token_metadata_by_id
+            .as_ref()
+            .and_then(|by_id| by_id.get(&accesorio2_id_burrito1))
+            .unwrap();
+
+        // Obtener metadata accesorio 3 burrito 1
+        let mut metadata_accesorio3_burrito1 = self
+            .tokens
+            .token_metadata_by_id
+            .as_ref()
+            .and_then(|by_id| by_id.get(&accesorio3_id_burrito1))
             .unwrap();
 
         // Obtener metadata burrito 2
@@ -276,11 +311,71 @@ impl Contract {
             .and_then(|by_id| by_id.get(&token_id_burrito2))
             .unwrap();
         
-        // Crear json
+        // Obtener metadata accesorio 1 burrito 2
+        let mut metadata_accesorio1_burrito2 = self
+            .tokens
+            .token_metadata_by_id
+            .as_ref()
+            .and_then(|by_id| by_id.get(&accesorio1_id_burrito2))
+            .unwrap();
+
+        // Obtener metadata accesorio 2 burrito 2
+        let mut metadata_accesorio2_burrito2 = self
+            .tokens
+            .token_metadata_by_id
+            .as_ref()
+            .and_then(|by_id| by_id.get(&accesorio2_id_burrito2))
+            .unwrap();
+
+        // Obtener metadata accesorio 3 burrito 2
+        let mut metadata_accesorio3_burrito2 = self
+            .tokens
+            .token_metadata_by_id
+            .as_ref()
+            .and_then(|by_id| by_id.get(&accesorio3_id_burrito2))
+            .unwrap();
+
+        // Extraer extras del token burrito 1
         let newextradata_burrito1 = str::replace(&metadata_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
+
+        // Extraer extras del token accesorios burrito 1
+        let newextradata_accesorio1_burrito1 = str::replace(&metadata_accesorio1_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
+        let newextradata_accesorio2_burrito1 = str::replace(&metadata_accesorio2_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
+        let newextradata_accesorio3_burrito1 = str::replace(&metadata_accesorio3_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
+
+        // Extraer extras del token burrito 2
         let newextradata_burrito2 = str::replace(&metadata_burrito2.extra.as_ref().unwrap().to_string(), "'", "\"");
+
+        // Extraer extras del token accesorios burrito 2
+        let newextradata_accesorio1_burrito2 = str::replace(&metadata_accesorio1_burrito2.extra.as_ref().unwrap().to_string(), "'", "\"");
+        let newextradata_accesorio2_burrito2 = str::replace(&metadata_accesorio2_burrito2.extra.as_ref().unwrap().to_string(), "'", "\"");
+        let newextradata_accesorio3_burrito2 = str::replace(&metadata_accesorio3_burrito2.extra.as_ref().unwrap().to_string(), "'", "\"");
+
+        // Crear json burrito 1
         let mut extradatajson_burrito1: Extras = serde_json::from_str(&newextradata_burrito1).unwrap();
+
+        // Crear json accesorios burrito 1
+        let mut extradatajson_accesorio1_burrito1: ExtraAccesorie = serde_json::from_str(&newextradata_accesorio1_burrito1).unwrap();
+        let mut extradatajson_accesorio2_burrito1: ExtraAccesorie = serde_json::from_str(&newextradata_accesorio2_burrito1).unwrap();
+        let mut extradatajson_accesorio3_burrito1: ExtraAccesorie = serde_json::from_str(&newextradata_accesorio3_burrito1).unwrap();
+
+        // Crear json burrito 2
         let mut extradatajson_burrito2: Extras = serde_json::from_str(&newextradata_burrito2).unwrap();
+
+        // Crear json accesorios burrito 2
+        let mut extradatajson_accesorio1_burrito2: ExtraAccesorie = serde_json::from_str(&newextradata_accesorio1_burrito2).unwrap();
+        let mut extradatajson_accesorio2_burrito2: ExtraAccesorie = serde_json::from_str(&newextradata_accesorio2_burrito2).unwrap();
+        let mut extradatajson_accesorio3_burrito2: ExtraAccesorie = serde_json::from_str(&newextradata_accesorio3_burrito2).unwrap();
+
+        // Obtener puntos totales a sumar de cada estadística de los accesorios del burrito 1
+        let accesories_attack_burrito1 : f32 = (extradatajson_accesorio1_burrito1.attack.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito1.attack.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito1.attack.parse::<f32>().unwrap());
+        let accesories_defense_burrito1 : f32 = (extradatajson_accesorio1_burrito1.defense.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito1.defense.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito1.defense.parse::<f32>().unwrap());
+        let accesories_speed_burrito1 : f32 = (extradatajson_accesorio1_burrito1.speed.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito1.speed.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito1.speed.parse::<f32>().unwrap());
+
+        // Obtener puntos totales a sumar de cada estadística de los accesorios del burrito 2
+        let accesories_attack_burrito2 : f32 = (extradatajson_accesorio1_burrito2.attack.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito2.attack.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito2.attack.parse::<f32>().unwrap());
+        let accesories_defense_burrito2 : f32 = (extradatajson_accesorio1_burrito2.defense.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito2.defense.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito2.defense.parse::<f32>().unwrap());
+        let accesories_speed_burrito2 : f32 = (extradatajson_accesorio1_burrito2.speed.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito2.speed.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito2.speed.parse::<f32>().unwrap());
 
         // Crear estructura burrito 1
         let burrito1 = Burrito {
@@ -322,8 +417,11 @@ impl Contract {
 
         //let burrito_winner : Burrito;
         let mut winner : i32 = 0;
-        let mut old_defense_burrito1 = burrito1.defense.parse::<f32>().unwrap();
-        let mut old_defense_burrito2 = burrito2.defense.parse::<f32>().unwrap();
+        
+        // Defensa total del burrito 1
+        let mut old_defense_burrito1 = (burrito1.defense.parse::<f32>().unwrap()+accesories_defense_burrito1);
+        // Defensa total del burrito 2
+        let mut old_defense_burrito2 = (burrito2.defense.parse::<f32>().unwrap()+accesories_defense_burrito2);
         let mut rands1: u8 = 0;
         let mut rands2: u8 = 0;
         let mut randa1: u8 = 0;
@@ -380,7 +478,7 @@ impl Contract {
                 }
 
                 // Verificar cuál burrito tiene mayor velocidad
-                if (burrito1.speed.parse::<f32>().unwrap()*speed_mult1) > (burrito2.speed.parse::<f32>().unwrap()*speed_mult2) {
+                if ((burrito1.speed.parse::<f32>().unwrap()*speed_mult1)+accesories_speed_burrito1) > ((burrito2.speed.parse::<f32>().unwrap()*speed_mult2)+accesories_speed_burrito2) {
                     //Obtener multiplicador de tipo
                     if(burrito1.burrito_type == "Fuego" && burrito2.burrito_type == "Planta"){
                         type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
@@ -398,7 +496,7 @@ impl Contract {
                         type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
                     }
 
-                    old_defense_burrito2 = old_defense_burrito2 - ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)+type_mult1);
+                    old_defense_burrito2 = old_defense_burrito2 - ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)+type_mult1+accesories_attack_burrito1);
                     type_mult1 = 0.0;
                     if old_defense_burrito2 < 0.0 {
                         winner = 1;
@@ -421,7 +519,7 @@ impl Contract {
                             type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
                         }
                         
-                        old_defense_burrito1 = old_defense_burrito1 - ((burrito2.attack.parse::<f32>().unwrap()*attack_mult2)+type_mult2);
+                        old_defense_burrito1 = old_defense_burrito1 - ((burrito2.attack.parse::<f32>().unwrap()*attack_mult2)+type_mult2+accesories_attack_burrito2);
                         type_mult2 = 0.0;
                         if old_defense_burrito1 < 0.0 {
                             winner = 2;
@@ -445,7 +543,7 @@ impl Contract {
                         type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
                     }
 
-                    old_defense_burrito1 = old_defense_burrito1 - ((burrito2.attack.parse::<f32>().unwrap()*attack_mult2)+type_mult2);
+                    old_defense_burrito1 = old_defense_burrito1 - ((burrito2.attack.parse::<f32>().unwrap()*attack_mult2)+type_mult2+accesories_attack_burrito2);
                     type_mult2 = 0.0;
                     if old_defense_burrito1 < 0.0 {
                         winner = 2;
@@ -468,7 +566,7 @@ impl Contract {
                             type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
                         }
 
-                        old_defense_burrito2 = old_defense_burrito2 - ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)+type_mult1);
+                        old_defense_burrito2 = old_defense_burrito2 - ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)+type_mult1+accesories_attack_burrito1);
                         type_mult1 = 0.0;
                         if old_defense_burrito2 < 0.0 {
                             winner = 1;

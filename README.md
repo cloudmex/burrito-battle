@@ -78,7 +78,8 @@ Obtener cantidad e tokens creados:
 
 Obtener datos de un token:
 
-    near call $ID get_burrito '{"token_id": "3"}' --accountId $ID
+    near call $ID get_burrito '{"token_id": "25"}' --accountId $ID
+        near call $ID get_burrito '{"token_id": "26"}' --accountId $ID
 
 Crear nuevo token:
 
@@ -90,7 +91,7 @@ Modificar token:
     
 Combate de 2 burritos
 
-    near call $ID fight_burritos '{"token_id_burrito1": "3","token_id_burrito2": "4"}' --accountId $ID
+    near call $ID fight_burritos '{"token_id_burrito1": "25","token_id_burrito2": "26"}' --accountId $ID
 
 ## Construido con 🛠️
 

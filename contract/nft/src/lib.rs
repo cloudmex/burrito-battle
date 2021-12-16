@@ -48,7 +48,7 @@ pub struct Extras {
 
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Debug)]
 #[serde(crate = "near_sdk::serde")]
-pub struct ExtraAccesorie {
+pub struct ExtraAccesory {
     attack : String,
     defense : String,
     speed : String
@@ -363,17 +363,17 @@ impl Contract {
         let mut extradatajson_burrito1: Extras = serde_json::from_str(&newextradata_burrito1).unwrap();
 
         // Crear json accesorios burrito 1
-        let mut extradatajson_accesorio1_burrito1: ExtraAccesorie = serde_json::from_str(&newextradata_accesorio1_burrito1).unwrap();
-        let mut extradatajson_accesorio2_burrito1: ExtraAccesorie = serde_json::from_str(&newextradata_accesorio2_burrito1).unwrap();
-        let mut extradatajson_accesorio3_burrito1: ExtraAccesorie = serde_json::from_str(&newextradata_accesorio3_burrito1).unwrap();
+        let mut extradatajson_accesorio1_burrito1: ExtraAccesory = serde_json::from_str(&newextradata_accesorio1_burrito1).unwrap();
+        let mut extradatajson_accesorio2_burrito1: ExtraAccesory = serde_json::from_str(&newextradata_accesorio2_burrito1).unwrap();
+        let mut extradatajson_accesorio3_burrito1: ExtraAccesory = serde_json::from_str(&newextradata_accesorio3_burrito1).unwrap();
 
         // Crear json burrito 2
         let mut extradatajson_burrito2: Extras = serde_json::from_str(&newextradata_burrito2).unwrap();
 
         // Crear json accesorios burrito 2
-        let mut extradatajson_accesorio1_burrito2: ExtraAccesorie = serde_json::from_str(&newextradata_accesorio1_burrito2).unwrap();
-        let mut extradatajson_accesorio2_burrito2: ExtraAccesorie = serde_json::from_str(&newextradata_accesorio2_burrito2).unwrap();
-        let mut extradatajson_accesorio3_burrito2: ExtraAccesorie = serde_json::from_str(&newextradata_accesorio3_burrito2).unwrap();
+        let mut extradatajson_accesorio1_burrito2: ExtraAccesory = serde_json::from_str(&newextradata_accesorio1_burrito2).unwrap();
+        let mut extradatajson_accesorio2_burrito2: ExtraAccesory = serde_json::from_str(&newextradata_accesorio2_burrito2).unwrap();
+        let mut extradatajson_accesorio3_burrito2: ExtraAccesory = serde_json::from_str(&newextradata_accesorio3_burrito2).unwrap();
 
         // Obtener puntos totales a sumar de cada estadística de los accesorios del burrito 1
         let accesories_attack_burrito1 : f32 = (extradatajson_accesorio1_burrito1.attack.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito1.attack.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito1.attack.parse::<f32>().unwrap());

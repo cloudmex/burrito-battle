@@ -149,6 +149,14 @@ impl Contract {
         metadata
     }
 
+
+    //Minar un nuevo accesorio  
+    #[payable]
+    pub fn new_accessory(&mut self,token_id: TokenId,receiver_id: ValidAccountId,token_metadata: TokenMetadata) -> Token {
+        self.n_tokens +=1;
+        self.tokens.mint(token_id, receiver_id, Some(token_metadata))
+    }
+
     // Minar un nuevo token
     #[payable]
     pub fn new_burrito(&mut self,token_id: TokenId,receiver_id: ValidAccountId,token_metadata: TokenMetadata) -> Token {

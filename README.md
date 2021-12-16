@@ -85,6 +85,10 @@ Crear nuevo token:
 
     near call $ID new_burrito '{"token_id": "26", "receiver_id": "'yairnava2.testnet'", "token_metadata": { "title": "X Burrito", "description": "This is a burrito", "media": "","extra":""}}' --accountId yairnava.testnet --deposit 0.1
 
+Crear nuevo accesorio:
+
+    near call $ID new_accessory '{"token_id": "6", "receiver_id": "'missael.testnet'", "token_metadata": { "title": "Sword", "description": "Heavy Sword", "media": "","extra":"{'"'attack'":"'5'","'defense'":"'0'","'speed'":"'-5'"}'"}}' --accountId missael.testnet --deposit 0.1
+
 Modificar token:
 
     near call $ID update_burrito '{"token_id": "4", "extra":"{'"'hp'":"'5'","'attack'":"'15'","'defense'":"'10'","'speed'":"'20'","'win'":"'0'"}'"}' --accountId $ID 

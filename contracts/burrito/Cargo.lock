@@ -1813,6 +1813,8 @@ dependencies = [
 name = "non-fungible-token"
 version = "1.1.0"
 dependencies = [
+ "instant",
+ "lazy_static",
  "near-contract-standards 3.2.0",
  "near-sdk",
  "serde_json",

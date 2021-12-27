@@ -61,7 +61,7 @@ Desplegar contrato:
 
 Asignamos el identificador de nuestro contrato desplegado a una constante:
 
-    ID=dev-1639689108291-31323529130799
+    ID=dev-1640218061355-93846003303984
     echo $ID
 
 El contrato NFT debe inicializarse antes de su uso, por lo que lo inicializaremos con los metadatos predeterminados:
@@ -82,13 +82,13 @@ Obtener cantidad de accesorios creados:
     
 Crear nuevo burrito:
 
-    near call $ID new_burrito '{"burrito_id": "3", "receiver_id": "'yairnava.testnet'", "burrito_metadata": { "title": "Z Burrito", "description": "This is a burrito", "media": "","extra":""}}' --accountId yairnava.testnet --deposit 0.1
+    near call $ID new_burrito '{"burrito_id": "1", "receiver_id": "'yairnava.testnet'", "burrito_metadata": { "title": "Z Burrito", "description": "This is a burrito", "media": "","extra":""}}' --accountId yairnava.testnet --deposit 0.1
 
 Modificar burrito:
 
-    near call $ID update_burrito '{"burrito_id": "1", "extra":"{'"'burrito_type'":"'Fuego'","'hp'":"'5'","'attack'":"'7'","'defense'":"'7'","'speed'":"'7'","'win'":"'0'"}'"}' --accountId $ID 
+    near call $ID update_burrito '{"burrito_id": "1", "extra":"{'"'burrito_type'":"'Fuego'","'hp'":"'5'","'attack'":"'7'","'defense'":"'7'","'speed'":"'7'","'win'":"'0'"}'"}' --accountId yairnava.testnet 
 
-    near call $ID update_burrito '{"burrito_id": "2", "extra":"{'"'burrito_type'":"'Fuego'","'hp'":"'5'","'attack'":"'7'","'defense'":"'7'","'speed'":"'7'","'win'":"'0'"}'"}' --accountId $ID 
+    near call $ID update_burrito '{"burrito_id": "2", "extra":"{'"'burrito_type'":"'Fuego'","'hp'":"'5'","'attack'":"'7'","'defense'":"'7'","'speed'":"'7'","'win'":"'0'"}'"}' --accountId yairnava.testnet
 
 Obtener datos de un burrito:
 
@@ -96,19 +96,33 @@ Obtener datos de un burrito:
 
 Crear nuevo accesorio:
 
-    near call $ID new_accessory '{"accessory_id": "1000000", "receiver_id": "'missael.testnet'", "accessory_metadata": { "title": "Sword", "description": "Heavy Sword", "media": "","extra":"{'"'attack'":"'5'","'defense'":"'0'","'speed'":"'-5'"}'"}}' --accountId $ID --deposit 0.1
+    near call $ID new_accessory '{"accessory_id": "0", "receiver_id": "'yairnava.testnet'", "accessory_metadata": { "title": "Sword", "description": "Heavy Sword", "media": "","extra":"{'"'attack'":"'5'","'defense'":"'0'","'speed'":"'-5'"}'"}}' --accountId $ID --deposit 0.1
 
-    near call $ID new_accessory '{"accessory_id": "1000002", "receiver_id": "'missael.testnet'", "accessory_metadata": { "title": "Sword", "description": "Heavy Shield", "media": "","extra":"{'"'attack'":"'0'","'defense'":"'5'","'speed'":"'-10'"}'"}}' --accountId $ID --deposit 0.1
+    near call $ID new_accessory '{"accessory_id": "1", "receiver_id": "'yairnava.testnet'", "accessory_metadata": { "title": "Sword", "description": "Heavy Spear", "media": "","extra":"{'"'attack'":"'3'","'defense'":"'0'","'speed'":"'-2'"}'"}}' --accountId $ID --deposit 0.1
 
-    near call $ID new_accessory '{"accessory_id": "1000004", "receiver_id": "'missael.testnet'", "accessory_metadata": { "title": "Sword", "description": "Heavy Spear", "media": "","extra":"{'"'attack'":"'3'","'defense'":"'0'","'speed'":"'-2'"}'"}}' --accountId $ID --deposit 0.1
+    near call $ID new_accessory '{"accessory_id": "2", "receiver_id": "'missael.testnet'", "accessory_metadata": { "title": "Sword", "description": "Heavy Shield", "media": "","extra":"{'"'attack'":"'0'","'defense'":"'5'","'speed'":"'-10'"}'"}}' --accountId $ID --deposit 0.1
+
+    near call $ID new_accessory '{"accessory_id": "3", "receiver_id": "'yairnava.testnet'", "accessory_metadata": { "title": "Sword", "description": "Heavy Shield", "media": "","extra":"{'"'attack'":"'0'","'defense'":"'5'","'speed'":"'-10'"}'"}}' --accountId $ID --deposit 0.1
+
+    near call $ID new_accessory '{"accessory_id": "4", "receiver_id": "'missael.testnet'", "accessory_metadata": { "title": "AK47", "description": "Heavy Spear", "media": "","extra":"{'"'attack'":"'5'","'defense'":"'0'","'speed'":"'-2'"}'"}}' --accountId $ID --deposit 0.1
 
 Obtener datos de un accesorio:
 
-    near call $ID get_accessory '{"accessory_id": "1000001"}' --accountId $ID
+    near call $ID get_accessory '{"accessory_id": "4"}' --accountId yairnava.testnet
     
+Obtener paginación de accesorios:
+    near view $ID get_pagination '{"tokens": 3}'
+
+Obtener accesorios de un usuario:
+    near view $ID get_items_owner '{"accountId": "yairnava.testnet"}'
+    near view $ID get_items_owner '{"accountId": "missael.testnet"}'
+
+Obtener accesorios de una página:
+    near view $ID get_items_page '{"tokens":2, "_start_index":0}'
+
 Combate de 2 burritos
 
-    near call $ID fight_burritos '{"burrito1_id": "1","accesorio1_burrito1_id":"1000000","accesorio2_burrito1_id":"1000002","accesorio3_burrito1_id":"1000004","burrito2_id": "2","accesorio1_burrito2_id":"1000001","accesorio2_burrito2_id":"1000003","accesorio3_burrito2_id":"1000005"}' --accountId $ID
+    near call $ID fight_burritos '{"burrito1_id": "1","accesorio1_burrito1_id":"1000000","accesorio2_burrito1_id":"1000002","accesorio3_burrito1_id":"1000004","burrito2_id": "2","accesorio1_burrito2_id":"1000001","accesorio2_burrito2_id":"1000003","accesorio3_burrito2_id":"1000005"}' --accountId yairnava.testnet
 
 ## Construido con 🛠️
 

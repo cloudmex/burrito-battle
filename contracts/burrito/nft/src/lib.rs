@@ -8,15 +8,20 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::LazyOption;
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::json_types::{ValidAccountId,Base64VecU8};
+use near_sdk::utils::promise_result_as_success;
 use std::sync::{Mutex};
 use lazy_static::lazy_static;
+use std::str;
 use near_sdk::{
     env, log, near_bindgen, ext_contract, AccountId, BorshStorageKey, PanicOnDefault,
-    Promise, PromiseOrValue, PromiseResult,};
+    Promise, PromiseOrValue, PromiseResult, Balance, Gas};
 near_sdk::setup_alloc!();
 use std::convert::TryInto;
-
-const ITEMS_CONTRACT = "dev-1640297267245-16523317752149";
+// Contrato de items
+const BURRITO_CONTRACT: &str = "dev-1640297264834-71420486232830";
+const ITEMS_CONTRACT: &str = "dev-1640297267245-16523317752149";
+const NO_DEPOSIT: Balance = 0;
+const BASE_GAS: Gas = 5_000_000_000_000;
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
@@ -55,6 +60,17 @@ pub struct ExtraBurrito {
     defense : String,
     speed : String,
     win : String
+}
+
+#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct AccessoriesForBattle {
+    final_attack_b1 : String,
+    final_defense_b1 : String,
+    final_speed_b1 : String,
+    final_attack_b2 : String,
+    final_defense_b2 : String,
+    final_speed_b2 : String,
 }
 
 lazy_static! {
@@ -106,6 +122,21 @@ enum StorageKey {
     TokenMetadata,
     Enumeration,
     Approval,
+}
+
+// Métodos de otro contrato
+#[ext_contract(ext_ft)]
+pub trait ItemsContract {
+    fn get_items_for_battle(&self, 
+        accesorio1_burrito1_id: TokenId, accesorio2_burrito1_id: TokenId, accesorio3_burrito1_id: TokenId,
+        accesorio1_burrito2_id: TokenId, accesorio2_burrito2_id: TokenId, accesorio3_burrito2_id: TokenId
+    ) -> AccessoriesForBattle;
+}
+
+// Métodos del mismo contrato para los callback
+#[ext_contract(ext_self)]
+pub trait MyContract {
+    fn get_winner(&self,burrito1_id: TokenId,burrito2_id: TokenId) -> String;
 }
 
 #[near_bindgen]
@@ -445,6 +476,99 @@ impl Contract {
             vectMEta.push(token);     
         }  
         return vectMEta ;     
+    }
+    
+    // Método para pelea de 2 burritos
+    pub fn fight_burritos(&self,
+        burrito1_id: TokenId, accesorio1_burrito1_id: TokenId, accesorio2_burrito1_id: TokenId, accesorio3_burrito1_id: TokenId, 
+        burrito2_id: TokenId, accesorio1_burrito2_id: TokenId, accesorio2_burrito2_id: TokenId, accesorio3_burrito2_id: TokenId) -> Promise {
+        log!("Llamando contrato @{} desde @{}",ITEMS_CONTRACT,BURRITO_CONTRACT);
+
+        // Invocar un método en otro contrato
+        let p = ext_ft::get_items_for_battle(
+            accesorio1_burrito1_id.to_string(), // Id el item 1 del burrito 1
+            accesorio2_burrito1_id.to_string(), // Id el item 2 del burrito 1
+            accesorio3_burrito1_id.to_string(), // Id el item 3 del burrito 1
+            accesorio1_burrito2_id.to_string(), // Id el item 1 del burrito 2
+            accesorio2_burrito2_id.to_string(), // Id el item 2 del burrito 2
+            accesorio3_burrito2_id.to_string(), // Id el item 3 del burrito 2
+            &ITEMS_CONTRACT, // Contrato de items
+            NO_DEPOSIT, // yocto NEAR a ajuntar
+            BASE_GAS // gas a ajuntar
+        )
+        .then(ext_self::get_winner(
+            burrito1_id.to_string(),
+            burrito2_id.to_string(),
+            &BURRITO_CONTRACT, // Contrato de burritos
+            NO_DEPOSIT, // yocto NEAR a ajuntar al callback
+            BASE_GAS // gas a ajuntar al callback
+        ));
+
+        p
+    } 
+
+    // Obtener al ganador de una pelea
+    pub fn get_winner(&self,burrito1_id: TokenId,burrito2_id: TokenId) -> String {
+        assert_eq!(
+            env::promise_results_count(),
+            1,
+            "Éste es un método callback"
+        );
+
+        // handle the result from the cross contract call this method is a callback for
+        match env::promise_result(0) {
+            PromiseResult::NotReady => unreachable!(),
+            PromiseResult::Failed => "oops!".to_string(),
+            PromiseResult::Successful(result) => {
+                let value = str::from_utf8(&result).unwrap();
+                let accessories_for_battle: AccessoriesForBattle = serde_json::from_str(&value).unwrap();
+
+                // Valores que modificarán cada característica
+                log!("Características accesorios burrito 1");
+                log!("final_attack_b1: {:#?}",accessories_for_battle.final_attack_b1);
+                log!("final_defense_b1: {:#?}",accessories_for_battle.final_defense_b1);
+                log!("final_speed_b1: {:#?}",accessories_for_battle.final_speed_b1);
+                log!("Características accesorios burrito 2");
+                log!("final_attack_b2: {:#?}",accessories_for_battle.final_attack_b2);
+                log!("final_defense_b2: {:#?}",accessories_for_battle.final_defense_b2);
+                log!("final_speed_b2: {:#?}",accessories_for_battle.final_speed_b2);
+
+                // Obtenemos los datos de los burritos
+
+                // Obtener metadata burrito 1
+                let mut metadata_burrito1 = self
+                .burritos
+                .token_metadata_by_id
+                .as_ref()
+                .and_then(|by_id| by_id.get(&burrito1_id.clone()))
+                .unwrap();
+
+                // Obtener metadata burrito 2
+                let mut metadata_burrito2 = self
+                .burritos
+                .token_metadata_by_id
+                .as_ref()
+                .and_then(|by_id| by_id.get(&burrito2_id.clone()))
+                .unwrap();
+
+                // Extraer extras del token burrito 1
+                let newextradata_burrito1 = str::replace(&metadata_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
+                log!("Extra burrito 1: {:?}",metadata_burrito1.extra);
+
+                // Extraer extras del token burrito 2
+                let newextradata_burrito2 = str::replace(&metadata_burrito2.extra.as_ref().unwrap().to_string(), "'", "\"");
+                log!("Extra burrito 2: {:?}",metadata_burrito2.extra);
+
+                // Crear json burrito 1
+                let mut extradatajson_burrito1: ExtraBurrito = serde_json::from_str(&newextradata_burrito1).unwrap();
+
+                // Crear json burrito 2
+                let mut extradatajson_burrito2: ExtraBurrito = serde_json::from_str(&newextradata_burrito2).unwrap();
+
+                // Respuesta a devolver del método fight_burritos
+                "This is value of the promise!".to_string()
+            }
+        }
     }
 }
 

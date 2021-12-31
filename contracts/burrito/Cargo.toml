@@ -10,7 +10,6 @@ near-sdk-sim = "3.2.0"
 near-contract-standards = "3.1.1"
 serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
 rand = "0.8.4"
-
 # remember to include a line for each contract
 non-fungible-token = { path = "./nft" }
 

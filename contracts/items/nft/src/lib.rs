@@ -49,6 +49,17 @@ pub struct ExtraAccessory {
     speed : String
 }
 
+#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct AccessoriesForBattle {
+    final_attack_b1 : String,
+    final_defense_b1 : String,
+    final_speed_b1 : String,
+    final_attack_b2 : String,
+    final_defense_b2 : String,
+    final_speed_b2 : String,
+}
+
 lazy_static! {
     static ref USER_TOKEN_HASHMAP: Mutex<HashMap<String, String>> = Mutex::new(HashMap::new());
     static ref CONV_MAP: HashMap<String, String> = {
@@ -285,6 +296,104 @@ impl Contract {
             vectMEta.push(token);     
         }  
         return vectMEta ;     
+    }
+
+    // Método de ejemplo para llamar desde el contrato de burritos
+    pub fn get_items_for_battle(&self, 
+        accesorio1_burrito1_id: TokenId, accesorio2_burrito1_id: TokenId, accesorio3_burrito1_id: TokenId,
+        accesorio1_burrito2_id: TokenId, accesorio2_burrito2_id: TokenId, accesorio3_burrito2_id: TokenId) -> AccessoriesForBattle  {
+        log!("Éste es el contrato de items");
+        
+         // Obtener metadata accesorio 1 burrito 1
+         let mut metadata_accesorio1_burrito1 = self
+            .accessories
+            .token_metadata_by_id
+            .as_ref()
+            .and_then(|by_id| by_id.get(&accesorio1_burrito1_id))
+            .unwrap();
+
+        // Obtener metadata accesorio 2 burrito 1
+        let mut metadata_accesorio2_burrito1 = self
+            .accessories
+            .token_metadata_by_id
+            .as_ref()
+            .and_then(|by_id| by_id.get(&accesorio2_burrito1_id))
+            .unwrap();
+
+        // Obtener metadata accesorio 3 burrito 1
+        let mut metadata_accesorio3_burrito1 = self
+            .accessories
+            .token_metadata_by_id
+            .as_ref()
+            .and_then(|by_id| by_id.get(&accesorio3_burrito1_id))
+            .unwrap();
+
+        
+        // Obtener metadata accesorio 1 burrito 2
+        let mut metadata_accesorio1_burrito2 = self
+            .accessories
+            .token_metadata_by_id
+            .as_ref()
+            .and_then(|by_id| by_id.get(&accesorio1_burrito2_id))
+            .unwrap();
+
+        // Obtener metadata accesorio 2 burrito 2
+        let mut metadata_accesorio2_burrito2 = self
+            .accessories
+            .token_metadata_by_id
+            .as_ref()
+            .and_then(|by_id| by_id.get(&accesorio2_burrito2_id))
+            .unwrap();
+
+        // Obtener metadata accesorio 3 burrito 2
+        let mut metadata_accesorio3_burrito2 = self
+            .accessories
+            .token_metadata_by_id
+            .as_ref()
+            .and_then(|by_id| by_id.get(&accesorio3_burrito2_id))
+            .unwrap();
+
+        // Extraer extras del token accesorios burrito 1
+        let newextradata_accesorio1_burrito1 = str::replace(&metadata_accesorio1_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
+        let newextradata_accesorio2_burrito1 = str::replace(&metadata_accesorio2_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
+        let newextradata_accesorio3_burrito1 = str::replace(&metadata_accesorio3_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
+        
+        // Extraer extras del token accesorios burrito 2
+        let newextradata_accesorio1_burrito2 = str::replace(&metadata_accesorio1_burrito2.extra.as_ref().unwrap().to_string(), "'", "\"");
+        let newextradata_accesorio2_burrito2 = str::replace(&metadata_accesorio2_burrito2.extra.as_ref().unwrap().to_string(), "'", "\"");
+        let newextradata_accesorio3_burrito2 = str::replace(&metadata_accesorio3_burrito2.extra.as_ref().unwrap().to_string(), "'", "\"");
+       
+        // Crear json accesorios burrito 1
+        let mut extradatajson_accesorio1_burrito1: ExtraAccessory = serde_json::from_str(&newextradata_accesorio1_burrito1).unwrap();
+        let mut extradatajson_accesorio2_burrito1: ExtraAccessory = serde_json::from_str(&newextradata_accesorio2_burrito1).unwrap();
+        let mut extradatajson_accesorio3_burrito1: ExtraAccessory = serde_json::from_str(&newextradata_accesorio3_burrito1).unwrap();
+
+        // Crear json accesorios burrito 2
+        let mut extradatajson_accesorio1_burrito2: ExtraAccessory = serde_json::from_str(&newextradata_accesorio1_burrito2).unwrap();
+        let mut extradatajson_accesorio2_burrito2: ExtraAccessory = serde_json::from_str(&newextradata_accesorio2_burrito2).unwrap();
+        let mut extradatajson_accesorio3_burrito2: ExtraAccessory = serde_json::from_str(&newextradata_accesorio3_burrito2).unwrap();
+        
+        // Obtener puntos totales a sumar de cada estadística de los accesorios del burrito 1
+        let accesories_attack_burrito1 : f32 = (extradatajson_accesorio1_burrito1.attack.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito1.attack.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito1.attack.parse::<f32>().unwrap());
+        let accesories_defense_burrito1 : f32 = (extradatajson_accesorio1_burrito1.defense.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito1.defense.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito1.defense.parse::<f32>().unwrap());
+        let accesories_speed_burrito1 : f32 = (extradatajson_accesorio1_burrito1.speed.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito1.speed.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito1.speed.parse::<f32>().unwrap());
+        
+        // Obtener puntos totales a sumar de cada estadística de los accesorios del burrito 2
+        let accesories_attack_burrito2 : f32 = (extradatajson_accesorio1_burrito2.attack.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito2.attack.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito2.attack.parse::<f32>().unwrap());
+        let accesories_defense_burrito2 : f32 = (extradatajson_accesorio1_burrito2.defense.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito2.defense.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito2.defense.parse::<f32>().unwrap());
+        let accesories_speed_burrito2 : f32 = (extradatajson_accesorio1_burrito2.speed.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito2.speed.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito2.speed.parse::<f32>().unwrap());
+        
+        let accessories_for_battle = AccessoriesForBattle {
+            final_attack_b1 : accesories_attack_burrito1.to_string(),
+            final_defense_b1 : accesories_defense_burrito1.to_string(),
+            final_speed_b1 : accesories_speed_burrito1.to_string(),
+            final_attack_b2 : accesories_attack_burrito2.to_string(),
+            final_defense_b2 : accesories_defense_burrito2.to_string(),
+            final_speed_b2 : accesories_speed_burrito2.to_string()
+        };
+
+        accessories_for_battle
+
     }
 }
 

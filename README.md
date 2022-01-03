@@ -47,13 +47,13 @@ Configure su near-cli para autorizar su cuenta de prueba creada recientemente:
 
 Paso 3: Crear contrato inteligente:
 
-Ejecute lo siguiente comando el cual generará nuestro archivo WASM en el directorio contract/. Este es el contrato inteligente que implementaremos a continuación:
+Ejecute el siguiente comando dentro de cada carpeta (burrito e items) el cual generará nuestro archivo WASM en el directorio correspondiente (burrito/ o items/). Estos son los contratos inteligentes que implementaremos a continuación:
          
          ./build.sh
     
 ## Despliegue 📦
 
-Desplegar contrato:
+Desplegar ambos contratos (burrito e items) entrar a cada carpeta y ejecutar el siguiente comando:
 
     near dev-deploy --wasmFile res/non_fungible_token.wasm
 
@@ -69,7 +69,7 @@ Asignamos el identificador de nuestro contrato desplegado a una constante:
     ID=dev-1640297267245-16523317752149
     echo $ID
 
-El contrato NFT debe inicializarse antes de su uso, por lo que lo inicializaremos con los metadatos predeterminados:
+Ambos contratos deben inicializarse antes de su uso, por lo que lo inicializaremos con los metadatos predeterminados:
 
     near call $ID init_contract '{"owner_id": "'$ID'"}' --accountId $ID
 
@@ -93,7 +93,7 @@ Crear nuevo burrito:
 
 Modificar burrito:
 
-    near call $ID update_burrito '{"burrito_id": "1", "extra":"{'"'burrito_type'":"'Fuego'","'hp'":"'5'","'attack'":"'7'","'defense'":"'7'","'speed'":"'7'","'win'":"'0'"}'"}' --accountId yairnava.testnet 
+    near call $ID update_burrito '{"burrito_id": "1", "extra":"{'"'burrito_type'":"'Fuego'","'hp'":"'5'","'attack'":"'6'","'defense'":"'7'","'speed'":"'7'","'win'":"'0'"}'"}' --accountId yairnava.testnet 
 
     near call $ID update_burrito '{"burrito_id": "2", "extra":"{'"'burrito_type'":"'Fuego'","'hp'":"'5'","'attack'":"'7'","'defense'":"'7'","'speed'":"'7'","'win'":"'0'"}'"}' --accountId yairnava.testnet
 
@@ -129,7 +129,9 @@ Obtener accesorios de una página:
 
 Combate de 2 burritos
 
-    near call $ID fight_burritos '{"burrito1_id": "0","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"1","accesorio3_burrito1_id":"2","burrito2_id": "1","accesorio1_burrito2_id":"0","accesorio2_burrito2_id":"0","accesorio3_burrito2_id":"4"}' --accountId yairnava.testnet
+    near call $ID fight_burritos '{"burrito1_id": "0","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"1","accesorio3_burrito1_id":"2","burrito2_id": "1","accesorio1_burrito2_id":"0","accesorio2_burrito2_id":"0","accesorio3_burrito2_id":"4"}' --accountId yairnava.testnet --gas=300000000000000
+
+    near call $ID fight_burritos '{"burrito1_id": "0","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"0","accesorio3_burrito1_id":"0","burrito2_id": "1","accesorio1_burrito2_id":"0","accesorio2_burrito2_id":"0","accesorio3_burrito2_id":"0"}' --accountId yairnava.testnet --gas=300000000000000
 
 ## Construido con 🛠️
 

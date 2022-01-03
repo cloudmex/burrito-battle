@@ -21,7 +21,7 @@ use std::convert::TryInto;
 const BURRITO_CONTRACT: &str = "dev-1640297264834-71420486232830";
 const ITEMS_CONTRACT: &str = "dev-1640297267245-16523317752149";
 const NO_DEPOSIT: Balance = 0;
-const BASE_GAS: Gas = 5_000_000_000_000;
+const BASE_GAS: Gas = 50_000_000_000_000;
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
@@ -136,7 +136,7 @@ pub trait ItemsContract {
 // Métodos del mismo contrato para los callback
 #[ext_contract(ext_self)]
 pub trait MyContract {
-    fn get_winner(&self,burrito1_id: TokenId,burrito2_id: TokenId) -> String;
+    fn get_winner(&mut self,burrito1_id: TokenId,burrito2_id: TokenId) -> String;
 }
 
 #[near_bindgen]
@@ -508,7 +508,7 @@ impl Contract {
     } 
 
     // Obtener al ganador de una pelea
-    pub fn get_winner(&self,burrito1_id: TokenId,burrito2_id: TokenId) -> String {
+    pub fn get_winner(&mut self,burrito1_id: TokenId,burrito2_id: TokenId) -> String {
         assert_eq!(
             env::promise_results_count(),
             1,
@@ -522,16 +522,6 @@ impl Contract {
             PromiseResult::Successful(result) => {
                 let value = str::from_utf8(&result).unwrap();
                 let accessories_for_battle: AccessoriesForBattle = serde_json::from_str(&value).unwrap();
-
-                // Valores que modificarán cada característica
-                log!("Características accesorios burrito 1");
-                log!("final_attack_b1: {:#?}",accessories_for_battle.final_attack_b1);
-                log!("final_defense_b1: {:#?}",accessories_for_battle.final_defense_b1);
-                log!("final_speed_b1: {:#?}",accessories_for_battle.final_speed_b1);
-                log!("Características accesorios burrito 2");
-                log!("final_attack_b2: {:#?}",accessories_for_battle.final_attack_b2);
-                log!("final_defense_b2: {:#?}",accessories_for_battle.final_defense_b2);
-                log!("final_speed_b2: {:#?}",accessories_for_battle.final_speed_b2);
 
                 // Obtenemos los datos de los burritos
 
@@ -553,11 +543,9 @@ impl Contract {
 
                 // Extraer extras del token burrito 1
                 let newextradata_burrito1 = str::replace(&metadata_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
-                log!("Extra burrito 1: {:?}",metadata_burrito1.extra);
 
                 // Extraer extras del token burrito 2
                 let newextradata_burrito2 = str::replace(&metadata_burrito2.extra.as_ref().unwrap().to_string(), "'", "\"");
-                log!("Extra burrito 2: {:?}",metadata_burrito2.extra);
 
                 // Crear json burrito 1
                 let mut extradatajson_burrito1: ExtraBurrito = serde_json::from_str(&newextradata_burrito1).unwrap();
@@ -565,8 +553,270 @@ impl Contract {
                 // Crear json burrito 2
                 let mut extradatajson_burrito2: ExtraBurrito = serde_json::from_str(&newextradata_burrito2).unwrap();
 
-                // Respuesta a devolver del método fight_burritos
-                "This is value of the promise!".to_string()
+
+                let owner_id_burrito1 = self.burritos.owner_by_id.get(&burrito1_id.clone()).unwrap();
+                // Crear estructura burrito 1
+                let burrito1 = Burrito {
+                    owner_id : owner_id_burrito1.to_string(),
+                    name : metadata_burrito1.title.as_ref().unwrap().to_string(),
+                    description : metadata_burrito1.description.as_ref().unwrap().to_string(),
+                    burrito_type : extradatajson_burrito1.burrito_type.clone(),
+                    hp : extradatajson_burrito1.hp.clone(),
+                    attack : extradatajson_burrito1.attack.clone(),
+                    defense : extradatajson_burrito1.defense.clone(),
+                    speed : extradatajson_burrito1.speed.clone(),
+                    win : extradatajson_burrito1.win.clone()
+        
+                };
+        
+                let owner_id_burrito2 = self.burritos.owner_by_id.get(&burrito2_id.clone()).unwrap();
+                // Crear estructura burrito 2
+                let burrito2 = Burrito {
+                    owner_id : owner_id_burrito2.to_string(),
+                    name : metadata_burrito2.title.as_ref().unwrap().to_string(),
+                    description : metadata_burrito2.description.as_ref().unwrap().to_string(),
+                    burrito_type : extradatajson_burrito2.burrito_type.clone(),
+                    hp : extradatajson_burrito2.hp.clone(),
+                    attack : extradatajson_burrito2.attack.clone(),
+                    defense : extradatajson_burrito2.defense.clone(),
+                    speed : extradatajson_burrito2.speed.clone(),
+                    win : extradatajson_burrito2.win.clone()
+                };
+                
+                // Validamos que ambos burritos tengan vidas para combatir
+                assert!(burrito1.hp.parse::<u8>().unwrap() > 0, "{} no tiene vidas para combatir",metadata_burrito1.title.as_ref().unwrap().to_string());
+                assert!(burrito2.hp.parse::<u8>().unwrap() > 0, "{} no tiene vidas para combatir",metadata_burrito2.title.as_ref().unwrap().to_string());
+
+                let logname1 = format!("Nombre Burrito 1: {}", metadata_burrito1.title.as_ref().unwrap().to_string() );
+                env::log(logname1.as_bytes());
+                
+                let logname2 = format!("Nombre Burrito 2: {}", metadata_burrito2.title.as_ref().unwrap().to_string() );
+                env::log(logname2.as_bytes());
+
+                // Variable que almacenará al ganador
+                let burrito_winner : Burrito;
+
+                //let burrito_winner : Burrito;
+                let mut winner : i32 = 1;
+                
+                // Defensa total del burrito 1
+                let mut old_defense_burrito1 = (burrito1.defense.parse::<f32>().unwrap()+accessories_for_battle.final_defense_b1.parse::<f32>().unwrap());
+                
+                // Defensa total del burrito 2
+                let mut old_defense_burrito2 = (burrito2.defense.parse::<f32>().unwrap()+accessories_for_battle.final_defense_b2.parse::<f32>().unwrap());
+                
+                // Generar números aleatorios para multiplicadores de velocidad y ataque
+                let mut rands1: u8 = *env::random_seed().get(0).unwrap();;
+                let mut rands2: u8 = *env::random_seed().get(1).unwrap();;
+                let mut randa1: u8 = *env::random_seed().get(2).unwrap();
+                let mut randa2: u8 = *env::random_seed().get(3).unwrap();
+
+                let mut speed_mult1: f32 = 0.0;
+                let mut speed_mult2: f32 = 0.0;
+                let mut attack_mult1: f32 = 0.0;
+                let mut attack_mult2: f32 = 0.0;
+                let mut type_mult1: f32 = 0.0;
+                let mut type_mult2: f32 = 0.0;
+
+                if rands1 < 10 {
+                    speed_mult1 = rands1 as f32 * 0.1;
+                }
+                if rands1 >= 10 && rands1 < 100 {
+                    speed_mult1 = rands1 as f32 * 0.01;
+                }
+                if rands1 >= 100 && rands1 < 255 {
+                    speed_mult1 = rands1 as f32 * 0.001;
+                }
+                if rands2 < 10 {
+                    speed_mult2 = rands2 as f32 * 0.1;
+                }
+                if rands2 >= 10 && rands2 < 100 {
+                    speed_mult2 = rands2 as f32 * 0.01;
+                }
+                if rands2 >= 100 && rands2 < 255 {
+                    speed_mult2 = rands2 as f32 * 0.001;
+                }
+                if randa1 < 10 {
+                    attack_mult1 = randa1 as f32 * 0.1;
+                }
+                if randa1 >= 10 && randa1 < 100 {
+                    attack_mult1 = randa1 as f32 * 0.01;
+                }
+                if randa1 >= 100 && randa1 < 255 {
+                    attack_mult1 = randa1 as f32 * 0.001;
+                }
+                if randa2 < 10 {
+                    attack_mult2 = randa2 as f32 * 0.1;
+                }
+                if randa2 >= 10 && randa2 < 100 {
+                    attack_mult2 = randa2 as f32 * 0.01;
+                }
+                if randa2 >= 100 && randa2 < 255 {
+                    attack_mult2 = randa2 as f32 * 0.001;
+                }
+
+                loop {
+                    // Verificar cuál burrito tiene mayor velocidad
+                    if ((burrito1.speed.parse::<f32>().unwrap()*speed_mult1)+accessories_for_battle.final_speed_b1.parse::<f32>().unwrap()) > ((burrito2.speed.parse::<f32>().unwrap()*speed_mult2)+accessories_for_battle.final_speed_b2.parse::<f32>().unwrap()) {
+                        //Obtener multiplicador de tipo
+                        if(burrito1.burrito_type == "Fuego" && burrito2.burrito_type == "Planta"){
+                            type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        }
+                        if(burrito1.burrito_type == "Agua" && burrito2.burrito_type == "Fuego"){
+                            type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        }
+                        if(burrito1.burrito_type == "Planta" && burrito2.burrito_type == "Eléctrico"){
+                            type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        }
+                        if(burrito1.burrito_type == "Eléctrico" && burrito2.burrito_type == "Volador"){
+                            type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        }
+                        if(burrito1.burrito_type == "Volador" && burrito2.burrito_type == "Agua"){
+                            type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        }
+    
+                        old_defense_burrito2 = old_defense_burrito2 - ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)+type_mult1+accessories_for_battle.final_attack_b1.parse::<f32>().unwrap());
+                        type_mult1 = 0.0;
+                        if old_defense_burrito2 < 0.0 {
+                            winner = 1;
+                        }
+                        if winner == 0 {
+                            //Obtener multiplicador de tipo
+                            if(burrito2.burrito_type == "Fuego" && burrito1.burrito_type == "Planta"){
+                                type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            }
+                            if(burrito2.burrito_type == "Agua" && burrito1.burrito_type == "Fuego"){
+                                type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            }
+                            if(burrito2.burrito_type == "Planta" && burrito1.burrito_type == "Eléctrico"){
+                                type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            }
+                            if(burrito2.burrito_type == "Eléctrico" && burrito1.burrito_type == "Volador"){
+                                type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            }
+                            if(burrito2.burrito_type == "Volador" && burrito1.burrito_type == "Agua"){
+                                type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            }
+                            
+                            old_defense_burrito1 = old_defense_burrito1 - ((burrito2.attack.parse::<f32>().unwrap()*attack_mult2)+type_mult2+accessories_for_battle.final_attack_b2.parse::<f32>().unwrap());
+                            type_mult2 = 0.0;
+                            if old_defense_burrito1 < 0.0 {
+                                winner = 2;
+                            }
+                        }
+                    } else {
+                        //Obtener multiplicador de tipo
+                        if(burrito2.burrito_type == "Fuego" && burrito1.burrito_type == "Planta"){
+                            type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        }
+                        if(burrito2.burrito_type == "Agua" && burrito1.burrito_type == "Fuego"){
+                            type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        }
+                        if(burrito2.burrito_type == "Planta" && burrito1.burrito_type == "Eléctrico"){
+                            type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        }
+                        if(burrito2.burrito_type == "Eléctrico" && burrito1.burrito_type == "Volador"){
+                            type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        }
+                        if(burrito2.burrito_type == "Volador" && burrito1.burrito_type == "Agua"){
+                            type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        }
+    
+                        old_defense_burrito1 = old_defense_burrito1 - ((burrito2.attack.parse::<f32>().unwrap()*attack_mult2)+type_mult2+accessories_for_battle.final_attack_b2.parse::<f32>().unwrap());
+                        type_mult2 = 0.0;
+                        if old_defense_burrito1 < 0.0 {
+                            winner = 2;
+                        }
+                        if winner == 0 {
+                            //Obtener multiplicador de tipo
+                            if(burrito1.burrito_type == "Fuego" && burrito2.burrito_type == "Planta"){
+                                type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            }
+                            if(burrito1.burrito_type == "Agua" && burrito2.burrito_type == "Fuego"){
+                                type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            }
+                            if(burrito1.burrito_type == "Planta" && burrito2.burrito_type == "Eléctrico"){
+                                type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            }
+                            if(burrito1.burrito_type == "Eléctrico" && burrito2.burrito_type == "Volador"){
+                                type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            }
+                            if(burrito1.burrito_type == "Volador" && burrito2.burrito_type == "Agua"){
+                                type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            }
+    
+                            old_defense_burrito2 = old_defense_burrito2 - ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)+type_mult1+accessories_for_battle.final_attack_b1.parse::<f32>().unwrap());
+                            type_mult1 = 0.0;
+                            if old_defense_burrito2 < 0.0 {
+                                winner = 1;
+                            }
+                        }
+                    }
+    
+                    if winner != 0 {
+                        break;
+                    }
+                }
+
+                if winner == 1 {
+                    burrito_winner = burrito1;
+        
+                    let new_hp_burrito2 = burrito2.hp.parse::<u8>().unwrap()-1;
+                    extradatajson_burrito2.hp = new_hp_burrito2.to_string();
+        
+                    let mut extra_string_burrito2 = serde_json::to_string(&extradatajson_burrito2).unwrap();
+                    extra_string_burrito2 = str::replace(&extra_string_burrito2, "\"", "'");
+                    metadata_burrito2.extra = Some(extra_string_burrito2.clone());
+        
+                    self.burritos
+                        .token_metadata_by_id
+                        .as_mut()
+                        .and_then(|by_id| by_id.insert(&burrito2_id, &metadata_burrito2));
+        
+                    let new_win_burrito1 = burrito_winner.win.parse::<u8>().unwrap()+1;
+                    extradatajson_burrito1.win = new_win_burrito1.to_string();
+        
+                    let mut extra_string_burrito1 = serde_json::to_string(&extradatajson_burrito1).unwrap();
+                    extra_string_burrito1 = str::replace(&extra_string_burrito1, "\"", "'");
+                    metadata_burrito1.extra = Some(extra_string_burrito1.clone());
+        
+                    self.burritos
+                        .token_metadata_by_id
+                        .as_mut()
+                        .and_then(|by_id| by_id.insert(&burrito1_id, &metadata_burrito1));
+                } 
+                else {
+                    burrito_winner = burrito2;
+        
+                    let new_hp_burrito1 = burrito1.hp.parse::<u8>().unwrap()-1;
+                    extradatajson_burrito1.hp = new_hp_burrito1.to_string();
+        
+                    let mut extra_string_burrito1 = serde_json::to_string(&extradatajson_burrito1).unwrap();
+                    extra_string_burrito1 = str::replace(&extra_string_burrito1, "\"", "'");
+                    metadata_burrito1.extra = Some(extra_string_burrito1.clone());
+        
+                    self.burritos
+                        .token_metadata_by_id
+                        .as_mut()
+                        .and_then(|by_id| by_id.insert(&burrito1_id, &metadata_burrito1));
+        
+                    let new_win_burrito2 = burrito_winner.win.parse::<u8>().unwrap()+1;
+                    extradatajson_burrito2.win = new_win_burrito2.to_string();
+        
+                    let mut extra_string_burrito2 = serde_json::to_string(&extradatajson_burrito2).unwrap();
+                    extra_string_burrito2 = str::replace(&extra_string_burrito2, "\"", "'");
+                    metadata_burrito2.extra = Some(extra_string_burrito2.clone());
+        
+                    self.burritos
+                        .token_metadata_by_id
+                        .as_mut()
+                        .and_then(|by_id| by_id.insert(&burrito2_id, &metadata_burrito2));
+                }
+
+                //Retornamos al burrito ganador
+                burrito_winner.name
+
+
             }
         }
     }

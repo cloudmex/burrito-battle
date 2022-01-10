@@ -18,8 +18,8 @@ use near_sdk::{
 near_sdk::setup_alloc!();
 use std::convert::TryInto;
 // Contrato de items
-const BURRITO_CONTRACT: &str = "dev-1640297264834-71420486232830";
-const ITEMS_CONTRACT: &str = "dev-1640297267245-16523317752149";
+const BURRITO_CONTRACT: &str = "dev-1641852649467-90519282117752";
+const ITEMS_CONTRACT: &str = "dev-1641232107829-62553275563586";
 const NO_DEPOSIT: Balance = 0;
 const BASE_GAS: Gas = 50_000_000_000_000;
 
@@ -29,9 +29,57 @@ pub struct Contract {
     tokens: NonFungibleToken,
     burritos: NonFungibleToken,
     metadata: LazyOption<NFTContractMetadata>,
-    n_tokens: u64,
-    n_burritos: u64,
-    burritos_hash_map:HashMap<TokenId, Vec<String>>
+    n_tokens: u128,
+    n_burritos: u128,
+    n_battles: u128,
+    burritos_hash_map:HashMap<TokenId, Vec<String>>,
+    users_hash_map:HashMap<u128,String>,
+    battle_room_map:HashMap::<u128,Vec<String>>
+
+    // Estatus = Espera,Ocupado,Finalizado
+    // NumeroBatalla,[Estatus,
+    //                        Jugador1,Burrito1,Burrito2,Burrito3,
+    //                        Jugador2,Burrito1,Burrito2,Burrito3,
+    //                        BurritoJ1,Accesorio1J1,Accesorio2J1,Accesorio3J1,BurritoJ2,Accesorio1J2,Accesorio2J2,Accesorio3J2,GanadorRonda1,
+    //                        BurritoJ1,Accesorio1J1,Accesorio2J1,Accesorio3J1,BurritoJ2,Accesorio1J2,Accesorio2J2,Accesorio3J2,GanadorRonda2,
+    //                        BurritoJ1,Accesorio1J1,Accesorio2J1,Accesorio3J1,BurritoJ2,Accesorio1J2,Accesorio2J2,Accesorio3J2,GanadorRonda3,
+    //                        BurritoJ1,Accesorio1J1,Accesorio2J1,Accesorio3J1,BurritoJ2,Accesorio1J2,Accesorio2J2,Accesorio3J2,GanadorRonda4,
+    //                        BurritoJ1,Accesorio1J1,Accesorio2J1,Accesorio3J1,BurritoJ2,Accesorio1J2,Accesorio2J2,Accesorio3J2,GanadorRonda5,
+    //                Ganador]
+
+    // Ejemplo Inicio de batalla
+    // 1,[Espera,
+    //                        yairnava.testnet,1,2,3,
+    //                        Jugador2,Burrito1,Burrito2,Burrito3,
+    //                        BurritoJ1,Accesorio1J1,Accesorio2J1,Accesorio3J1,BurritoJ2,Accesorio1J2,Accesorio2J2,Accesorio3J2,GanadorRonda1,
+    //                        BurritoJ1,Accesorio1J1,Accesorio2J1,Accesorio3J1,BurritoJ2,Accesorio1J2,Accesorio2J2,Accesorio3J2,GanadorRonda2,
+    //                        BurritoJ1,Accesorio1J1,Accesorio2J1,Accesorio3J1,BurritoJ2,Accesorio1J2,Accesorio2J2,Accesorio3J2,GanadorRonda3,
+    //                        BurritoJ1,Accesorio1J1,Accesorio2J1,Accesorio3J1,BurritoJ2,Accesorio1J2,Accesorio2J2,Accesorio3J2,GanadorRonda4,
+    //                        BurritoJ1,Accesorio1J1,Accesorio2J1,Accesorio3J1,BurritoJ2,Accesorio1J2,Accesorio2J2,Accesorio3J2,GanadorRonda5,
+    //                Ganador]
+
+    // Ejemplo Proceso de batalla
+    // 1,[Batallando,
+    //                        yairnava.testnet,1,2,3,
+    //                        missael.testnet,4,5,6,
+    //                        1,1,2,3,4,4,5,6,yairnava.testnet,
+    //                        1,1,2,3,4,4,5,6,missael.testnet,
+    //                        BurritoJ1,Accesorio1J1,Accesorio2J1,Accesorio3J1,BurritoJ2,Accesorio1J2,Accesorio2J2,Accesorio3J2,GanadorRonda3,
+    //                        BurritoJ1,Accesorio1J1,Accesorio2J1,Accesorio3J1,BurritoJ2,Accesorio1J2,Accesorio2J2,Accesorio3J2,GanadorRonda4,
+    //                        BurritoJ1,Accesorio1J1,Accesorio2J1,Accesorio3J1,BurritoJ2,Accesorio1J2,Accesorio2J2,Accesorio3J2,GanadorRonda5,
+    //                Ganador]
+
+    // Ejemplo Final de batalla
+    // 1,[Finalizado,
+    //                        yairnava.testnet,1,2,3,
+    //                        missael.testnet,4,5,6,
+    //                        1,1,2,3,4,4,5,6,yairnava.testnet,
+    //                        1,1,2,3,4,4,5,6,missael.testnet,
+    //                        2,1,2,3,4,4,5,6,yairnava.testnet,
+    //                        1,1,2,3,4,4,5,6,missael.testnet,
+    //                        3,1,2,3,5,4,5,6,yairnava.testnet,
+    //                yairnava.testnet]
+
 }
 
 const DATA_IMAGE_SVG_NEAR_ICON: &str = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 288 288'%3E%3Cg id='l' data-name='l'%3E%3Cpath d='M187.58,79.81l-30.1,44.69a3.2,3.2,0,0,0,4.75,4.2L191.86,103a1.2,1.2,0,0,1,2,.91v80.46a1.2,1.2,0,0,1-2.12.77L102.18,77.93A15.35,15.35,0,0,0,90.47,72.5H87.34A15.34,15.34,0,0,0,72,87.84V201.16A15.34,15.34,0,0,0,87.34,216.5h0a15.35,15.35,0,0,0,13.08-7.31l30.1-44.69a3.2,3.2,0,0,0-4.75-4.2L96.14,186a1.2,1.2,0,0,1-2-.91V104.61a1.2,1.2,0,0,1,2.12-.77l89.55,107.23a15.35,15.35,0,0,0,11.71,5.43h3.13A15.34,15.34,0,0,0,216,201.16V87.84A15.34,15.34,0,0,0,200.66,72.5h0A15.35,15.35,0,0,0,187.58,79.81Z'/%3E%3C/g%3E%3C/svg%3E";
@@ -110,7 +158,10 @@ impl Default for Contract {
             metadata: LazyOption::new(StorageKey::Metadata, Some(&meta)),
             n_tokens: 0,
             n_burritos: 0,
-            burritos_hash_map:HashMap::new()
+            n_battles: 0,
+            burritos_hash_map:HashMap::new(),
+            battle_room_map:HashMap::new(),
+            users_hash_map:HashMap::new(),
         }   
     }
 }
@@ -179,13 +230,21 @@ impl Contract {
             metadata: LazyOption::new(StorageKey::Metadata, Some(&metadata)),
             n_tokens: 0,
             n_burritos: 0,
-            burritos_hash_map:HashMap::new()
+            n_battles: 0 ,
+            burritos_hash_map:HashMap::new(),
+            battle_room_map:HashMap::new(),
+            users_hash_map:HashMap::new(),
         }
     }
 
     // Obtener cantidad de burritos creados
-    pub fn get_number_burritos(&self) -> u64 {
+    pub fn get_number_burritos(&self) -> u128 {
         self.n_burritos
+    }
+
+    // Obtener cantidad de batallas creadas
+    pub fn get_number_battles(&self) -> u128 {
+        self.n_battles
     }
 
     // Minar un nuevo burrito
@@ -301,7 +360,7 @@ impl Contract {
         extra_data_string = str::replace(&extra_data_string, "\"", "'");
         new_burrito.extra = Some(extra_data_string);
 
-        self.burritos.mint(burrito_id.clone(), receiver_id, Some(new_burrito.clone()));
+        self.burritos.mint(burrito_id.clone(), receiver_id.clone(), Some(new_burrito.clone()));
 
         self.n_burritos += 1;
         let owner_id = self.burritos.owner_by_id.get(&burrito_id.clone()).unwrap();
@@ -324,11 +383,34 @@ impl Contract {
         info.push(burrito.owner_id.clone());
         //info[1] name
         info.push(burrito.name.clone());
-        let mut _map =self.burritos_hash_map.clone();
-        _map.insert(burrito_id.clone(),info);
-        self.burritos_hash_map=_map.clone();
+        let mut _map_burritos =self.burritos_hash_map.clone();
+        _map_burritos.insert(burrito_id.clone(),info);
+        self.burritos_hash_map=_map_burritos.clone();
+
+        // Consultamos usuarios registrados en el Hashmap
+        let mut _map_users = self.users_hash_map.clone();
+        let users_number = (_map_users.len()+1).to_string().parse::<u128>();            
+        let ends = _map_users.len().to_string().parse::<u128>();
+        let mut exist_user = false;
+        for x in 0..ends.unwrap()  {
+            let tok = _map_users.get(&(&x.to_string().parse::<u128>().unwrap()+1));
+            if tok == Some(&receiver_id.to_string()){
+                exist_user = true;
+            }             
+        }
+
+        // Verificar si ya existe usuario en Hashmap
+        if !exist_user {
+            //Insertar nuevo token a Hashmap
+            _map_users.insert(users_number.unwrap(),receiver_id.to_string());
+            self.users_hash_map=_map_users.clone();
+        }
 
         burrito
+    }
+
+    pub fn get_hashmap_users(&self){
+        log!("{:?}",&self.users_hash_map);
     }
 
     // Obtener burrito
@@ -393,9 +475,6 @@ impl Contract {
 
         burrito
     }
-
-    // Pelear
-    // Sacar ddel contrato general
 
     //Obtener paginación de los accesorios (Max 25 elementos por página)
     pub fn get_pagination(&self,tokens:u64) ->  Vec<u64> {
@@ -820,6 +899,188 @@ impl Contract {
             }
         }
     }
+
+    // Obtener rival de combate
+    pub fn get_battle_room(&self, accountId: ValidAccountId) -> String {
+        // Buscar en el hashmap de la salas de combate si ya hay un encuentro iniciado con otro jugador.
+            // Verificar en que número de ronda va la batalla.
+                // Cada jugador debe seleccionar su burrito y accesorios para el próximo combate.
+                // Se manda a llamar el metodo de fight_burritos con los datos de los burritos y accesorios a combatir.
+                // Una vez determinado al ganador se moifica el hashmap y se registra al ganador de la ronda.
+                    // Se verifica si ya es la ronda final
+                        // Se determina al ganador de 3 de 5 combates para determinar al ganador de la batalla y finalizarla en el hashmap.
+                    // Se verifica si algún jugador ya ganó 3 combates
+                        // Se registra al ganador y se finaliza la batalla en el hashmap.
+
+        // Buscar en el hashmap de salas de combate si hay una sala disponible para combatir.
+            // Si no hay una sala disponible, entonces se crea una nueva.
+                // Se espera a que llegue un contrincante.
+                    // Cada jugador debe seleccionar su burrito y accesorios para el próximo combate.
+                    // Se manda a llamar el metodo de fight_burritos con los datos de los burritos y accesorios a combatir.
+                    // Una vez determinado al ganador se moifica el hashmap y se registra al ganador de la ronda.
+            // Si ya exíste una sala disponible, entonces se registra en esa sala disponible para combatir.
+                // Cada jugador debe seleccionar su burrito y accesorios para el próximo combate.
+                        // Se manda a llamar el metodo de fight_burritos con los datos de los burritos y accesorios a combatir.
+                        // Una vez determinado al ganador se moifica el hashmap y se registra al ganador de la ronda.
+
+            let mut _map = self.battle_room_map.clone();
+
+            //let mut vectIDs = vec![];
+            let ends = _map.len().to_string().parse::<u128>();
+            for x in 0..ends.unwrap()  {
+                log!("Sala: {:?}",&x+1);
+                let tok = _map.get(&(&x.to_string().parse::<u128>().unwrap()+1));
+                log!("{:?}",tok);                
+            }
+
+        "Obteniendo salas de batalla".to_string()
+    }
+
+    // Crear batalla player vs cpu
+    pub fn save_battle_cpu(&mut self, accountId: ValidAccountId,burrito1_id: TokenId,burrito2_id: TokenId,burrito3_id: TokenId) {
+        //Insertar nuevo token a Hashmap
+        let mut _map_rooms =self.battle_room_map.clone();
+        let battle_number = (_map_rooms.len()+1).to_string().parse::<u128>();
+        let mut info:Vec<String>=Vec::new();
+
+        //info[0] Estatus
+        info.push("Espera".to_string());
+        //info[1] Jugador1
+        info.push(accountId.to_string());
+        //info[2] Jugador1 Burrito1
+        info.push(burrito1_id.to_string());
+        //info[3] Jugador1 Burrito2
+        info.push(burrito2_id.to_string());
+        //info[4] Jugador1 Burrito3
+        info.push(burrito3_id.to_string());
+
+        // Consultar Hashmap de usuarios
+        let mut _map_users = self.users_hash_map.clone();
+        let mut users = vec![];
+        let ends = _map_users.len().to_string().parse::<u128>();
+        for x in 0..ends.unwrap()  {
+            let tok = _map_users.get(&(&x.to_string().parse::<u128>().unwrap()+1));
+            // Verificar que el usuario sea diferente al que está iniciando la batalla
+            if tok != Some(&accountId.to_string()){
+                users.push(tok);
+            }             
+        }
+
+        log!("{:?}",&users);
+        // Tomar usuario al azar
+        let users_number = (users.len()).to_string().parse::<u128>();            
+        log!("{:?}",&users_number);
+        let num_rand = *env::random_seed().get(0).unwrap();
+        log!("{:?}",&num_rand);
+
+        // Obtener los burritos del jugador
+        
+        //info[5] Jugador2
+        info.push("".to_string());
+        //info[6] Jugador2 Burrito1
+        info.push("".to_string());
+        //info[7] Jugador2 Burrito2
+        info.push("".to_string());
+        //info[8] Jugador2 Burrito3
+        info.push("".to_string());
+
+        
+        //info[9] BurritoJ1
+        info.push("".to_string());
+        //info[10] Accesorio1J1
+        info.push("".to_string());
+        //info[11] Accesorio2J1
+        info.push("".to_string());
+        //info[12] Accesorio3J1
+        info.push("".to_string());
+        //info[13] BurritoJ2
+        info.push("".to_string());
+        //info[14] Accesorio1J2
+        info.push("".to_string());
+        //info[15] Accesorio2J2
+        info.push("".to_string());
+        //info[16] Accesorio3J2
+        info.push("".to_string());
+        //info[17] GanadorRonda1
+        info.push("".to_string());
+        //info[18] BurritoJ1
+        info.push("".to_string());
+        //info[19] Accesorio1J1
+        info.push("".to_string());
+        //info[20] Accesorio2J1
+        info.push("".to_string());
+        //info[21] Accesorio3J1
+        info.push("".to_string());
+        //info[22] BurritoJ2
+        info.push("".to_string());
+        //info[23] Accesorio1J2
+        info.push("".to_string());
+        //info[24] Accesorio2J2
+        info.push("".to_string());
+        //info[25] Accesorio3J2
+        info.push("".to_string());
+        //info[26] GanadorRonda1
+        info.push("".to_string());
+        //info[27] BurritoJ1
+        info.push("".to_string());
+        //info[28] Accesorio1J1
+        info.push("".to_string());
+        //info[29] Accesorio2J1
+        info.push("".to_string());
+        //info[30] Accesorio3J1
+        info.push("".to_string());
+        //info[31] BurritoJ2
+        info.push("".to_string());
+        //info[32] Accesorio1J2
+        info.push("".to_string());
+        //info[33] Accesorio2J2
+        info.push("".to_string());
+        //info[34] Accesorio3J2
+        info.push("".to_string());
+        //info[35] GanadorRonda1
+        info.push("".to_string());
+        //info[36] BurritoJ1
+        info.push("".to_string());
+        //info[37] Accesorio1J1
+        info.push("".to_string());
+        //info[38] Accesorio2J1
+        info.push("".to_string());
+        //info[39] Accesorio3J1
+        info.push("".to_string());
+        //info[40] BurritoJ2
+        info.push("".to_string());
+        //info[41] Accesorio1J2
+        info.push("".to_string());
+        //info[42] Accesorio2J2
+        info.push("".to_string());
+        //info[43] Accesorio3J2
+        info.push("".to_string());
+        //info[44] GanadorRonda1
+        info.push("".to_string());
+        //info[45] BurritoJ1
+        info.push("".to_string());
+        //info[46] Accesorio1J1
+        info.push("".to_string());
+        //info[47] Accesorio2J1
+        info.push("".to_string());
+        //info[48] Accesorio3J1
+        info.push("".to_string());
+        //info[49] BurritoJ2
+        info.push("".to_string());
+        //info[50] Accesorio1J2
+        info.push("".to_string());
+        //info[51] Accesorio2J2
+        info.push("".to_string());
+        //info[52] Accesorio3J2
+        info.push("".to_string());
+        //info[53] GanadorRonda1
+        info.push("".to_string());
+        //info[54] Ganador
+        info.push("".to_string());
+        // _map_rooms.insert(battle_number.unwrap(),info);
+        // self.battle_room_map=_map_rooms.clone();
+    }
+
 }
 
 near_contract_standards::impl_non_fungible_token_core!(Contract, tokens);

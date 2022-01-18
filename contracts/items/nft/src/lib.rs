@@ -298,7 +298,7 @@ impl Contract {
         return vectMEta ;     
     }
 
-    // Método de ejemplo para llamar desde el contrato de burritos
+    // Obtener items para batalla pvp
     pub fn get_items_for_battle(&self, 
         accesorio1_burrito1_id: TokenId, accesorio2_burrito1_id: TokenId, accesorio3_burrito1_id: TokenId,
         accesorio1_burrito2_id: TokenId, accesorio2_burrito2_id: TokenId, accesorio3_burrito2_id: TokenId) -> AccessoriesForBattle  {
@@ -391,6 +391,90 @@ impl Contract {
             final_defense_b2 : accesories_defense_burrito2.to_string(),
             final_speed_b2 : accesories_speed_burrito2.to_string()
         };
+
+        accessories_for_battle
+
+    }
+
+    // Obtener items para batalla player vs cpu
+    pub fn get_items_for_battle_cpu(&self, 
+        accesorio1_burrito1_id: TokenId, accesorio2_burrito1_id: TokenId, accesorio3_burrito1_id: TokenId) -> AccessoriesForBattle  {
+
+        // Obtener metadata accesorio 1 burrito 1
+        let mut metadata_accesorio1_burrito1 = self
+        .accessories
+        .token_metadata_by_id
+        .as_ref()
+        .and_then(|by_id| by_id.get(&accesorio1_burrito1_id))
+        .unwrap();
+
+        // Obtener metadata accesorio 2 burrito 1
+        let mut metadata_accesorio2_burrito1 = self
+            .accessories
+            .token_metadata_by_id
+            .as_ref()
+            .and_then(|by_id| by_id.get(&accesorio2_burrito1_id))
+            .unwrap();
+
+        // Obtener metadata accesorio 3 burrito 1
+        let mut metadata_accesorio3_burrito1 = self
+            .accessories
+            .token_metadata_by_id
+            .as_ref()
+            .and_then(|by_id| by_id.get(&accesorio3_burrito1_id))
+            .unwrap();
+
+        // Extraer extras del token accesorios burrito 1
+        let newextradata_accesorio1_burrito1 = str::replace(&metadata_accesorio1_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
+        let newextradata_accesorio2_burrito1 = str::replace(&metadata_accesorio2_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
+        let newextradata_accesorio3_burrito1 = str::replace(&metadata_accesorio3_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
+        
+        // Crear json accesorios burrito 1
+        let mut extradatajson_accesorio1_burrito1: ExtraAccessory = serde_json::from_str(&newextradata_accesorio1_burrito1).unwrap();
+        let mut extradatajson_accesorio2_burrito1: ExtraAccessory = serde_json::from_str(&newextradata_accesorio2_burrito1).unwrap();
+        let mut extradatajson_accesorio3_burrito1: ExtraAccessory = serde_json::from_str(&newextradata_accesorio3_burrito1).unwrap();
+
+        // Obtener puntos totales a sumar de cada estadística de los accesorios del burrito 1
+        let accesories_attack_burrito1 : f32 = (extradatajson_accesorio1_burrito1.attack.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito1.attack.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito1.attack.parse::<f32>().unwrap());
+        let accesories_defense_burrito1 : f32 = (extradatajson_accesorio1_burrito1.defense.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito1.defense.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito1.defense.parse::<f32>().unwrap());
+        let accesories_speed_burrito1 : f32 = (extradatajson_accesorio1_burrito1.speed.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito1.speed.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito1.speed.parse::<f32>().unwrap());
+        
+        let mut accessories_for_battle = AccessoriesForBattle {
+            final_attack_b1 : accesories_attack_burrito1.to_string(),
+            final_defense_b1 : accesories_defense_burrito1.to_string(),
+            final_speed_b1 : accesories_speed_burrito1.to_string(),
+            final_attack_b2 : accesories_attack_burrito1.to_string(),
+            final_defense_b2 : accesories_defense_burrito1.to_string(),
+            final_speed_b2 : accesories_speed_burrito1.to_string()
+        };
+
+        // Generamos incremento o decremento de los accesorios del burrito del CPU
+        let rand_attack = *env::random_seed().get(0).unwrap();
+        let rand_defense = *env::random_seed().get(1).unwrap();
+        let rand_speed = *env::random_seed().get(2).unwrap();
+        let mut attack: f32 = 0.0;
+        let mut defense: f32 = 0.0;
+        let mut speed: f32 = 0.0;
+
+        if rand_attack >= 0 &&  rand_attack <= 127 {
+            attack = 3.0;
+        } else {
+            attack = -3.0;
+        }
+        if rand_defense >= 0 &&  rand_defense <= 127 {
+            defense = 3.0;
+        } else {
+            defense = -3.0;
+        }
+        if rand_speed >= 0 &&  rand_speed <= 127 {
+            speed = 3.0;
+        } else {
+            speed = -3.0;
+        }
+
+        accessories_for_battle.final_attack_b2 = (accessories_for_battle.final_attack_b2.parse::<f32>().unwrap()+attack).to_string();
+        accessories_for_battle.final_defense_b2 = (accessories_for_battle.final_defense_b2.parse::<f32>().unwrap()+defense).to_string();
+        accessories_for_battle.final_speed_b2 = (accessories_for_battle.final_speed_b2.parse::<f32>().unwrap()+speed).to_string();
 
         accessories_for_battle
 

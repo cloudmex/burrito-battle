@@ -66,11 +66,11 @@ Desplegar ambos contratos (burrito e items) entrar a cada carpeta y ejecutar el 
 Asignamos el identificador de nuestro contrato desplegado a una constante:
 
     Burrito
-    ID=dev-1641852649467-90519282117752
+    ID=dev-1642449421641-10509675308655
     echo $ID
 
     Accesorios
-    ID=dev-1641232107829-62553275563586
+    ID=dev-1642449398854-14188334329365
     echo $ID
 
 Ambos contratos deben inicializarse antes de su uso, por lo que lo inicializaremos con los metadatos predeterminados:
@@ -97,19 +97,29 @@ Crear nuevo burrito:
 
     near call $ID new_burrito '{"burrito_id": "0", "receiver_id": "'yairnava.testnet'", "burrito_metadata": { "title": "Burrito A", "description": "This is a burrito", "media": "","extra":""}}' --accountId yairnava.testnet --deposit 0.1
 
-    near call $ID new_burrito '{"burrito_id": "1", "receiver_id": "'missael.testnet'", "burrito_metadata": { "title": "Burrito B", "description": "This is a burrito", "media": "","extra":""}}' --accountId yairnava.testnet --deposit 0.1
+    near call $ID new_burrito '{"burrito_id": "1", "receiver_id": "'yairnava.testnet'", "burrito_metadata": { "title": "Burrito B", "description": "This is a burrito", "media": "","extra":""}}' --accountId yairnava.testnet --deposit 0.1
+
+    near call $ID new_burrito '{"burrito_id": "2", "receiver_id": "'yairnava.testnet'", "burrito_metadata": { "title": "Burrito C", "description": "This is a burrito", "media": "","extra":""}}' --accountId yairnava.testnet --deposit 0.1
+
+    near call $ID new_burrito '{"burrito_id": "3", "receiver_id": "'yairnava.testnet'", "burrito_metadata": { "title": "Burrito D", "description": "This is a burrito", "media": "","extra":""}}' --accountId yairnava.testnet --deposit 0.1
+
+    near call $ID new_burrito '{"burrito_id": "4", "receiver_id": "'user1.testnet'", "burrito_metadata": { "title": "Burrito F", "description": "This is a burrito", "media": "","extra":""}}' --accountId yairnava.testnet --deposit 0.1
+
+    near call $ID new_burrito '{"burrito_id": "5", "receiver_id": "'user2.testnet'", "burrito_metadata": { "title": "Burrito G", "description": "This is a burrito", "media": "","extra":""}}' --accountId yairnava.testnet --deposit 0.1
+
+    near call $ID new_burrito '{"burrito_id": "6", "receiver_id": "'user3.testnet'", "burrito_metadata": { "title": "Burrito G", "description": "This is a burrito", "media": "","extra":""}}' --accountId yairnava.testnet --deposit 0.1
 
 Modificar burrito:
 
-    near call $ID update_burrito '{"burrito_id": "0", "extra":"{'"'burrito_type'":"'Fuego'","'hp'":"'5'","'attack'":"'6'","'defense'":"'7'","'speed'":"'7'","'win'":"'0'"}'"}' --accountId yairnava.testnet 
+    near call $ID update_burrito '{"burrito_id": "0", "extra":"{'"'burrito_type'":"'Fuego'","'hp'":"'5'","'attack'":"'9'","'defense'":"'5'","'speed'":"'7'","'level'":"'2'","'win'":"'9'"}'"}' --accountId yairnava.testnet 
 
     near call $ID update_burrito '{"burrito_id": "1", "extra":"{'"'burrito_type'":"'Fuego'","'hp'":"'5'","'attack'":"'7'","'defense'":"'7'","'speed'":"'7'","'win'":"'0'"}'"}' --accountId yairnava.testnet
 
 Obtener datos de un burrito:
 
-    near call $ID get_burrito '{"burrito_id": "0"}' --accountId $ID
+    near view $ID get_burrito '{"burrito_id": "0"}'
 
-    near call $ID get_burrito '{"burrito_id": "1"}' --accountId $ID
+    near view $ID get_burrito '{"burrito_id": "1"}'
 
 Obtener burritos de un usuario:
 
@@ -144,10 +154,19 @@ Obtener accesorios de una página:
     near view $ID get_items_page '{"tokens":2, "_start_index":0}'
 
 Obtener sala de batalla:
-        near call $ID get_battle_room '{"accountId": "yairnava.testnet"}' --accountId yairnava.testnet 
+    near call $ID get_battle_room '{"accountId": "yairnava.testnet"}' --accountId yairnava.testnet 
+
+Obtener número de jugadores registrados:
+    near view $ID getUsersNumber
+
+Obtener jugadores para pelear cpu:
+    near view $ID getUsersList '{"accountId": "yairnava.testnet","init_count":1}'
 
 Guardar sala de combate jugador vs cpu:
-        near call $ID save_battle_cpu '{"accountId": "missael.testnet","burrito1_id":"0","burrito2_id":"0","burrito3_id":"0"}' --accountId yairnava.testnet 
+    near call $ID save_battle_cpu '{"accountId": "missael.testnet","burrito1_id":"0","burrito2_id":"0","burrito3_id":"0","adversaryId":"yairnava.testnet"}' --accountId yairnava.testnet 
+
+Combate jugador vs cpu
+    near call $ID fight_player_cpu '{"burrito1_id": "0","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"1","accesorio3_burrito1_id":"2"}' --accountId yairnava.testnet --gas=300000000000000
 
 Combate de 2 burritos
 

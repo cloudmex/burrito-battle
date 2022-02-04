@@ -66,11 +66,11 @@ Desplegar ambos contratos (burrito e items) entrar a cada carpeta y ejecutar el 
 Asignamos el identificador de nuestro contrato desplegado a una constante:
 
     Burrito
-    ID=dev-1642449421641-10509675308655
+    ID=dev-1643951075935-27022974276068
     echo $ID
 
     Accesorios
-    ID=dev-1642449398854-14188334329365
+    ID=dev-1643957848449-43046979351328
     echo $ID
 
 Ambos contratos deben inicializarse antes de su uso, por lo que lo inicializaremos con los metadatos predeterminados:
@@ -95,84 +95,46 @@ Obtener cantidad de accesorios creados:
     
 Crear nuevo burrito:
 
-    near call $ID new_burrito '{"burrito_id": "0", "receiver_id": "'yairnava.testnet'", "burrito_metadata": { "title": "Burrito A", "description": "This is a burrito", "media": "","extra":""}}' --accountId yairnava.testnet --deposit 0.1
-
-    near call $ID new_burrito '{"burrito_id": "1", "receiver_id": "'yairnava.testnet'", "burrito_metadata": { "title": "Burrito B", "description": "This is a burrito", "media": "","extra":""}}' --accountId yairnava.testnet --deposit 0.1
-
-    near call $ID new_burrito '{"burrito_id": "2", "receiver_id": "'yairnava.testnet'", "burrito_metadata": { "title": "Burrito C", "description": "This is a burrito", "media": "","extra":""}}' --accountId yairnava.testnet --deposit 0.1
-
-    near call $ID new_burrito '{"burrito_id": "3", "receiver_id": "'yairnava.testnet'", "burrito_metadata": { "title": "Burrito D", "description": "This is a burrito", "media": "","extra":""}}' --accountId yairnava.testnet --deposit 0.1
-
-    near call $ID new_burrito '{"burrito_id": "4", "receiver_id": "'user1.testnet'", "burrito_metadata": { "title": "Burrito F", "description": "This is a burrito", "media": "","extra":""}}' --accountId yairnava.testnet --deposit 0.1
-
-    near call $ID new_burrito '{"burrito_id": "5", "receiver_id": "'user2.testnet'", "burrito_metadata": { "title": "Burrito G", "description": "This is a burrito", "media": "","extra":""}}' --accountId yairnava.testnet --deposit 0.1
-
-    near call $ID new_burrito '{"burrito_id": "6", "receiver_id": "'user3.testnet'", "burrito_metadata": { "title": "Burrito G", "description": "This is a burrito", "media": "","extra":""}}' --accountId yairnava.testnet --deposit 0.1
-
+    near call $ID nft_mint_token '{"token_owner_id": "'yairnava.testnet'", "colecction": "'Burritos'", "token_metadata": { "title": "Burrito Name", "description": "This is a burrito", "media": "", "extra":""}}' --accountId yairnava.testnet --deposit 0.1
+    
 Modificar burrito:
 
-    near call $ID update_burrito '{"burrito_id": "0", "extra":"{'"'burrito_type'":"'Fuego'","'hp'":"'5'","'attack'":"'9'","'defense'":"'5'","'speed'":"'7'","'level'":"'2'","'win'":"'9'"}'"}' --accountId yairnava.testnet 
-
-    near call $ID update_burrito '{"burrito_id": "1", "extra":"{'"'burrito_type'":"'Fuego'","'hp'":"'5'","'attack'":"'7'","'defense'":"'7'","'speed'":"'7'","'win'":"'0'"}'"}' --accountId yairnava.testnet
+    near call $ID update_burrito '{"burrito_id": "2", "extra":"{'"'burrito_type'":"'Fuego'","'hp'":"'5'","'attack'":"'9'","'defense'":"'5'","'speed'":"'7'","'level'":"'1'","'win'":"'0'"}'"}' --accountId yairnava.testnet 
 
 Obtener datos de un burrito:
 
     near view $ID get_burrito '{"burrito_id": "0"}'
 
-    near view $ID get_burrito '{"burrito_id": "1"}'
+    near view $ID nft_token '{"token_id":"0"}' --accountId yairnava.testnet
 
-Obtener burritos de un usuario:
+Guardar sala de combate jugador vs cpu:
+    near call $ID save_battle_player_cpu '{"burrito1_id":"0","burrito2_id":"1","burrito3_id":"2"}' --accountId yairnava.testnet 
 
-    near view $ID get_burritos_owner '{"accountId": "yairnava.testnet"}'
-    
+Combate jugador vs cpu
+    near call $ID fight_player_cpu '{"burrito1_id": "1","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"1","accesorio3_burrito1_id":"2","burrito_cpu_level":1}' --accountId yairnava.testnet --gas=300000000000000
+
+Combate de 2 burritos
+
+    near call $ID fight_burritos '{"burrito1_id": "0","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"1","accesorio3_burrito1_id":"2","burrito2_id": "2","accesorio1_burrito2_id":"0","accesorio2_burrito2_id":"1","accesorio3_burrito2_id":"2"}' --accountId yairnh.testnet --gas=300000000000000
+
 Crear nuevo accesorio:
 
-    near call $ID new_accessory '{"accessory_id": "0", "receiver_id": "'yairnava.testnet'", "accessory_metadata": { "title": "Sword", "description": "Heavy Sword", "media": "","extra":"{'"'attack'":"'3'","'defense'":"'0'","'speed'":"'-2'"}'"}}' --accountId $ID --deposit 0.1
-
-    near call $ID new_accessory '{"accessory_id": "1", "receiver_id": "'yairnava.testnet'", "accessory_metadata": { "title": "Spear", "description": "Heavy Spear", "media": "","extra":"{'"'attack'":"'2'","'defense'":"'0'","'speed'":"'-1'"}'"}}' --accountId $ID --deposit 0.1
-
-    near call $ID new_accessory '{"accessory_id": "2", "receiver_id": "'yairnava.testnet'", "accessory_metadata": { "title": "Shield", "description": "Heavy Shield", "media": "","extra":"{'"'attack'":"'0'","'defense'":"'5'","'speed'":"'-5'"}'"}}' --accountId $ID --deposit 0.1
-
-    near call $ID new_accessory '{"accessory_id": "3", "receiver_id": "'missael.testnet'", "accessory_metadata": { "title": "Sword", "description": "Heavy Sword", "media": "","extra":"{'"'attack'":"'3'","'defense'":"'0'","'speed'":"'-2'"}'"}}' --accountId $ID --deposit 0.1
-
-    near call $ID new_accessory '{"accessory_id": "4", "receiver_id": "'missael.testnet'", "accessory_metadata": { "title": "Spear", "description": "Heavy Spear", "media": "","extra":"{'"'attack'":"'2'","'defense'":"'0'","'speed'":"'-1'"}'"}}' --accountId $ID --deposit 0.1
-
-    near call $ID new_accessory '{"accessory_id": "5", "receiver_id": "'missael.testnet'", "accessory_metadata": { "title": "Shield", "description": "Heavy Shield", "media": "","extra":"{'"'attack'":"'0'","'defense'":"'5'","'speed'":"'-5'"}'"}}' --accountId $ID --deposit 0.1
+    near call $ID nft_mint_token '{"token_owner_id": "'yairnava.testnet'", "colecction": "'Items'", "token_metadata": { "title": "Thunder Sword", "description": "Thunder Sword 2", "media": "","extra":"{'"'attack'":"'3'","'defense'":"'0'","'speed'":"'0'"}'"}}' --accountId yairnava.testnet --deposit 0.1 --gas=300000000000000
 
 Obtener datos de un accesorio:
 
     near call $ID get_accessory '{"accessory_id": "0"}' --accountId yairnava.testnet
     
-Obtener paginación de accesorios:
-    near view $ID get_pagination '{"tokens": 2}'
+    near view $ID nft_token '{"token_id":"0"}' --accountId yairnava.testnet
 
-Obtener accesorios de un usuario:
-    near view $ID get_items_owner '{"accountId": "yairnava.testnet"}'
-    near view $ID get_items_owner '{"accountId": "missael.testnet"}'
-
-Obtener accesorios de una página:
-    near view $ID get_items_page '{"tokens":2, "_start_index":0}'
-
-Obtener sala de batalla:
-    near call $ID get_battle_room '{"accountId": "yairnava.testnet"}' --accountId yairnava.testnet 
-
-Obtener número de jugadores registrados:
-    near view $ID getUsersNumber
-
-Obtener jugadores para pelear cpu:
-    near view $ID getUsersList '{"accountId": "yairnava.testnet","init_count":1}'
-
-Guardar sala de combate jugador vs cpu:
-    near call $ID save_battle_cpu '{"accountId": "missael.testnet","burrito1_id":"0","burrito2_id":"0","burrito3_id":"0","adversaryId":"yairnava.testnet"}' --accountId yairnava.testnet 
-
-Combate jugador vs cpu
-    near call $ID fight_player_cpu '{"burrito1_id": "0","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"1","accesorio3_burrito1_id":"2"}' --accountId yairnava.testnet --gas=300000000000000
-
-Combate de 2 burritos
-
-    near call $ID fight_burritos '{"burrito1_id": "0","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"1","accesorio3_burrito1_id":"2","burrito2_id": "2","accesorio1_burrito2_id":"0","accesorio2_burrito2_id":"1","accesorio3_burrito2_id":"2"}' --accountId yairnava.testnet --gas=300000000000000
 
 ## Construido con 🛠️
 
 * [RUST](https://www.rust-lang.org/) - Lenguaje de programación usado para contrato inteligente.
 * [NEAR CLI](https://docs.near.org/docs/tools/near-cli) - Herramienta de interfaz de línea de comandos para interactuar con cuentas y contratos inteligentes en NEAR.
+
+// Crear varios Burritos/Items desde market place
+
+for i in {1..5}; do near call dev-1643331107973-95015694722073 market_mint_generic '{ "contractaddress":"dev-1643397987098-14647510574330", "token_owner_id": "yairnh.testnet","colecction":"Burritos_Nativo", "token_metadata": { "title": "Omega Burrito", "description": "This is a mega burrito", "media": "","extra":""}}'  --accountId yairnh.testnet  --amount 0.1 --gas=300000000000000; done
+
+for i in {1..5}; do near call dev-1643331107973-95015694722073 market_mint_generic '{ "contractaddress":"dev-1643395586727-81817628656300", "token_owner_id": "'yairnh.testnet'", "colecction": "'Items_Nativo'", "token_metadata": { "title": "Thunder Sword", "description": "Thunder Sword", "media": "","extra":"{'"'attack'":"'3'","'defense'":"'0'","'speed'":"'0'"}'"}}'   --accountId yairnh.testnet  --amount 0.1 --gas=300000000000000; done

@@ -105,12 +105,20 @@ Obtener datos de un burrito:
 
     near view $ID get_burrito '{"burrito_id": "0"}'
 
-    near view $ID nft_token '{"token_id":"0"}' --accountId yairnava.testnet
+    near view $ID nft_token '{"token_id":"2"}' --accountId yairnava.testnet
 
 Guardar sala de combate jugador vs cpu:
     near call $ID save_battle_player_cpu '{"burrito1_id":"0","burrito2_id":"1","burrito3_id":"2"}' --accountId yairnava.testnet 
 
 Combate jugador vs cpu
+
+    near call $ID fight_player_cpu '{"burrito1_id": "2","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"1","accesorio3_burrito1_id":"2","burrito_cpu_level":1}' --accountId yairnava.testnet --gas=300000000000000
+
+    near call $ID fight_player_cpu '{"burrito1_id": "1","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"1","accesorio3_burrito1_id":"3","burrito_cpu_level":1}' --accountId yairnava.testnet --gas=300000000000000
+
+    near call $ID fight_player_cpu '{"burrito1_id": "1","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"2","accesorio3_burrito1_id":"2","burrito_cpu_level":2}' --accountId yairnava.testnet --gas=300000000000000
+
+
     near call $ID fight_player_cpu '{"burrito1_id": "1","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"1","accesorio3_burrito1_id":"2","burrito_cpu_level":1}' --accountId yairnava.testnet --gas=300000000000000
 
 Combate de 2 burritos
@@ -123,7 +131,7 @@ Crear nuevo accesorio:
 
 Obtener datos de un accesorio:
 
-    near call $ID get_accessory '{"accessory_id": "0"}' --accountId yairnava.testnet
+    near view $ID get_accessory '{"accessory_id": "0"}'
     
     near view $ID nft_token '{"token_id":"0"}' --accountId yairnava.testnet
 

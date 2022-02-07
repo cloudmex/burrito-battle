@@ -289,14 +289,6 @@ impl Contract {
             env::panic(b"No existe el accesorio con el id ingresado");
         }
 
-        // Validar que el burrito pertenezca al signer
-        let token_owner_id = env::signer_account_id();
-        let owner_id = self.accessories.owner_by_id.get(&accessory_id.clone()).unwrap();
-
-        if token_owner_id.clone() != owner_id.clone() {
-            env::panic(b"El accesorio no te pertenece");
-        }
-
         let metadata = self
             .accessories
             .token_metadata_by_id

@@ -66,7 +66,7 @@ Desplegar ambos contratos (burrito e items) entrar a cada carpeta y ejecutar el 
 Asignamos el identificador de nuestro contrato desplegado a una constante:
 
     Burrito
-    ID=dev-1643951075935-27022974276068
+    ID=dev-1644623937975-51231628183482
     echo $ID
 
     Accesorios

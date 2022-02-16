@@ -17,15 +17,18 @@ use near_sdk::{
     Promise, PromiseOrValue, PromiseResult, Balance, Gas};
 near_sdk::setup_alloc!();
 use std::convert::TryInto;
+use near_sdk::env::BLOCKCHAIN_INTERFACE;
 
 // Contrato de items
 const BURRITO_CONTRACT: &str = "dev-1643951075935-27022974276068";
 const ITEMS_CONTRACT: &str = "dev-1643957848449-43046979351328";
-const MK_CONTRACT: &str = "dev-1643331107973-95015694722073";
+const MK_CONTRACT: &str = "dev-1644433845094-13612285357489";
 const STRWTOKEN_CONTRACT: &str = "dev-1643778763383-79833681549715";
 
 const NO_DEPOSIT: Balance = 0;
 const BASE_GAS: Gas = 10_000_000_000_000;
+
+pub const TGAS: u64 = 1_000_000_000_000;
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
@@ -164,7 +167,7 @@ pub trait ExternsContract {
     fn get_items_for_battle_cpu(&self, 
         accesorio1_burrito1_id: TokenId, accesorio2_burrito1_id: TokenId, accesorio3_burrito1_id: TokenId
     ) -> AccessoriesForBattle;
-    fn saveToTheGraph(&self, info: String) -> Option<Token>;
+    fn saveMintTTG(&self, info: String) -> Option<Token>;
     fn reward_player(&self,player_owner_id: String,tokens_mint: String) -> String;
 }
 
@@ -394,7 +397,7 @@ impl Contract {
 
         let rett : String = graphdata.contract_name.to_string()+","+&graphdata.token_id.to_string()+","+&graphdata.owner_id.to_string()+","+ &graphdata.title.to_string()+","+&graphdata.description.to_string()+","+ &graphdata.media.to_string()+","+&graphdata.creator.to_string()+","+&graphdata.price.to_string()+","+ &graphdata.status.to_string()+","+ &graphdata.adressbidder.to_string()+","+ &graphdata.highestbid.to_string()+","+ &graphdata.lowestbid.to_string()+","+&graphdata.expires_at.to_string()+","+ &graphdata.starts_at.to_string()+","+&graphdata.extra.to_string()+","+&graphdata.colecction.to_string(); 
 
-        let p = ext_nft::saveToTheGraph(
+        let p = ext_nft::saveMintTTG(
             rett.clone(),
             &MK_CONTRACT, //  account_id MARKET PLACE
             env::attached_deposit(), // yocto NEAR to attach
@@ -1733,6 +1736,53 @@ impl Contract {
                 //Retornamos al burrito ganador
                 burrito_winner.name
             }
+        }
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    pub fn upgrade(self) {
+        // assert!(env::predecessor_account_id() == self.minter_account_id);
+        //input is code:<Vec<u8> on REGISTER 0
+        //log!("bytes.length {}", code.unwrap().len());
+        const GAS_FOR_UPGRADE: u64 = 20 * TGAS; //gas occupied by this fn
+        const BLOCKCHAIN_INTERFACE_NOT_SET_ERR: &str = "Blockchain interface not set.";
+        //after upgrade we call *pub fn migrate()* on the NEW CODE
+        let current_id = env::current_account_id().into_bytes();
+        let migrate_method_name = "migrate".as_bytes().to_vec();
+        let attached_gas = env::prepaid_gas() - env::used_gas() - GAS_FOR_UPGRADE;
+        unsafe {
+            BLOCKCHAIN_INTERFACE.with(|b| {
+                // Load input (new contract code) into register 0
+                b.borrow()
+                    .as_ref()
+                    .expect(BLOCKCHAIN_INTERFACE_NOT_SET_ERR)
+                    .input(0);
+                //prepare self-call promise
+                let promise_id = b
+                    .borrow()
+                    .as_ref()
+                    .expect(BLOCKCHAIN_INTERFACE_NOT_SET_ERR)
+                    .promise_batch_create(current_id.len() as _, current_id.as_ptr() as _);
+                //1st action, deploy/upgrade code (takes code from register 0)
+                b.borrow()
+                    .as_ref()
+                    .expect(BLOCKCHAIN_INTERFACE_NOT_SET_ERR)
+                    .promise_batch_action_deploy_contract(promise_id, u64::MAX as _, 0);
+                //2nd action, schedule a call to "migrate()".
+                //Will execute on the **new code**
+                // b.borrow()
+                //     .as_ref()
+                //     .expect(BLOCKCHAIN_INTERFACE_NOT_SET_ERR)
+                //     .promise_batch_action_function_call(
+                //         promise_id,
+                //         migrate_method_name.len() as _,
+                //         migrate_method_name.as_ptr() as _,
+                //         0 as _,
+                //         0 as _,
+                //         0 as _,
+                //         attached_gas,
+                //     );
+            });
         }
     }
 

@@ -66,11 +66,15 @@ Desplegar ambos contratos (burrito e items) entrar a cada carpeta y ejecutar el 
 Asignamos el identificador de nuestro contrato desplegado a una constante:
 
     Burrito
-    ID=dev-1644623937975-51231628183482
+    ID=dev-1645132247816-96813559805059
     echo $ID
 
     Accesorios
-    ID=dev-1643957848449-43046979351328
+    ID=dev-1645132677038-92099956814413
+    echo $ID
+
+    STRW-TOKEN
+    ID=dev-1643778763383-79833681549715
     echo $ID
 
 Ambos contratos deben inicializarse antes de su uso, por lo que lo inicializaremos con los metadatos predeterminados:
@@ -95,7 +99,7 @@ Obtener cantidad de accesorios creados:
     
 Crear nuevo burrito:
 
-    near call $ID nft_mint_token '{"token_owner_id": "'yairnava.testnet'", "colecction": "'Burritos'", "token_metadata": { "title": "Burrito Name", "description": "This is a burrito", "media": "", "extra":""}}' --accountId yairnava.testnet --deposit 0.1
+    near call $ID mint_token '{"token_owner_id": "'yairnava.testnet'", "colecction": "Burritos BB", "token_metadata": { "title": "Burrito Name", "description": "This is a burrito", "media": "", "extra":""}}' --accountId yairnava.testnet --deposit 0.1 --gas=300000000000000
     
 Modificar burrito:
 
@@ -127,7 +131,7 @@ Combate de 2 burritos
 
 Crear nuevo accesorio:
 
-    near call $ID nft_mint_token '{"token_owner_id": "'yairnava.testnet'", "colecction": "'Items'", "token_metadata": { "title": "Thunder Sword", "description": "Thunder Sword 2", "media": "","extra":"{'"'attack'":"'3'","'defense'":"'0'","'speed'":"'0'"}'"}}' --accountId yairnava.testnet --deposit 0.1 --gas=300000000000000
+    near call $ID mint_token '{"token_owner_id": "'yairnava.testnet'", "colecction": "Items BB", "token_metadata": { "title": "Thunder Sword", "description": "Thunder Sword 2", "media": "","extra":"{'"'attack'":"'3'","'defense'":"'0'","'speed'":"'0'"}'"}}' --accountId yairnava.testnet --deposit 0.1 --gas=300000000000000
 
 Obtener datos de un accesorio:
 
@@ -140,9 +144,3 @@ Obtener datos de un accesorio:
 
 * [RUST](https://www.rust-lang.org/) - Lenguaje de programación usado para contrato inteligente.
 * [NEAR CLI](https://docs.near.org/docs/tools/near-cli) - Herramienta de interfaz de línea de comandos para interactuar con cuentas y contratos inteligentes en NEAR.
-
-// Crear varios Burritos/Items desde market place
-
-for i in {1..5}; do near call dev-1643331107973-95015694722073 market_mint_generic '{ "contractaddress":"dev-1643397987098-14647510574330", "token_owner_id": "yairnh.testnet","colecction":"Burritos_Nativo", "token_metadata": { "title": "Omega Burrito", "description": "This is a mega burrito", "media": "","extra":""}}'  --accountId yairnh.testnet  --amount 0.1 --gas=300000000000000; done
-
-for i in {1..5}; do near call dev-1643331107973-95015694722073 market_mint_generic '{ "contractaddress":"dev-1643395586727-81817628656300", "token_owner_id": "'yairnh.testnet'", "colecction": "'Items_Nativo'", "token_metadata": { "title": "Thunder Sword", "description": "Thunder Sword", "media": "","extra":"{'"'attack'":"'3'","'defense'":"'0'","'speed'":"'0'"}'"}}'   --accountId yairnh.testnet  --amount 0.1 --gas=300000000000000; done

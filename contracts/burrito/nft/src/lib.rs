@@ -7,27 +7,23 @@ use near_contract_standards::non_fungible_token::NonFungibleToken;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::LazyOption;
 use near_sdk::serde::{Deserialize, Serialize};
-use near_sdk::json_types::{ValidAccountId,Base64VecU8};
-use near_sdk::utils::promise_result_as_success;
-use std::sync::{Mutex};
-use lazy_static::lazy_static;
+use near_sdk::json_types::{ValidAccountId};
 use std::str;
 use near_sdk::{
-    env, log, near_bindgen, ext_contract, AccountId, BorshStorageKey, PanicOnDefault,
+    env, log, near_bindgen, ext_contract, AccountId, BorshStorageKey,
     Promise, PromiseOrValue, PromiseResult, Balance, Gas};
 near_sdk::setup_alloc!();
 use std::convert::TryInto;
 use near_sdk::env::BLOCKCHAIN_INTERFACE;
 
 // Contrato de items
-const BURRITO_CONTRACT: &str = "dev-1643951075935-27022974276068";
-const ITEMS_CONTRACT: &str = "dev-1643957848449-43046979351328";
-const MK_CONTRACT: &str = "dev-1644433845094-13612285357489";
+const BURRITO_CONTRACT: &str = "dev-1645132247816-96813559805059";
+const ITEMS_CONTRACT: &str = "dev-1645132677038-92099956814413";
+const MK_CONTRACT: &str = "dev-1645131376413-69111001778844";
 const STRWTOKEN_CONTRACT: &str = "dev-1643778763383-79833681549715";
 
 const NO_DEPOSIT: Balance = 0;
 const BASE_GAS: Gas = 10_000_000_000_000;
-
 pub const TGAS: u64 = 1_000_000_000_000;
 
 #[near_bindgen]
@@ -86,7 +82,8 @@ pub struct AccessoriesForBattle {
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Thegraphstructure {
-    colecction:String,
+    collection:String,
+    collection_id:String,
     contract_name:String,
     token_id : String,
     owner_id : String,
@@ -102,15 +99,6 @@ pub struct Thegraphstructure {
     expires_at: String,
     starts_at: String,
     extra: String,
-}
-
-
-lazy_static! {
-    static ref USER_TOKEN_HASHMAP: Mutex<HashMap<String, String>> = Mutex::new(HashMap::new());
-    static ref CONV_MAP: HashMap<String, String> = {
-        let mut map = HashMap::new();  
-        map
-    };
 }
 
 impl Default for Contract {
@@ -167,7 +155,7 @@ pub trait ExternsContract {
     fn get_items_for_battle_cpu(&self, 
         accesorio1_burrito1_id: TokenId, accesorio2_burrito1_id: TokenId, accesorio3_burrito1_id: TokenId
     ) -> AccessoriesForBattle;
-    fn saveMintTTG(&self, info: String) -> Option<Token>;
+    fn save_mint_ttg(&self, info: String) -> Option<Token>;
     fn reward_player(&self,player_owner_id: String,tokens_mint: String) -> String;
 }
 
@@ -236,7 +224,7 @@ impl Contract {
 
     // Minar un nuevo token
     #[payable]
-    pub fn nft_mint_token(&mut self,token_owner_id: ValidAccountId, colecction: String, token_metadata: TokenMetadata) -> Burrito {
+    pub fn mint_token(&mut self,token_owner_id: ValidAccountId, colecction: String, token_metadata: TokenMetadata) -> Burrito {
         // let token_owner_id = env::signer_account_id();
 
         let mut new_burrito = token_metadata;
@@ -258,13 +246,13 @@ impl Contract {
         let rand_speed = *env::random_seed().get(2).unwrap();
         let rand_type = *env::random_seed().get(3).unwrap();
 
-        let mut attack: u8 = 0;
-        let mut defense: u8 = 0;
-        let mut speed: u8 = 0;
+        let mut attack: u8 = 5;
+        let mut defense: u8 = 5;
+        let mut speed: u8 = 5;
         let mut burrito_type: String = "".to_string();
 
         // Obtener ataque aleatorio
-        if rand_attack >= 0 &&  rand_attack <= 70 {
+        if rand_attack > 0 &&  rand_attack <= 70 {
             attack = 5;
         }
         if rand_attack >= 71 &&  rand_attack <= 130 {
@@ -279,12 +267,12 @@ impl Contract {
         if rand_attack >= 221 &&  rand_attack <= 250 {
             attack = 9;
         }
-        if rand_attack >= 251 &&  rand_attack <= 255 {
+        if rand_attack >= 251 &&  rand_attack < 255 {
             attack = 10;
         }
 
         // Obtener defensa aleatoria
-        if rand_defense >= 0 &&  rand_defense <= 70 {
+        if rand_defense > 0 &&  rand_defense <= 70 {
             defense = 5;
         }
         if rand_defense >= 71 &&  rand_defense <= 130 {
@@ -299,12 +287,12 @@ impl Contract {
         if rand_defense >= 221 &&  rand_defense <= 250 {
             defense = 9;
         }
-        if rand_defense >= 251 &&  rand_defense <= 255 {
+        if rand_defense >= 251 &&  rand_defense < 255 {
             defense = 10;
         }
 
         // Obtener velociad aleatoria
-        if rand_speed >= 0 &&  rand_speed <= 70 {
+        if rand_speed > 0 &&  rand_speed <= 70 {
             speed = 5;
         }
         if rand_speed >= 71 &&  rand_speed <= 130 {
@@ -319,12 +307,12 @@ impl Contract {
         if rand_speed >= 221 &&  rand_speed <= 250 {
             speed = 9;
         }
-        if rand_speed >= 251 &&  rand_speed <= 255 {
+        if rand_speed >= 251 &&  rand_speed < 255 {
             speed = 10;
         }
 
         // Obtener tipo
-        if rand_type >= 0 &&  rand_type <= 51 {
+        if rand_type > 0 &&  rand_type <= 51 {
             burrito_type = "Fuego".to_string();
         }
         if rand_type >= 52 &&  rand_type <= 102 {
@@ -336,7 +324,7 @@ impl Contract {
         if rand_type >= 154 &&  rand_type <= 204 {
             burrito_type = "Eléctrico".to_string();
         }
-        if rand_type >= 205 &&  rand_type <= 255 {
+        if rand_type >= 205 &&  rand_type < 255 {
             burrito_type = "Volador".to_string();
         }
 
@@ -376,9 +364,10 @@ impl Contract {
                                         &burrito.burrito_type.clone()+&":".to_string()+
                                         &burrito.level.clone();
 
-        let mut graphdata = Thegraphstructure {
+        let graphdata = Thegraphstructure {
             contract_name: BURRITO_CONTRACT.to_string(),
-            colecction: colecction.clone().to_string(),
+            collection: colecction.clone().to_string(),
+            collection_id: "4".to_string(),
             token_id : burrito_id.to_string(),
             owner_id : owner_id.to_string(),
             title : new_burrito.title.as_ref().unwrap().to_string(),
@@ -395,13 +384,13 @@ impl Contract {
             extra: ext.clone()
         };
 
-        let rett : String = graphdata.contract_name.to_string()+","+&graphdata.token_id.to_string()+","+&graphdata.owner_id.to_string()+","+ &graphdata.title.to_string()+","+&graphdata.description.to_string()+","+ &graphdata.media.to_string()+","+&graphdata.creator.to_string()+","+&graphdata.price.to_string()+","+ &graphdata.status.to_string()+","+ &graphdata.adressbidder.to_string()+","+ &graphdata.highestbid.to_string()+","+ &graphdata.lowestbid.to_string()+","+&graphdata.expires_at.to_string()+","+ &graphdata.starts_at.to_string()+","+&graphdata.extra.to_string()+","+&graphdata.colecction.to_string(); 
-
-        let p = ext_nft::saveMintTTG(
+        let rett : String = graphdata.contract_name.to_string()+","+&graphdata.token_id.to_string()+","+&graphdata.owner_id.to_string()+","+ &graphdata.title.to_string()+","+&graphdata.description.to_string()+","+ &graphdata.media.to_string()+","+&graphdata.creator.to_string()+","+&graphdata.price.to_string()+","+ &graphdata.status.to_string()+","+ &graphdata.adressbidder.to_string()+","+ &graphdata.highestbid.to_string()+","+ &graphdata.lowestbid.to_string()+","+&graphdata.expires_at.to_string()+","+ &graphdata.starts_at.to_string()+","+&graphdata.extra.to_string()+","+&graphdata.collection.to_string()+","+&graphdata.collection_id.to_string();
+        
+        ext_nft::save_mint_ttg(
             rett.clone(),
             &MK_CONTRACT, //  account_id MARKET PLACE
             env::attached_deposit(), // yocto NEAR to attach
-            10_000_000_000_000 // gas to attach
+            20_000_000_000_000 // gas to attach
         );
 
         burrito
@@ -409,7 +398,7 @@ impl Contract {
 
     // Minar un nuevo token desde contrato externo
     #[payable]
-    pub fn nft_mint_token_ext(&mut self,token_owner_id: ValidAccountId, colecction: String, token_metadata: TokenMetadata) -> String {
+    pub fn mint_token_ext(&mut self,token_owner_id: ValidAccountId, colecction: String, token_metadata: TokenMetadata) -> String {
         let mut new_burrito = token_metadata;
         let burrito_id: TokenId = self.n_burritos.to_string();
         let mut burrito_data = ExtraBurrito {
@@ -435,7 +424,7 @@ impl Contract {
         let mut burrito_type: String = "".to_string();
 
         // Obtener ataque aleatorio
-        if rand_attack >= 0 &&  rand_attack <= 70 {
+        if rand_attack > 0 &&  rand_attack <= 70 {
             attack = 5;
         }
         if rand_attack >= 71 &&  rand_attack <= 130 {
@@ -450,12 +439,12 @@ impl Contract {
         if rand_attack >= 221 &&  rand_attack <= 250 {
             attack = 9;
         }
-        if rand_attack >= 251 &&  rand_attack <= 255 {
+        if rand_attack >= 251 &&  rand_attack < 255 {
             attack = 10;
         }
 
         // Obtener defensa aleatoria
-        if rand_defense >= 0 &&  rand_defense <= 70 {
+        if rand_defense > 0 &&  rand_defense <= 70 {
             defense = 5;
         }
         if rand_defense >= 71 &&  rand_defense <= 130 {
@@ -470,12 +459,12 @@ impl Contract {
         if rand_defense >= 221 &&  rand_defense <= 250 {
             defense = 9;
         }
-        if rand_defense >= 251 &&  rand_defense <= 255 {
+        if rand_defense >= 251 &&  rand_defense < 255 {
             defense = 10;
         }
 
         // Obtener velociad aleatoria
-        if rand_speed >= 0 &&  rand_speed <= 70 {
+        if rand_speed > 0 &&  rand_speed <= 70 {
             speed = 5;
         }
         if rand_speed >= 71 &&  rand_speed <= 130 {
@@ -490,12 +479,12 @@ impl Contract {
         if rand_speed >= 221 &&  rand_speed <= 250 {
             speed = 9;
         }
-        if rand_speed >= 251 &&  rand_speed <= 255 {
+        if rand_speed >= 251 &&  rand_speed < 255 {
             speed = 10;
         }
 
         // Obtener tipo
-        if rand_type >= 0 &&  rand_type <= 51 {
+        if rand_type > 0 &&  rand_type <= 51 {
             burrito_type = "Fuego".to_string();
         }
         if rand_type >= 52 &&  rand_type <= 102 {
@@ -507,7 +496,7 @@ impl Contract {
         if rand_type >= 154 &&  rand_type <= 204 {
             burrito_type = "Eléctrico".to_string();
         }
-        if rand_type >= 205 &&  rand_type <= 255 {
+        if rand_type >= 205 &&  rand_type < 255 {
             burrito_type = "Volador".to_string();
         }
 
@@ -547,9 +536,10 @@ impl Contract {
                                         &burrito.burrito_type.clone()+&":".to_string()+
                                         &burrito.level.clone();
 
-        let mut graphdata = Thegraphstructure {
+        let graphdata = Thegraphstructure {
             contract_name: BURRITO_CONTRACT.to_string(),
-            colecction: colecction.clone().to_string(),
+            collection: colecction.clone().to_string(),
+            collection_id: "4".to_string(),
             token_id : burrito_id.to_string(),
             owner_id : owner_id.to_string(),
             title : new_burrito.title.as_ref().unwrap().to_string(),
@@ -566,8 +556,7 @@ impl Contract {
             extra: ext.clone()
         };
 
-        let rett : String = graphdata.contract_name.to_string()+","+&graphdata.token_id.to_string()+","+&graphdata.owner_id.to_string()+","+ &graphdata.title.to_string()+","+&graphdata.description.to_string()+","+ &graphdata.media.to_string()+","+&graphdata.creator.to_string()+","+&graphdata.price.to_string()+","+ &graphdata.status.to_string()+","+ &graphdata.adressbidder.to_string()+","+ &graphdata.highestbid.to_string()+","+ &graphdata.lowestbid.to_string()+","+&graphdata.expires_at.to_string()+","+ &graphdata.starts_at.to_string()+","+&graphdata.extra.to_string()+","+&graphdata.colecction.to_string(); 
-
+        let rett : String = graphdata.contract_name.to_string()+","+&graphdata.token_id.to_string()+","+&graphdata.owner_id.to_string()+","+ &graphdata.title.to_string()+","+&graphdata.description.to_string()+","+ &graphdata.media.to_string()+","+&graphdata.creator.to_string()+","+&graphdata.price.to_string()+","+ &graphdata.status.to_string()+","+ &graphdata.adressbidder.to_string()+","+ &graphdata.highestbid.to_string()+","+ &graphdata.lowestbid.to_string()+","+&graphdata.expires_at.to_string()+","+ &graphdata.starts_at.to_string()+","+&graphdata.extra.to_string()+","+&graphdata.collection.to_string()+","+&graphdata.collection_id.to_string();
         rett
     }
 
@@ -777,16 +766,16 @@ impl Contract {
                 let mut winner : i32 = 1;
                 
                 // Defensa total del burrito 1
-                let mut old_defense_burrito1 = (burrito1.defense.parse::<f32>().unwrap()+accessories_for_battle.final_defense_b1.parse::<f32>().unwrap());
+                let mut old_defense_burrito1 = burrito1.defense.parse::<f32>().unwrap()+accessories_for_battle.final_defense_b1.parse::<f32>().unwrap();
                 
                 // Defensa total del burrito 2
-                let mut old_defense_burrito2 = (burrito2.defense.parse::<f32>().unwrap()+accessories_for_battle.final_defense_b2.parse::<f32>().unwrap());
+                let mut old_defense_burrito2 = burrito2.defense.parse::<f32>().unwrap()+accessories_for_battle.final_defense_b2.parse::<f32>().unwrap();
                 
                 // Generar números aleatorios para multiplicadores de velocidad y ataque
-                let mut rands1: u8 = *env::random_seed().get(0).unwrap();;
-                let mut rands2: u8 = *env::random_seed().get(1).unwrap();;
-                let mut randa1: u8 = *env::random_seed().get(2).unwrap();
-                let mut randa2: u8 = *env::random_seed().get(3).unwrap();
+                let rands1: u8 = *env::random_seed().get(0).unwrap();
+                let rands2: u8 = *env::random_seed().get(1).unwrap();
+                let randa1: u8 = *env::random_seed().get(2).unwrap();
+                let randa2: u8 = *env::random_seed().get(3).unwrap();
 
                 let mut speed_mult1: f32 = 0.0;
                 let mut speed_mult2: f32 = 0.0;
@@ -836,20 +825,20 @@ impl Contract {
                     // Verificar cuál burrito tiene mayor velocidad
                     if ((burrito1.speed.parse::<f32>().unwrap()*speed_mult1)+accessories_for_battle.final_speed_b1.parse::<f32>().unwrap()) > ((burrito2.speed.parse::<f32>().unwrap()*speed_mult2)+accessories_for_battle.final_speed_b2.parse::<f32>().unwrap()) {
                         //Obtener multiplicador de tipo
-                        if(burrito1.burrito_type == "Fuego" && burrito2.burrito_type == "Planta"){
-                            type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        if burrito1.burrito_type == "Fuego" && burrito2.burrito_type == "Planta"{
+                            type_mult1 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                         }
-                        if(burrito1.burrito_type == "Agua" && burrito2.burrito_type == "Fuego"){
-                            type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        if burrito1.burrito_type == "Agua" && burrito2.burrito_type == "Fuego"{
+                            type_mult1 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                         }
-                        if(burrito1.burrito_type == "Planta" && burrito2.burrito_type == "Eléctrico"){
-                            type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        if burrito1.burrito_type == "Planta" && burrito2.burrito_type == "Eléctrico"{
+                            type_mult1 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                         }
-                        if(burrito1.burrito_type == "Eléctrico" && burrito2.burrito_type == "Volador"){
-                            type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        if burrito1.burrito_type == "Eléctrico" && burrito2.burrito_type == "Volador"{
+                            type_mult1 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                         }
-                        if(burrito1.burrito_type == "Volador" && burrito2.burrito_type == "Agua"){
-                            type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        if burrito1.burrito_type == "Volador" && burrito2.burrito_type == "Agua"{
+                            type_mult1 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                         }
     
                         old_defense_burrito2 = old_defense_burrito2 - ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)+type_mult1+accessories_for_battle.final_attack_b1.parse::<f32>().unwrap());
@@ -859,20 +848,20 @@ impl Contract {
                         }
                         if winner == 0 {
                             //Obtener multiplicador de tipo
-                            if(burrito2.burrito_type == "Fuego" && burrito1.burrito_type == "Planta"){
-                                type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            if burrito2.burrito_type == "Fuego" && burrito1.burrito_type == "Planta"{
+                                type_mult2 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                             }
-                            if(burrito2.burrito_type == "Agua" && burrito1.burrito_type == "Fuego"){
-                                type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            if burrito2.burrito_type == "Agua" && burrito1.burrito_type == "Fuego"{
+                                type_mult2 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                             }
-                            if(burrito2.burrito_type == "Planta" && burrito1.burrito_type == "Eléctrico"){
-                                type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            if burrito2.burrito_type == "Planta" && burrito1.burrito_type == "Eléctrico"{
+                                type_mult2 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                             }
-                            if(burrito2.burrito_type == "Eléctrico" && burrito1.burrito_type == "Volador"){
-                                type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            if burrito2.burrito_type == "Eléctrico" && burrito1.burrito_type == "Volador"{
+                                type_mult2 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                             }
-                            if(burrito2.burrito_type == "Volador" && burrito1.burrito_type == "Agua"){
-                                type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            if burrito2.burrito_type == "Volador" && burrito1.burrito_type == "Agua"{
+                                type_mult2 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                             }
                             
                             old_defense_burrito1 = old_defense_burrito1 - ((burrito2.attack.parse::<f32>().unwrap()*attack_mult2)+type_mult2+accessories_for_battle.final_attack_b2.parse::<f32>().unwrap());
@@ -883,20 +872,20 @@ impl Contract {
                         }
                     } else {
                         //Obtener multiplicador de tipo
-                        if(burrito2.burrito_type == "Fuego" && burrito1.burrito_type == "Planta"){
-                            type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        if burrito2.burrito_type == "Fuego" && burrito1.burrito_type == "Planta"{
+                            type_mult2 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                         }
-                        if(burrito2.burrito_type == "Agua" && burrito1.burrito_type == "Fuego"){
-                            type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        if burrito2.burrito_type == "Agua" && burrito1.burrito_type == "Fuego"{
+                            type_mult2 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                         }
-                        if(burrito2.burrito_type == "Planta" && burrito1.burrito_type == "Eléctrico"){
-                            type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        if burrito2.burrito_type == "Planta" && burrito1.burrito_type == "Eléctrico"{
+                            type_mult2 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                         }
-                        if(burrito2.burrito_type == "Eléctrico" && burrito1.burrito_type == "Volador"){
-                            type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        if burrito2.burrito_type == "Eléctrico" && burrito1.burrito_type == "Volador"{
+                            type_mult2 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                         }
-                        if(burrito2.burrito_type == "Volador" && burrito1.burrito_type == "Agua"){
-                            type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        if burrito2.burrito_type == "Volador" && burrito1.burrito_type == "Agua"{
+                            type_mult2 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                         }
     
                         old_defense_burrito1 = old_defense_burrito1 - ((burrito2.attack.parse::<f32>().unwrap()*attack_mult2)+type_mult2+accessories_for_battle.final_attack_b2.parse::<f32>().unwrap());
@@ -906,20 +895,20 @@ impl Contract {
                         }
                         if winner == 0 {
                             //Obtener multiplicador de tipo
-                            if(burrito1.burrito_type == "Fuego" && burrito2.burrito_type == "Planta"){
-                                type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            if burrito1.burrito_type == "Fuego" && burrito2.burrito_type == "Planta"{
+                                type_mult1 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                             }
-                            if(burrito1.burrito_type == "Agua" && burrito2.burrito_type == "Fuego"){
-                                type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            if burrito1.burrito_type == "Agua" && burrito2.burrito_type == "Fuego"{
+                                type_mult1 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                             }
-                            if(burrito1.burrito_type == "Planta" && burrito2.burrito_type == "Eléctrico"){
-                                type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            if burrito1.burrito_type == "Planta" && burrito2.burrito_type == "Eléctrico"{
+                                type_mult1 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                             }
-                            if(burrito1.burrito_type == "Eléctrico" && burrito2.burrito_type == "Volador"){
-                                type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            if burrito1.burrito_type == "Eléctrico" && burrito2.burrito_type == "Volador"{
+                                type_mult1 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                             }
-                            if(burrito1.burrito_type == "Volador" && burrito2.burrito_type == "Agua"){
-                                type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            if burrito1.burrito_type == "Volador" && burrito2.burrito_type == "Agua"{
+                                type_mult1 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                             }
     
                             old_defense_burrito2 = old_defense_burrito2 - ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)+type_mult1+accessories_for_battle.final_attack_b1.parse::<f32>().unwrap());
@@ -1013,40 +1002,40 @@ impl Contract {
     }
 
     // Obtener rival de combate
-    pub fn get_battle_room(&self, accountId: ValidAccountId) -> String {
-        // Buscar en el hashmap de la salas de combate si ya hay un encuentro iniciado con otro jugador.
-            // Verificar en que número de ronda va la batalla.
-                // Cada jugador debe seleccionar su burrito y accesorios para el próximo combate.
-                // Se manda a llamar el metodo de fight_burritos con los datos de los burritos y accesorios a combatir.
-                // Una vez determinado al ganador se moifica el hashmap y se registra al ganador de la ronda.
-                    // Se verifica si ya es la ronda final
-                        // Se determina al ganador de 3 de 5 combates para determinar al ganador de la batalla y finalizarla en el hashmap.
-                    // Se verifica si algún jugador ya ganó 3 combates
-                        // Se registra al ganador y se finaliza la batalla en el hashmap.
+    // pub fn get_battle_room(&self, account_id: ValidAccountId) -> String {
+    //     // Buscar en el hashmap de la salas de combate si ya hay un encuentro iniciado con otro jugador.
+    //         // Verificar en que número de ronda va la batalla.
+    //             // Cada jugador debe seleccionar su burrito y accesorios para el próximo combate.
+    //             // Se manda a llamar el metodo de fight_burritos con los datos de los burritos y accesorios a combatir.
+    //             // Una vez determinado al ganador se moifica el hashmap y se registra al ganador de la ronda.
+    //                 // Se verifica si ya es la ronda final
+    //                     // Se determina al ganador de 3 de 5 combates para determinar al ganador de la batalla y finalizarla en el hashmap.
+    //                 // Se verifica si algún jugador ya ganó 3 combates
+    //                     // Se registra al ganador y se finaliza la batalla en el hashmap.
 
-        // Buscar en el hashmap de salas de combate si hay una sala disponible para combatir.
-            // Si no hay una sala disponible, entonces se crea una nueva.
-                // Se espera a que llegue un contrincante.
-                    // Cada jugador debe seleccionar su burrito y accesorios para el próximo combate.
-                    // Se manda a llamar el metodo de fight_burritos con los datos de los burritos y accesorios a combatir.
-                    // Una vez determinado al ganador se moifica el hashmap y se registra al ganador de la ronda.
-            // Si ya exíste una sala disponible, entonces se registra en esa sala disponible para combatir.
-                // Cada jugador debe seleccionar su burrito y accesorios para el próximo combate.
-                        // Se manda a llamar el metodo de fight_burritos con los datos de los burritos y accesorios a combatir.
-                        // Una vez determinado al ganador se moifica el hashmap y se registra al ganador de la ronda.
+    //     // Buscar en el hashmap de salas de combate si hay una sala disponible para combatir.
+    //         // Si no hay una sala disponible, entonces se crea una nueva.
+    //             // Se espera a que llegue un contrincante.
+    //                 // Cada jugador debe seleccionar su burrito y accesorios para el próximo combate.
+    //                 // Se manda a llamar el metodo de fight_burritos con los datos de los burritos y accesorios a combatir.
+    //                 // Una vez determinado al ganador se moifica el hashmap y se registra al ganador de la ronda.
+    //         // Si ya exíste una sala disponible, entonces se registra en esa sala disponible para combatir.
+    //             // Cada jugador debe seleccionar su burrito y accesorios para el próximo combate.
+    //                     // Se manda a llamar el metodo de fight_burritos con los datos de los burritos y accesorios a combatir.
+    //                     // Una vez determinado al ganador se moifica el hashmap y se registra al ganador de la ronda.
 
-            let mut _map = self.battle_room_map.clone();
+    //         let mut _map = self.battle_room_map.clone();
 
-            //let mut vectIDs = vec![];
-            let ends = _map.len().to_string().parse::<u128>();
-            for x in 0..ends.unwrap()  {
-                log!("Sala: {:?}",&x+1);
-                let tok = _map.get(&(&x.to_string().parse::<u128>().unwrap()+1));
-                log!("{:?}",tok);                
-            }
+    //         //let mut vectIDs = vec![];
+    //         let ends = _map.len().to_string().parse::<u128>();
+    //         for x in 0..ends.unwrap()  {
+    //             log!("Sala: {:?}",&x+1);
+    //             let tok = _map.get(&(&x.to_string().parse::<u128>().unwrap()+1));
+    //             log!("{:?}",tok);                
+    //         }
 
-        "Obteniendo salas de batalla".to_string()
-    }
+    //     "Obteniendo salas de batalla".to_string()
+    // }
 
     // Crear batalla player vs cpu
     pub fn save_battle_player_cpu(&mut self,burrito1_id: TokenId,burrito2_id: TokenId,burrito3_id: TokenId) -> Vec<String> {
@@ -1323,7 +1312,7 @@ impl Contract {
                 let mut burrito_type: String = "".to_string();
 
                 // Obtener ataque aleatorio
-                if rand_attack >= 0 &&  rand_attack <= 70 {
+                if rand_attack > 0 &&  rand_attack <= 70 {
                     attack = 5+(burrito_cpu_level.clone()*2);
                 }
                 if rand_attack >= 71 &&  rand_attack <= 130 {
@@ -1338,12 +1327,12 @@ impl Contract {
                 if rand_attack >= 221 &&  rand_attack <= 250 {
                     attack = 9+(burrito_cpu_level.clone()*2);
                 }
-                if rand_attack >= 251 &&  rand_attack <= 255 {
+                if rand_attack >= 251 &&  rand_attack < 255 {
                     attack = 10+(burrito_cpu_level.clone()*2);
                 }
 
                 // Obtener defensa aleatoria
-                if rand_defense >= 0 &&  rand_defense <= 70 {
+                if rand_defense > 0 &&  rand_defense <= 70 {
                     defense = 5+(burrito_cpu_level.clone()*2);
                 }
                 if rand_defense >= 71 &&  rand_defense <= 130 {
@@ -1358,12 +1347,12 @@ impl Contract {
                 if rand_defense >= 221 &&  rand_defense <= 250 {
                     defense = 9+(burrito_cpu_level.clone()*2);
                 }
-                if rand_defense >= 251 &&  rand_defense <= 255 {
+                if rand_defense >= 251 &&  rand_defense < 255 {
                     defense = 10+(burrito_cpu_level.clone()*2);
                 }
 
                 // Obtener velociad aleatoria
-                if rand_speed >= 0 &&  rand_speed <= 70 {
+                if rand_speed > 0 &&  rand_speed <= 70 {
                     speed = 5+(burrito_cpu_level.clone()*2);
                 }
                 if rand_speed >= 71 &&  rand_speed <= 130 {
@@ -1378,12 +1367,12 @@ impl Contract {
                 if rand_speed >= 221 &&  rand_speed <= 250 {
                     speed = 9+(burrito_cpu_level.clone()*2);
                 }
-                if rand_speed >= 251 &&  rand_speed <= 255 {
+                if rand_speed >= 251 &&  rand_speed < 255 {
                     speed = 10+(burrito_cpu_level.clone()*2);
                 }
 
                 // Obtener tipo
-                if rand_type >= 0 &&  rand_type <= 51 {
+                if rand_type > 0 &&  rand_type <= 51 {
                     burrito_type = "Fuego".to_string();
                 }
                 if rand_type >= 52 &&  rand_type <= 102 {
@@ -1395,7 +1384,7 @@ impl Contract {
                 if rand_type >= 154 &&  rand_type <= 204 {
                     burrito_type = "Eléctrico".to_string();
                 }
-                if rand_type >= 205 &&  rand_type <= 255 {
+                if rand_type >= 205 &&  rand_type < 255 {
                     burrito_type = "Volador".to_string();
                 }
 
@@ -1436,18 +1425,18 @@ impl Contract {
                 let mut winner : i32 = 0;
                 
                 // Defensa total del burrito 1
-                let mut old_defense_burrito1 = (burrito1.defense.parse::<f32>().unwrap()+accessories_for_battle.final_defense_b1.parse::<f32>().unwrap());
+                let mut old_defense_burrito1 = burrito1.defense.parse::<f32>().unwrap()+accessories_for_battle.final_defense_b1.parse::<f32>().unwrap();
                 // log!("old_defense_burrito1: {}",old_defense_burrito1.clone());
 
                 // Defensa total del burrito 2
-                let mut old_defense_burrito2 = (burrito2.defense.parse::<f32>().unwrap()+accessories_for_battle.final_defense_b2.parse::<f32>().unwrap());
+                let mut old_defense_burrito2 = burrito2.defense.parse::<f32>().unwrap()+accessories_for_battle.final_defense_b2.parse::<f32>().unwrap();
                 // log!("old_defense_burrito2: {}",old_defense_burrito2.clone());
 
                 // Generar números aleatorios para multiplicadores de velocidad y ataque
-                let mut rands1: u8 = *env::random_seed().get(0).unwrap();
-                let mut rands2: u8 = *env::random_seed().get(1).unwrap();
-                let mut randa1: u8 = *env::random_seed().get(2).unwrap();
-                let mut randa2: u8 = *env::random_seed().get(3).unwrap();
+                let rands1: u8 = *env::random_seed().get(0).unwrap();
+                let rands2: u8 = *env::random_seed().get(1).unwrap();
+                let randa1: u8 = *env::random_seed().get(2).unwrap();
+                let randa2: u8 = *env::random_seed().get(3).unwrap();
 
                 let mut speed_mult1: f32 = 0.0;
                 let mut speed_mult2: f32 = 0.0;
@@ -1500,20 +1489,20 @@ impl Contract {
                     if ((burrito1.speed.parse::<f32>().unwrap()*speed_mult1)+accessories_for_battle.final_speed_b1.parse::<f32>().unwrap()) > ((burrito2.speed.parse::<f32>().unwrap()*speed_mult2)+accessories_for_battle.final_speed_b2.parse::<f32>().unwrap()) {
                         // log!("Ganó Velocidad B1");
                         //Obtener multiplicador de tipo
-                        if(burrito1.burrito_type == "Fuego" && burrito2.burrito_type == "Planta"){
-                            type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        if burrito1.burrito_type == "Fuego" && burrito2.burrito_type == "Planta"{
+                            type_mult1 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                         }
-                        if(burrito1.burrito_type == "Agua" && burrito2.burrito_type == "Fuego"){
-                            type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        if burrito1.burrito_type == "Agua" && burrito2.burrito_type == "Fuego"{
+                            type_mult1 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                         }
-                        if(burrito1.burrito_type == "Planta" && burrito2.burrito_type == "Eléctrico"){
-                            type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        if burrito1.burrito_type == "Planta" && burrito2.burrito_type == "Eléctrico"{
+                            type_mult1 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                         }
-                        if(burrito1.burrito_type == "Eléctrico" && burrito2.burrito_type == "Volador"){
-                            type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        if burrito1.burrito_type == "Eléctrico" && burrito2.burrito_type == "Volador"{
+                            type_mult1 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                         }
-                        if(burrito1.burrito_type == "Volador" && burrito2.burrito_type == "Agua"){
-                            type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        if burrito1.burrito_type == "Volador" && burrito2.burrito_type == "Agua"{
+                            type_mult1 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                         }
     
                         old_defense_burrito2 = old_defense_burrito2 - ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)+type_mult1+accessories_for_battle.final_attack_b1.parse::<f32>().unwrap());
@@ -1527,20 +1516,20 @@ impl Contract {
                         }
                         if winner == 0 {
                             //Obtener multiplicador de tipo
-                            if(burrito2.burrito_type == "Fuego" && burrito1.burrito_type == "Planta"){
-                                type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            if burrito2.burrito_type == "Fuego" && burrito1.burrito_type == "Planta"{
+                                type_mult2 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                             }
-                            if(burrito2.burrito_type == "Agua" && burrito1.burrito_type == "Fuego"){
-                                type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            if burrito2.burrito_type == "Agua" && burrito1.burrito_type == "Fuego"{
+                                type_mult2 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                             }
-                            if(burrito2.burrito_type == "Planta" && burrito1.burrito_type == "Eléctrico"){
-                                type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            if burrito2.burrito_type == "Planta" && burrito1.burrito_type == "Eléctrico"{
+                                type_mult2 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                             }
-                            if(burrito2.burrito_type == "Eléctrico" && burrito1.burrito_type == "Volador"){
-                                type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            if burrito2.burrito_type == "Eléctrico" && burrito1.burrito_type == "Volador"{
+                                type_mult2 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                             }
-                            if(burrito2.burrito_type == "Volador" && burrito1.burrito_type == "Agua"){
-                                type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            if burrito2.burrito_type == "Volador" && burrito1.burrito_type == "Agua"{
+                                type_mult2 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                             }
                             
                             old_defense_burrito1 = old_defense_burrito1 - ((burrito2.attack.parse::<f32>().unwrap()*attack_mult2)+type_mult2+accessories_for_battle.final_attack_b2.parse::<f32>().unwrap());
@@ -1556,20 +1545,20 @@ impl Contract {
                     } else {
                         // log!("Ganó Velocidad B2");
                         //Obtener multiplicador de tipo
-                        if(burrito2.burrito_type == "Fuego" && burrito1.burrito_type == "Planta"){
-                            type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        if burrito2.burrito_type == "Fuego" && burrito1.burrito_type == "Planta"{
+                            type_mult2 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                         }
-                        if(burrito2.burrito_type == "Agua" && burrito1.burrito_type == "Fuego"){
-                            type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        if burrito2.burrito_type == "Agua" && burrito1.burrito_type == "Fuego"{
+                            type_mult2 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                         }
-                        if(burrito2.burrito_type == "Planta" && burrito1.burrito_type == "Eléctrico"){
-                            type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        if burrito2.burrito_type == "Planta" && burrito1.burrito_type == "Eléctrico"{
+                            type_mult2 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                         }
-                        if(burrito2.burrito_type == "Eléctrico" && burrito1.burrito_type == "Volador"){
-                            type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        if burrito2.burrito_type == "Eléctrico" && burrito1.burrito_type == "Volador"{
+                            type_mult2 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                         }
-                        if(burrito2.burrito_type == "Volador" && burrito1.burrito_type == "Agua"){
-                            type_mult2 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                        if burrito2.burrito_type == "Volador" && burrito1.burrito_type == "Agua"{
+                            type_mult2 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                         }
     
                         old_defense_burrito1 = old_defense_burrito1 - ((burrito2.attack.parse::<f32>().unwrap()*attack_mult2)+type_mult2+accessories_for_battle.final_attack_b2.parse::<f32>().unwrap());
@@ -1583,20 +1572,20 @@ impl Contract {
                         }
                         if winner == 0 {
                             //Obtener multiplicador de tipo
-                            if(burrito1.burrito_type == "Fuego" && burrito2.burrito_type == "Planta"){
-                                type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            if burrito1.burrito_type == "Fuego" && burrito2.burrito_type == "Planta"{
+                                type_mult1 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                             }
-                            if(burrito1.burrito_type == "Agua" && burrito2.burrito_type == "Fuego"){
-                                type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            if burrito1.burrito_type == "Agua" && burrito2.burrito_type == "Fuego"{
+                                type_mult1 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                             }
-                            if(burrito1.burrito_type == "Planta" && burrito2.burrito_type == "Eléctrico"){
-                                type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            if burrito1.burrito_type == "Planta" && burrito2.burrito_type == "Eléctrico"{
+                                type_mult1 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                             }
-                            if(burrito1.burrito_type == "Eléctrico" && burrito2.burrito_type == "Volador"){
-                                type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            if burrito1.burrito_type == "Eléctrico" && burrito2.burrito_type == "Volador"{
+                                type_mult1 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                             }
-                            if(burrito1.burrito_type == "Volador" && burrito2.burrito_type == "Agua"){
-                                type_mult1 = ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25)
+                            if burrito1.burrito_type == "Volador" && burrito2.burrito_type == "Agua"{
+                                type_mult1 = (burrito1.attack.parse::<f32>().unwrap()*attack_mult1)*0.25
                             }
     
                             old_defense_burrito2 = old_defense_burrito2 - ((burrito1.attack.parse::<f32>().unwrap()*attack_mult1)+type_mult1+accessories_for_battle.final_attack_b1.parse::<f32>().unwrap());
@@ -1708,7 +1697,7 @@ impl Contract {
 
                     log!("Tokens a minar {}",tokens_mint*1000000000000000000000000.0);
                     let tokens_to_mint = tokens_mint*1000000000000000000000000.0;
-                    let prp = ext_nft::reward_player(
+                    ext_nft::reward_player(
                         player_owner_id.clone().to_string(),
                         tokens_to_mint.to_string(),
                         &STRWTOKEN_CONTRACT,
@@ -1748,8 +1737,8 @@ impl Contract {
         const BLOCKCHAIN_INTERFACE_NOT_SET_ERR: &str = "Blockchain interface not set.";
         //after upgrade we call *pub fn migrate()* on the NEW CODE
         let current_id = env::current_account_id().into_bytes();
-        let migrate_method_name = "migrate".as_bytes().to_vec();
-        let attached_gas = env::prepaid_gas() - env::used_gas() - GAS_FOR_UPGRADE;
+        // let migrate_method_name = "migrate".as_bytes().to_vec();
+        let _attached_gas = env::prepaid_gas() - env::used_gas() - GAS_FOR_UPGRADE;
         unsafe {
             BLOCKCHAIN_INTERFACE.with(|b| {
                 // Load input (new contract code) into register 0
@@ -1780,7 +1769,7 @@ impl Contract {
                 //         0 as _,
                 //         0 as _,
                 //         0 as _,
-                //         attached_gas,
+                //         _attached_gas,
                 //     );
             });
         }

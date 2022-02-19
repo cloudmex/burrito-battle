@@ -9,16 +9,25 @@ use near_sdk::collections::LazyOption;
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::json_types::{ValidAccountId};
 use near_sdk::{
-    env, near_bindgen, AccountId, BorshStorageKey,ext_contract,
-    Promise, PromiseOrValue,};
+    env, log, near_bindgen, ext_contract, AccountId, BorshStorageKey,
+    Promise, PromiseOrValue};
 near_sdk::setup_alloc!();
 use std::convert::TryInto;
 use near_sdk::env::BLOCKCHAIN_INTERFACE;
 
-const ITEMS_CONTRACT: &str = "dev-1645132677038-92099956814413";
+const ITEMS_CONTRACT: &str = "dev-1645212248150-33385648447581";
 const MK_CONTRACT: &str = "dev-1645131376413-69111001778844";
 
 pub const TGAS: u64 = 1_000_000_000_000;
+
+#[derive(BorshDeserialize, BorshSerialize)]
+pub struct OldContract {
+    tokens: NonFungibleToken,
+    accessories: NonFungibleToken,
+    metadata: LazyOption<NFTContractMetadata>,
+    n_tokens: u128,
+    n_accessories: u128,
+}
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
@@ -526,7 +535,7 @@ impl Contract {
         const BLOCKCHAIN_INTERFACE_NOT_SET_ERR: &str = "Blockchain interface not set.";
         //after upgrade we call *pub fn migrate()* on the NEW CODE
         let current_id = env::current_account_id().into_bytes();
-        // let migrate_method_name = "migrate".as_bytes().to_vec();
+        let migrate_method_name = "migrate".as_bytes().to_vec();
         let _attached_gas = env::prepaid_gas() - env::used_gas() - GAS_FOR_UPGRADE;
         unsafe {
             BLOCKCHAIN_INTERFACE.with(|b| {
@@ -548,19 +557,33 @@ impl Contract {
                     .promise_batch_action_deploy_contract(promise_id, u64::MAX as _, 0);
                 //2nd action, schedule a call to "migrate()".
                 //Will execute on the **new code**
-                // b.borrow()
-                //     .as_ref()
-                //     .expect(BLOCKCHAIN_INTERFACE_NOT_SET_ERR)
-                //     .promise_batch_action_function_call(
-                //         promise_id,
-                //         migrate_method_name.len() as _,
-                //         migrate_method_name.as_ptr() as _,
-                //         0 as _,
-                //         0 as _,
-                //         0 as _,
-                //         _attached_gas,
-                //     );
+                b.borrow()
+                    .as_ref()
+                    .expect(BLOCKCHAIN_INTERFACE_NOT_SET_ERR)
+                    .promise_batch_action_function_call(
+                        promise_id,
+                        migrate_method_name.len() as _,
+                        migrate_method_name.as_ptr() as _,
+                        0 as _,
+                        0 as _,
+                        0 as _,
+                        _attached_gas,
+                    );
             });
+        }
+    }
+
+    #[private]
+    #[init(ignore_state)]
+    pub fn migrate() -> Self {
+        let old_state: OldContract = env::state_read().expect("failed");
+        log!("old state readed {}", old_state.n_accessories);
+        Self {
+            tokens: old_state.tokens,
+            accessories: old_state.accessories,
+            metadata: old_state.metadata,
+            n_tokens: old_state.n_tokens,
+            n_accessories: old_state.n_accessories,
         }
     }
 }

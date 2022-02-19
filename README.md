@@ -66,11 +66,11 @@ Desplegar ambos contratos (burrito e items) entrar a cada carpeta y ejecutar el 
 Asignamos el identificador de nuestro contrato desplegado a una constante:
 
     Burrito
-    ID=dev-1645132247816-96813559805059
+    ID=dev-1645231705770-40583248943867
     echo $ID
 
     Accesorios
-    ID=dev-1645132677038-92099956814413
+    ID=dev-1645212248150-33385648447581
     echo $ID
 
     STRW-TOKEN
@@ -88,14 +88,6 @@ Podremos ver nuestros metadatos inmediatamente después:
 Obtener cantidad de burritos creados:
 
     near view $ID get_number_burritos
-
-Obtener cantidad de batallas realizadas:
-
-    near view $ID get_number_battles
-
-Obtener cantidad de accesorios creados:
-
-    near view $ID get_number_accessories
     
 Crear nuevo burrito:
 
@@ -111,9 +103,6 @@ Obtener datos de un burrito:
 
     near view $ID nft_token '{"token_id":"2"}' --accountId yairnava.testnet
 
-Guardar sala de combate jugador vs cpu:
-    near call $ID save_battle_player_cpu '{"burrito1_id":"0","burrito2_id":"1","burrito3_id":"2"}' --accountId yairnava.testnet 
-
 Combate jugador vs cpu
 
     near call $ID fight_player_cpu '{"burrito1_id": "2","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"1","accesorio3_burrito1_id":"2","burrito_cpu_level":1}' --accountId yairnava.testnet --gas=300000000000000
@@ -122,12 +111,15 @@ Combate jugador vs cpu
 
     near call $ID fight_player_cpu '{"burrito1_id": "1","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"2","accesorio3_burrito1_id":"2","burrito_cpu_level":2}' --accountId yairnava.testnet --gas=300000000000000
 
-
     near call $ID fight_player_cpu '{"burrito1_id": "1","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"1","accesorio3_burrito1_id":"2","burrito_cpu_level":1}' --accountId yairnava.testnet --gas=300000000000000
 
 Combate de 2 burritos
 
     near call $ID fight_burritos '{"burrito1_id": "0","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"1","accesorio3_burrito1_id":"2","burrito2_id": "2","accesorio1_burrito2_id":"0","accesorio2_burrito2_id":"1","accesorio3_burrito2_id":"2"}' --accountId yairnh.testnet --gas=300000000000000
+
+Obtener cantidad de accesorios creados:
+
+    near view $ID get_number_accessories
 
 Crear nuevo accesorio:
 
@@ -139,6 +131,9 @@ Obtener datos de un accesorio:
     
     near view $ID nft_token '{"token_id":"0"}' --accountId yairnava.testnet
 
+Desplegar y Migrar Contratos:
+
+    near deploy --wasmFile res/non_fungible_token.wasm --initFunction "migrate" --initArgs "{}" --accountId $ID
 
 ## Construido con 🛠️
 

@@ -17,14 +17,25 @@ use std::convert::TryInto;
 use near_sdk::env::BLOCKCHAIN_INTERFACE;
 
 // Contrato de items
-const BURRITO_CONTRACT: &str = "dev-1645132247816-96813559805059";
-const ITEMS_CONTRACT: &str = "dev-1645132677038-92099956814413";
+const BURRITO_CONTRACT: &str = "dev-1645231705770-40583248943867";
+const ITEMS_CONTRACT: &str = "dev-1645212248150-33385648447581";
 const MK_CONTRACT: &str = "dev-1645131376413-69111001778844";
 const STRWTOKEN_CONTRACT: &str = "dev-1643778763383-79833681549715";
 
 const NO_DEPOSIT: Balance = 0;
 const BASE_GAS: Gas = 10_000_000_000_000;
 pub const TGAS: u64 = 1_000_000_000_000;
+
+#[derive(BorshDeserialize, BorshSerialize)]
+pub struct OldContract {
+    tokens: NonFungibleToken,
+    burritos: NonFungibleToken,
+    metadata: LazyOption<NFTContractMetadata>,
+    n_tokens: u128,
+    n_burritos: u128
+    // n_battles: u128,
+    // battle_room_map:HashMap::<u128,Vec<String>>
+}
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
@@ -34,8 +45,9 @@ pub struct Contract {
     metadata: LazyOption<NFTContractMetadata>,
     n_tokens: u128,
     n_burritos: u128,
-    n_battles: u128,
-    battle_room_map:HashMap::<u128,Vec<String>>
+    contract_version: f32,
+    // n_battles: u128,
+    // battle_room_map:HashMap::<u128,Vec<String>>
 }
 
 const DATA_IMAGE_SVG_NEAR_ICON: &str = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 288 288'%3E%3Cg id='l' data-name='l'%3E%3Cpath d='M187.58,79.81l-30.1,44.69a3.2,3.2,0,0,0,4.75,4.2L191.86,103a1.2,1.2,0,0,1,2,.91v80.46a1.2,1.2,0,0,1-2.12.77L102.18,77.93A15.35,15.35,0,0,0,90.47,72.5H87.34A15.34,15.34,0,0,0,72,87.84V201.16A15.34,15.34,0,0,0,87.34,216.5h0a15.35,15.35,0,0,0,13.08-7.31l30.1-44.69a3.2,3.2,0,0,0-4.75-4.2L96.14,186a1.2,1.2,0,0,1-2-.91V104.61a1.2,1.2,0,0,1,2.12-.77l89.55,107.23a15.35,15.35,0,0,0,11.71,5.43h3.13A15.34,15.34,0,0,0,216,201.16V87.84A15.34,15.34,0,0,0,200.66,72.5h0A15.35,15.35,0,0,0,187.58,79.81Z'/%3E%3C/g%3E%3C/svg%3E";
@@ -130,8 +142,9 @@ impl Default for Contract {
             metadata: LazyOption::new(StorageKey::Metadata, Some(&meta)),
             n_tokens: 0,
             n_burritos: 0,
-            n_battles: 0,
-            battle_room_map:HashMap::new(),
+            contract_version: 1.1
+            // n_battles: 0,
+            // battle_room_map:HashMap::new(),
         }   
     }
 }
@@ -207,8 +220,9 @@ impl Contract {
             metadata: LazyOption::new(StorageKey::Metadata, Some(&metadata)),
             n_tokens: 0,
             n_burritos: 0,
-            n_battles: 0 ,
-            battle_room_map:HashMap::new(),
+            contract_version: 1.1
+            // n_battles: 0 ,
+            // battle_room_map:HashMap::new(),
         }
     }
 
@@ -218,9 +232,9 @@ impl Contract {
     }
 
     // Obtener cantidad de batallas creadas
-    pub fn get_number_battles(&self) -> u128 {
-        self.n_battles
-    }
+    // pub fn get_number_battles(&self) -> u128 {
+    //     self.n_battles
+    // }
 
     // Minar un nuevo token
     #[payable]
@@ -1038,165 +1052,165 @@ impl Contract {
     // }
 
     // Crear batalla player vs cpu
-    pub fn save_battle_player_cpu(&mut self,burrito1_id: TokenId,burrito2_id: TokenId,burrito3_id: TokenId) -> Vec<String> {
-        // Validar que exista el id
-        if burrito1_id.clone().parse::<u128>().unwrap() > self.n_burritos-1 {
-            env::panic(b"No existe el id del burrito 1");
-        }
-        if burrito2_id.clone().parse::<u128>().unwrap() > self.n_burritos-1 {
-            env::panic(b"No existe el id del burrito 2");
-        }
-        if burrito3_id.clone().parse::<u128>().unwrap() > self.n_burritos-1 {
-            env::panic(b"No existe el id del burrito 3");
-        }
+    // pub fn save_battle_player_cpu(&mut self,burrito1_id: TokenId,burrito2_id: TokenId,burrito3_id: TokenId) -> Vec<String> {
+    //     // Validar que exista el id
+    //     if burrito1_id.clone().parse::<u128>().unwrap() > self.n_burritos-1 {
+    //         env::panic(b"No existe el id del burrito 1");
+    //     }
+    //     if burrito2_id.clone().parse::<u128>().unwrap() > self.n_burritos-1 {
+    //         env::panic(b"No existe el id del burrito 2");
+    //     }
+    //     if burrito3_id.clone().parse::<u128>().unwrap() > self.n_burritos-1 {
+    //         env::panic(b"No existe el id del burrito 3");
+    //     }
 
 
-        // Validar que el burrito pertenezca al signer
-        let token_owner_id = env::signer_account_id();
-        let owner_id_b1 = self.burritos.owner_by_id.get(&burrito1_id.clone()).unwrap();
-        let owner_id_b2 = self.burritos.owner_by_id.get(&burrito2_id.clone()).unwrap();
-        let owner_id_b3 = self.burritos.owner_by_id.get(&burrito3_id.clone()).unwrap();
+    //     // Validar que el burrito pertenezca al signer
+    //     let token_owner_id = env::signer_account_id();
+    //     let owner_id_b1 = self.burritos.owner_by_id.get(&burrito1_id.clone()).unwrap();
+    //     let owner_id_b2 = self.burritos.owner_by_id.get(&burrito2_id.clone()).unwrap();
+    //     let owner_id_b3 = self.burritos.owner_by_id.get(&burrito3_id.clone()).unwrap();
 
-        if token_owner_id.clone() != owner_id_b1.clone() {
-            env::panic(b"El burrito 1 no te pertenece");
-        }
-        if token_owner_id.clone() != owner_id_b2.clone() {
-            env::panic(b"El burrito 2 no te pertenece");
-        }
-        if token_owner_id.clone() != owner_id_b3.clone() {
-            env::panic(b"El burrito 3 no te pertenece");
-        }
-        if (burrito1_id.clone().parse::<u128>().unwrap() == burrito2_id.clone().parse::<u128>().unwrap()) || (burrito1_id.clone().parse::<u128>().unwrap() == burrito3_id.clone().parse::<u128>().unwrap()) || (burrito2_id.clone().parse::<u128>().unwrap() == burrito3_id.clone().parse::<u128>().unwrap()){
-            env::panic(b"Los 3 burritos deben ser diferentes");
-        }
+    //     if token_owner_id.clone() != owner_id_b1.clone() {
+    //         env::panic(b"El burrito 1 no te pertenece");
+    //     }
+    //     if token_owner_id.clone() != owner_id_b2.clone() {
+    //         env::panic(b"El burrito 2 no te pertenece");
+    //     }
+    //     if token_owner_id.clone() != owner_id_b3.clone() {
+    //         env::panic(b"El burrito 3 no te pertenece");
+    //     }
+    //     if (burrito1_id.clone().parse::<u128>().unwrap() == burrito2_id.clone().parse::<u128>().unwrap()) || (burrito1_id.clone().parse::<u128>().unwrap() == burrito3_id.clone().parse::<u128>().unwrap()) || (burrito2_id.clone().parse::<u128>().unwrap() == burrito3_id.clone().parse::<u128>().unwrap()){
+    //         env::panic(b"Los 3 burritos deben ser diferentes");
+    //     }
 
-        //Insertar nuevo token a Hashmap
-        let mut _map_rooms =self.battle_room_map.clone();
-        let battle_number = (_map_rooms.len()+1).to_string().parse::<u128>();
-        let mut info:Vec<String>=Vec::new();
+    //     //Insertar nuevo token a Hashmap
+    //     let mut _map_rooms =self.battle_room_map.clone();
+    //     let battle_number = (_map_rooms.len()+1).to_string().parse::<u128>();
+    //     let mut info:Vec<String>=Vec::new();
 
-        //info[0] Estatus
-        info.push("Combatiendo".to_string());
-        //info[1] Jugador1
-        info.push(token_owner_id.to_string());
-        //info[2] Jugador1 Burrito1
-        info.push(burrito1_id.to_string());
-        //info[3] Jugador1 Burrito2
-        info.push(burrito2_id.to_string());
-        //info[4] Jugador1 Burrito3
-        info.push(burrito3_id.to_string());
+    //     //info[0] Estatus
+    //     info.push("Combatiendo".to_string());
+    //     //info[1] Jugador1
+    //     info.push(token_owner_id.to_string());
+    //     //info[2] Jugador1 Burrito1
+    //     info.push(burrito1_id.to_string());
+    //     //info[3] Jugador1 Burrito2
+    //     info.push(burrito2_id.to_string());
+    //     //info[4] Jugador1 Burrito3
+    //     info.push(burrito3_id.to_string());
 
-        //info[5] Jugador2
-        info.push("BB CPU".to_string());
+    //     //info[5] Jugador2
+    //     info.push("BB CPU".to_string());
 
-        //info[6] Jugador2 Burrito1
-        info.push("Random".to_string());
-        //info[7] Jugador2 Burrito2
-        info.push("Random".to_string());
-        //info[8] Jugador2 Burrito3
-        info.push("Random".to_string());
+    //     //info[6] Jugador2 Burrito1
+    //     info.push("Random".to_string());
+    //     //info[7] Jugador2 Burrito2
+    //     info.push("Random".to_string());
+    //     //info[8] Jugador2 Burrito3
+    //     info.push("Random".to_string());
 
-        //info[9] BurritoJ1
-        info.push("".to_string());
-        //info[10] Accesorio1J1
-        info.push("".to_string());
-        //info[11] Accesorio2J1
-        info.push("".to_string());
-        //info[12] Accesorio3J1
-        info.push("".to_string());
-        //info[13] BurritoJ2
-        info.push("".to_string());
-        //info[14] Accesorio1J2
-        info.push("".to_string());
-        //info[15] Accesorio2J2
-        info.push("".to_string());
-        //info[16] Accesorio3J2
-        info.push("".to_string());
-        //info[17] GanadorRonda1
-        info.push("".to_string());
+    //     //info[9] BurritoJ1
+    //     info.push("".to_string());
+    //     //info[10] Accesorio1J1
+    //     info.push("".to_string());
+    //     //info[11] Accesorio2J1
+    //     info.push("".to_string());
+    //     //info[12] Accesorio3J1
+    //     info.push("".to_string());
+    //     //info[13] BurritoJ2
+    //     info.push("".to_string());
+    //     //info[14] Accesorio1J2
+    //     info.push("".to_string());
+    //     //info[15] Accesorio2J2
+    //     info.push("".to_string());
+    //     //info[16] Accesorio3J2
+    //     info.push("".to_string());
+    //     //info[17] GanadorRonda1
+    //     info.push("".to_string());
 
-        //info[18] BurritoJ1
-        info.push("".to_string());
-        //info[19] Accesorio1J1
-        info.push("".to_string());
-        //info[20] Accesorio2J1
-        info.push("".to_string());
-        //info[21] Accesorio3J1
-        info.push("".to_string());
-        //info[22] BurritoJ2
-        info.push("".to_string());
-        //info[23] Accesorio1J2
-        info.push("".to_string());
-        //info[24] Accesorio2J2
-        info.push("".to_string());
-        //info[25] Accesorio3J2
-        info.push("".to_string());
-        //info[26] GanadorRonda2
-        info.push("".to_string());
+    //     //info[18] BurritoJ1
+    //     info.push("".to_string());
+    //     //info[19] Accesorio1J1
+    //     info.push("".to_string());
+    //     //info[20] Accesorio2J1
+    //     info.push("".to_string());
+    //     //info[21] Accesorio3J1
+    //     info.push("".to_string());
+    //     //info[22] BurritoJ2
+    //     info.push("".to_string());
+    //     //info[23] Accesorio1J2
+    //     info.push("".to_string());
+    //     //info[24] Accesorio2J2
+    //     info.push("".to_string());
+    //     //info[25] Accesorio3J2
+    //     info.push("".to_string());
+    //     //info[26] GanadorRonda2
+    //     info.push("".to_string());
 
-        //info[27] BurritoJ1
-        info.push("".to_string());
-        //info[28] Accesorio1J1
-        info.push("".to_string());
-        //info[29] Accesorio2J1
-        info.push("".to_string());
-        //info[30] Accesorio3J1
-        info.push("".to_string());
-        //info[31] BurritoJ2
-        info.push("".to_string());
-        //info[32] Accesorio1J2
-        info.push("".to_string());
-        //info[33] Accesorio2J2
-        info.push("".to_string());
-        //info[34] Accesorio3J2
-        info.push("".to_string());
-        //info[35] GanadorRonda3
-        info.push("".to_string());
+    //     //info[27] BurritoJ1
+    //     info.push("".to_string());
+    //     //info[28] Accesorio1J1
+    //     info.push("".to_string());
+    //     //info[29] Accesorio2J1
+    //     info.push("".to_string());
+    //     //info[30] Accesorio3J1
+    //     info.push("".to_string());
+    //     //info[31] BurritoJ2
+    //     info.push("".to_string());
+    //     //info[32] Accesorio1J2
+    //     info.push("".to_string());
+    //     //info[33] Accesorio2J2
+    //     info.push("".to_string());
+    //     //info[34] Accesorio3J2
+    //     info.push("".to_string());
+    //     //info[35] GanadorRonda3
+    //     info.push("".to_string());
 
-        //info[36] BurritoJ1
-        info.push("".to_string());
-        //info[37] Accesorio1J1
-        info.push("".to_string());
-        //info[38] Accesorio2J1
-        info.push("".to_string());
-        //info[39] Accesorio3J1
-        info.push("".to_string());
-        //info[40] BurritoJ2
-        info.push("".to_string());
-        //info[41] Accesorio1J2
-        info.push("".to_string());
-        //info[42] Accesorio2J2
-        info.push("".to_string());
-        //info[43] Accesorio3J2
-        info.push("".to_string());
-        //info[44] GanadorRonda4
-        info.push("".to_string());
+    //     //info[36] BurritoJ1
+    //     info.push("".to_string());
+    //     //info[37] Accesorio1J1
+    //     info.push("".to_string());
+    //     //info[38] Accesorio2J1
+    //     info.push("".to_string());
+    //     //info[39] Accesorio3J1
+    //     info.push("".to_string());
+    //     //info[40] BurritoJ2
+    //     info.push("".to_string());
+    //     //info[41] Accesorio1J2
+    //     info.push("".to_string());
+    //     //info[42] Accesorio2J2
+    //     info.push("".to_string());
+    //     //info[43] Accesorio3J2
+    //     info.push("".to_string());
+    //     //info[44] GanadorRonda4
+    //     info.push("".to_string());
 
-        //info[45] BurritoJ1
-        info.push("".to_string());
-        //info[46] Accesorio1J1
-        info.push("".to_string());
-        //info[47] Accesorio2J1
-        info.push("".to_string());
-        //info[48] Accesorio3J1
-        info.push("".to_string());
-        //info[49] BurritoJ2
-        info.push("".to_string());
-        //info[50] Accesorio1J2
-        info.push("".to_string());
-        //info[51] Accesorio2J2
-        info.push("".to_string());
-        //info[52] Accesorio3J2
-        info.push("".to_string());
-        //info[53] GanadorRonda5
-        info.push("".to_string());
+    //     //info[45] BurritoJ1
+    //     info.push("".to_string());
+    //     //info[46] Accesorio1J1
+    //     info.push("".to_string());
+    //     //info[47] Accesorio2J1
+    //     info.push("".to_string());
+    //     //info[48] Accesorio3J1
+    //     info.push("".to_string());
+    //     //info[49] BurritoJ2
+    //     info.push("".to_string());
+    //     //info[50] Accesorio1J2
+    //     info.push("".to_string());
+    //     //info[51] Accesorio2J2
+    //     info.push("".to_string());
+    //     //info[52] Accesorio3J2
+    //     info.push("".to_string());
+    //     //info[53] GanadorRonda5
+    //     info.push("".to_string());
 
-        //info[54] Ganador Batalla
-        info.push("".to_string());
-        _map_rooms.insert(battle_number.unwrap(),info.clone());
+    //     //info[54] Ganador Batalla
+    //     info.push("".to_string());
+    //     _map_rooms.insert(battle_number.unwrap(),info.clone());
         
-        info
-    }
+    //     info
+    // }
 
     // Método de iniciar ronda player vs cpu
     pub fn fight_player_cpu(&self, burrito1_id: TokenId, accesorio1_burrito1_id: TokenId, accesorio2_burrito1_id: TokenId, accesorio3_burrito1_id: TokenId, burrito_cpu_level: u8) -> Promise {
@@ -1737,8 +1751,8 @@ impl Contract {
         const BLOCKCHAIN_INTERFACE_NOT_SET_ERR: &str = "Blockchain interface not set.";
         //after upgrade we call *pub fn migrate()* on the NEW CODE
         let current_id = env::current_account_id().into_bytes();
-        // let migrate_method_name = "migrate".as_bytes().to_vec();
-        let _attached_gas = env::prepaid_gas() - env::used_gas() - GAS_FOR_UPGRADE;
+        let migrate_method_name = "migrate".as_bytes().to_vec();
+        let attached_gas = env::prepaid_gas() - env::used_gas() - GAS_FOR_UPGRADE;
         unsafe {
             BLOCKCHAIN_INTERFACE.with(|b| {
                 // Load input (new contract code) into register 0
@@ -1759,22 +1773,40 @@ impl Contract {
                     .promise_batch_action_deploy_contract(promise_id, u64::MAX as _, 0);
                 //2nd action, schedule a call to "migrate()".
                 //Will execute on the **new code**
-                // b.borrow()
-                //     .as_ref()
-                //     .expect(BLOCKCHAIN_INTERFACE_NOT_SET_ERR)
-                //     .promise_batch_action_function_call(
-                //         promise_id,
-                //         migrate_method_name.len() as _,
-                //         migrate_method_name.as_ptr() as _,
-                //         0 as _,
-                //         0 as _,
-                //         0 as _,
-                //         _attached_gas,
-                //     );
+                b.borrow()
+                    .as_ref()
+                    .expect(BLOCKCHAIN_INTERFACE_NOT_SET_ERR)
+                    .promise_batch_action_function_call(
+                        promise_id,
+                        migrate_method_name.len() as _,
+                        migrate_method_name.as_ptr() as _,
+                        0 as _,
+                        0 as _,
+                        0 as _,
+                        attached_gas,
+                    );
             });
         }
     }
 
+    #[private]
+    #[init(ignore_state)]
+    pub fn migrate() -> Self {
+        let old_state: OldContract = env::state_read().expect("failed");
+        log!("old state readed {}", old_state.n_burritos);
+        Self {
+            tokens: old_state.tokens,
+            burritos: old_state.burritos,
+            metadata: old_state.metadata,
+            n_tokens: old_state.n_tokens,
+            n_burritos: old_state.n_burritos,
+            contract_version: 1.1
+        }
+    }
+
+    pub fn getContractVersion(&self) -> String {
+        self.contract_version.to_string()
+    }
 }
 
 near_contract_standards::impl_non_fungible_token_core!(Contract, tokens);

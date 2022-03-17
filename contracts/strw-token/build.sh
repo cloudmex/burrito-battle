@@ -11,4 +11,10 @@ MASTER_ACC=strw-token.$NETWORK
 CONTRACT_ACC=$MASTER_ACC
 export NODE_ENV=$NETWORK
 
-near dev-deploy --wasmFile res/strw_token.wasm
+echo "¿Quieres desplegar el contrato?"
+select yn in "Si" "No"; do
+    case $yn in
+        Si ) near dev-deploy --wasmFile res/strw_token.wasm; break;;
+        No ) exit;;
+    esac
+done

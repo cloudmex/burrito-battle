@@ -22,6 +22,10 @@ pub struct PrevContractStateStruct {
     pub owner_id: AccountId,
     pub minters: Vec<AccountId>,
     pub total_supply: Balance,
+    pub treasury_id: AccountId,
+    pub strw_mint_cost: u128,
+    pub strw_reset_cost: u128,
+    pub strw_evolve_cost: u128
 }
 
 use crate::MetaToken;
@@ -70,6 +74,10 @@ impl MetaToken {
             locked_until_nano: 0,
             vested: LookupMap::new(b"v".to_vec()),
             vested_count: 0,
+            treasury_id : old.treasury_id,
+            strw_mint_cost: old.strw_mint_cost,
+            strw_reset_cost: old.strw_reset_cost,
+            strw_evolve_cost: old.strw_evolve_cost  
         };
     }
 }

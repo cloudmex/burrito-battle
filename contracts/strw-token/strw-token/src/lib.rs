@@ -11,8 +11,9 @@ use near_sdk::collections::LazyOption;
 use near_sdk::json_types::{ValidAccountId, U128};
 use near_sdk::{
     assert_one_yocto, env, ext_contract, log, near_bindgen, AccountId, Balance, Gas,
-    PanicOnDefault, PromiseOrValue,
+    Promise, PanicOnDefault, PromiseOrValue
 };
+use std::str;
 
 //-- Sputnik DAO remote upgrade requires BLOCKCHAIN_INTERFACE low-level access
 #[cfg(target_arch = "wasm32")]
@@ -56,14 +57,18 @@ pub struct MetaToken {
     pub locked_until_nano: TimestampNano,
 
     pub vested: LookupMap<AccountId, VestingRecord>,
-    pub vested_count: u32,
+    pub vested_count: u32, 
+    pub treasury_id: AccountId,
+    pub strw_mint_cost: u128,
+    pub strw_reset_cost: u128,
+    pub strw_evolve_cost: u128
 }
 
 #[near_bindgen]
 impl MetaToken {
     /// Initializes the contract with the given total supply owned by the given `owner_id`.
     #[init]
-    pub fn new(owner_id: AccountId) -> Self {
+    pub fn init_contract(owner_id: AccountId, treasury_id: AccountId, strw_mint_cost: u128, strw_reset_cost: u128, strw_evolve_cost: u128) -> Self {
         //validate default metadata
         // internal::default_ft_metadata().assert_valid();
         Self {
@@ -75,6 +80,10 @@ impl MetaToken {
             locked_until_nano: 0,
             vested: LookupMap::new(b"v".to_vec()),
             vested_count: 0,
+            treasury_id : treasury_id,
+            strw_mint_cost: strw_mint_cost,
+            strw_reset_cost: strw_reset_cost,
+            strw_evolve_cost: strw_evolve_cost        
         }
     }
 
@@ -82,6 +91,7 @@ impl MetaToken {
     pub fn get_owner_id(&self) -> AccountId {
         return self.owner_id.clone();
     }
+    
     pub fn set_owner_id(&mut self, owner_id: AccountId) {
         self.assert_owner_calling();
         assert!(env::is_valid_account_id(owner_id.as_bytes()));
@@ -116,6 +126,76 @@ impl MetaToken {
 
         self.internal_transfer(&sender_id, receiver_id.as_ref(), amount, memo);
 
+    }
+
+    #[payable]
+    pub fn get_balance_and_transfer(&mut self, account_id: AccountId, action: String) -> bool {
+        // Obtener STRW Tokens del jugador
+        let balance : u128 = self.accounts.get(&account_id).unwrap_or(0).into();
+        // Obtener Nears
+        let deposit = env::attached_deposit();
+        Promise::new(self.treasury_id.clone()).transfer(deposit as u128);
+
+        log!("{}",action);
+
+        // Costo de STRW
+        let mut strw_cost = 0;
+
+        // Tipo de operación
+        if action == "Mint" {
+            if deposit < 4900000000000000000000000 {
+                env::panic(
+                    format!("NEARS Insuficientes, enviaste {} y necesitas 5000000000000000000000000", &deposit).as_bytes(),
+                );
+            }
+
+            if balance < self.strw_mint_cost*1000000000000000000000000 {
+                env::panic(
+                    format!("STRW Tokens Insuficientes, tienes {} y necesitas 600000000000000000000000000000", &balance).as_bytes(),
+                );
+            }
+            strw_cost = self.strw_mint_cost*1000000000000000000000000;
+        }
+        if action == "Reset" {
+            if deposit < 1000000000000000000000000 {
+                env::panic(
+                    format!("NEARS Insuficientes, enviaste {} y necesitas 1000000000000000000000000", &deposit).as_bytes(),
+                );
+            }
+
+            if balance < self.strw_reset_cost*1000000000000000000000000 {
+                env::panic(
+                    format!("STRW Tokens Insuficientes, tienes {} y necesitas 30000000000000000000000000000", &balance).as_bytes(),
+                );
+            }
+            strw_cost = self.strw_reset_cost*1000000000000000000000000;
+        }
+        if action == "Evolve" {
+            if deposit < 2000000000000000000000000 {
+                env::panic(
+                    format!("NEARS Insuficientes, enviaste {} y necesitas 2000000000000000000000000", &deposit).as_bytes(),
+                );
+            }
+
+            if balance < self.strw_evolve_cost*1000000000000000000000000 {
+                env::panic(
+                    format!("STRW Tokens Insuficientes, tienes {} y necesitas 100000000000000000000000000000", &balance).as_bytes(),
+                );
+            }
+            strw_cost = self.strw_evolve_cost*1000000000000000000000000;
+
+        }
+
+        self.internal_burn(&account_id, strw_cost);
+        true
+    }
+
+    // Obtener costos de STRW Tokens
+    pub fn get_costs(&self) {
+        log!("Treasury Account: {}",self.treasury_id);
+        log!("STRW Mint Cost: {}",self.strw_mint_cost);
+        log!("STRW Reset Cost: {}",self.strw_reset_cost);
+        log!("STRW Evolve Cost: {}",self.strw_evolve_cost);
     }
         
     //owner can add/remove minters

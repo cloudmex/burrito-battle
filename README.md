@@ -48,86 +48,112 @@ Paso 2: Configure su NEAR CLI
 Configure su near-cli para autorizar su cuenta de prueba creada recientemente:
 
     near login
-
-Paso 3: Crear contrato inteligente:
-
-Ejecute el siguiente comando dentro de cada carpeta (burrito e items) el cual generará nuestro archivo WASM en el directorio correspondiente (burrito/ o items/). Estos son los contratos inteligentes que implementaremos a continuación:
          
-         ./build.sh
     
 ## Despliegue 📦
 
-Desplegar ambos contratos (burrito e items) entrar a cada carpeta y ejecutar el siguiente comando:
+Ejecute el siguiente comando dentro de cada carpeta (Burrito, Items y STRW-Tokens) el cual generará nuestro archivo WASM en el directorio correspondiente (contracts/burrito/ , contracts/items/ y contracts/strw-token/ ). Además de que la consola preguntará si deseamos desplegar el contrato.
+    
+    ./build.sh
 
-    near dev-deploy --wasmFile res/non_fungible_token.wasm
+Desplegar y Migrar Contratos:
 
-## Métodos del contrato 🚀
+    near deploy --wasmFile wasmFile.wasm --initFunction "migrate" --initArgs "{}" --accountId $ID
 
-Asignamos el identificador de nuestro contrato desplegado a una constante:
+## Métodos de los contratos 🚀
+
+Asignamos el identificador de nuestro contrato desplegado a una constante (Sustituir el ID por el del contrato desplegado):
 
     Burrito
-    ID=dev-1645132247816-96813559805059
+    ID=dev-1647245153470-55139133456484
     echo $ID
 
     Accesorios
-    ID=dev-1645132677038-92099956814413
+    ID=dev-1645212248150-33385648447581
     echo $ID
 
     STRW-TOKEN
-    ID=dev-1643778763383-79833681549715
+    ID=dev-1645837411235-48460272126519
     echo $ID
 
-Ambos contratos deben inicializarse antes de su uso, por lo que lo inicializaremos con los metadatos predeterminados:
+Los 3 contratos deben inicializarse antes de su uso, por lo que lo haremos con los siguientes comandos dependiendo del contrato:
 
+    Burrito
+    near call $ID init_contract '{"owner_id":"'$ID'"}' --accountId $ID
+
+    Accesorios
     near call $ID init_contract '{"owner_id": "'$ID'"}' --accountId $ID
 
-Podremos ver nuestros metadatos inmediatamente después:
+    STRW-TOKEN
+    near call $ID init_contract '{"owner_id": "yairnava.testnet", "treasury_id": "yairnh.testnet", "strw_mint_cost": 600000, "strw_reset_cost": 30000, "strw_evolve_cost": 100000}' --accountId $ID
 
-    near call $ID nft_metadata --accountId $ID
+### Burritos
 
 Obtener cantidad de burritos creados:
 
     near view $ID get_number_burritos
-
-Obtener cantidad de batallas realizadas:
-
-    near view $ID get_number_battles
-
-Obtener cantidad de accesorios creados:
-
-    near view $ID get_number_accessories
     
 Crear nuevo burrito:
 
-    near call $ID mint_token '{"token_owner_id": "'yairnava.testnet'", "colecction": "Burritos BB", "token_metadata": { "title": "Burrito Name", "description": "This is a burrito", "media": "", "extra":""}}' --accountId yairnava.testnet --deposit 0.1 --gas=300000000000000
+    near call $ID mint_token '{"token_owner_id": "'yairnava.testnet'", "colecction": "Burritos BB", "token_metadata": { "title": "Burrito Name", "description": "This is a burrito", "media": "", "extra":""}}' --accountId yairnava.testnet --deposit 5 --gas=300000000000000
     
 Modificar burrito:
 
-    near call $ID update_burrito '{"burrito_id": "2", "extra":"{'"'burrito_type'":"'Fuego'","'hp'":"'5'","'attack'":"'9'","'defense'":"'5'","'speed'":"'7'","'level'":"'1'","'win'":"'0'"}'"}' --accountId yairnava.testnet 
+    near call $ID update_burrito '{"burrito_id": "0", "extra":"{'"'burrito_type'":"'Fuego'","'hp'":"'5'","'attack'":"'9'","'defense'":"'5'","'speed'":"'7'","'level'":"'1'","'win'":"'10'","'global_win'":"'10'"}'"}' --accountId yairnava.testnet 
+
+Evolucionar burrito:
+
+    near call $ID evolve_burrito '{"burrito_id": "0"}' --accountId yairnava.testnet --deposit 2 --gas=300000000000000
+
+Restaurar burrito:
+
+    near call $ID reset_burrito '{"burrito_id": "0"}' --accountId yairnava.testnet --deposit 1 --gas=300000000000000
 
 Obtener datos de un burrito:
 
     near view $ID get_burrito '{"burrito_id": "0"}'
 
-    near view $ID nft_token '{"token_id":"2"}' --accountId yairnava.testnet
+    near view $ID nft_token '{"token_id":"0"}' --accountId yairnava.testnet
 
-Guardar sala de combate jugador vs cpu:
-    near call $ID save_battle_player_cpu '{"burrito1_id":"0","burrito2_id":"1","burrito3_id":"2"}' --accountId yairnava.testnet 
+Crear una partida Jugador vs CPU:
 
-Combate jugador vs cpu
+    near call $ID create_battle_player_cpu '{"burrito_id":"'0'", "accesorio1_id":"'0'", "accesorio2_id":"'1'", "accesorio3_id":"'2'"}' --accountId yairnava.testnet
 
-    near call $ID fight_player_cpu '{"burrito1_id": "2","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"1","accesorio3_burrito1_id":"2","burrito_cpu_level":1}' --accountId yairnava.testnet --gas=300000000000000
+Obtener cantidad de batallas finalizadas:
 
-    near call $ID fight_player_cpu '{"burrito1_id": "1","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"1","accesorio3_burrito1_id":"3","burrito_cpu_level":1}' --accountId yairnava.testnet --gas=300000000000000
+    near view $ID get_number_battles
 
-    near call $ID fight_player_cpu '{"burrito1_id": "1","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"2","accesorio3_burrito1_id":"2","burrito_cpu_level":2}' --accountId yairnava.testnet --gas=300000000000000
+Mostrar todo el historial de batallas finalizadas del jugador:
 
+    near call $ID get_battle_rooms_history --accountId yairnava.testnet 
 
-    near call $ID fight_player_cpu '{"burrito1_id": "1","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"1","accesorio3_burrito1_id":"2","burrito_cpu_level":1}' --accountId yairnava.testnet --gas=300000000000000
+Obtener cantidad de batallas activas:
 
-Combate de 2 burritos
+    near view $ID get_number_battles_actives_cpu
 
-    near call $ID fight_burritos '{"burrito1_id": "0","accesorio1_burrito1_id":"0","accesorio2_burrito1_id":"1","accesorio3_burrito1_id":"2","burrito2_id": "2","accesorio1_burrito2_id":"0","accesorio2_burrito2_id":"1","accesorio3_burrito2_id":"2"}' --accountId yairnh.testnet --gas=300000000000000
+Obtener la sala activa del jugador
+
+    near call $ID get_battle_active_cpu '{}' --accountId yairnava.testnet
+
+Rendirse y finalizar combate activo
+
+    near call $ID surrender_cpu '{}' --accountId yairnava.testnet
+
+Combatir Ronda Player vs CPU [type_move => (1 = Ataque Debil, 2 = Ataque Fuerte, 3 = No Defenderse, 4 = Defenderse)]
+    
+    near call $ID battle_player_cpu '{"type_move":"'1'"}' --accountId yairnava.testnet --gas=300000000000000
+    
+    near call $ID battle_player_cpu '{"type_move":"'2'"}' --accountId yairnava.testnet --gas=300000000000000
+    
+    near call $ID battle_player_cpu '{"type_move":"'3'"}' --accountId yairnava.testnet --gas=300000000000000
+    
+    near call $ID battle_player_cpu '{"type_move":"'4'"}' --accountId yairnava.testnet --gas=300000000000000
+
+### Items
+
+Obtener cantidad de accesorios creados:
+
+    near view $ID get_number_accessories
 
 Crear nuevo accesorio:
 
@@ -139,6 +165,51 @@ Obtener datos de un accesorio:
     
     near view $ID nft_token '{"token_id":"0"}' --accountId yairnava.testnet
 
+### STRW-Tokens
+
+Obtener propietario del contrato STRW-Token
+    
+    near view $ID get_owner_id
+
+Cambiar propietario del contrato STRW-Token
+
+    near call $ID set_owner_id '{"owner_id": "yairnh.testnet"}' --accountId yairnava.testnet
+
+Obtener lista de mineros STRW-Token
+    
+    near view $ID get_minters
+
+Agregar minero STRW-Token
+
+    near call $ID add_minter '{"account_id": "yairnh.testnet"}' --accountId yairnava.testnet --deposit 0.000000000000000000000001
+
+Remover minero STRW-Token
+
+    near call $ID remove_minter '{"account_id": "bbtoken.testnet"}' --accountId yairnava.testnet --deposit 0.000000000000000000000001
+
+Minar STRW-Token
+
+    near call $ID mint '{"account_id": "yairnava.testnet", "amount" : "1000000000000000000000000000000"}' --accountId yairnava.testnet --deposit 0.000000000000000000000001
+
+Obtener balance total de STRW-Token
+    
+    near view $ID ft_total_supply
+
+Obtener balance de una cuenta de STRW-Token
+
+    near view $ID ft_balance_of '{"account_id": "yairnava.testnet"}'
+
+Transferir STRW-Token a una cuenta
+
+    near call $ID ft_transfer '{"receiver_id": "yairnh.testnet", "amount" : "1000000000000000000000000000"}' --accountId yairnava.testnet --deposit 0.000000000000000000000001
+
+Mostrar STRW-Token en Wallet
+
+    near call $ID ft_transfer '{"receiver_id": "yairnava.testnet", "amount":"0", "memo":""}' --accountId yairnava.testnet --deposit 0.000000000000000000000001
+
+Minar tokens y agregarlos al wallet
+
+    near call $ID reward_player '{"player_owner_id": "yairnava.testnet", "tokens_mint" : "1000000000000000000000000000000"}' --accountId $ID --deposit 0.000000000000000000000001
 
 ## Construido con 🛠️
 

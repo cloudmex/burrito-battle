@@ -9,16 +9,25 @@ use near_sdk::collections::LazyOption;
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::json_types::{ValidAccountId};
 use near_sdk::{
-    env, near_bindgen, AccountId, BorshStorageKey,ext_contract,
-    Promise, PromiseOrValue,};
+    env, log, near_bindgen, ext_contract, AccountId, BorshStorageKey,
+    Promise, PromiseOrValue};
 near_sdk::setup_alloc!();
 use std::convert::TryInto;
 use near_sdk::env::BLOCKCHAIN_INTERFACE;
 
-const ITEMS_CONTRACT: &str = "dev-1645132677038-92099956814413";
+const ITEMS_CONTRACT: &str = "dev-1645212248150-33385648447581";
 const MK_CONTRACT: &str = "dev-1645131376413-69111001778844";
 
 pub const TGAS: u64 = 1_000_000_000_000;
+
+#[derive(BorshDeserialize, BorshSerialize)]
+pub struct OldContract {
+    tokens: NonFungibleToken,
+    accessories: NonFungibleToken,
+    metadata: LazyOption<NFTContractMetadata>,
+    n_tokens: u128,
+    n_accessories: u128,
+}
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
@@ -184,7 +193,7 @@ impl Contract {
     // Minar un nuevo token
     #[payable]
     pub fn mint_token(&mut self,token_owner_id: ValidAccountId, colecction: String, token_metadata: TokenMetadata) -> Accessory {
-        let accessory_id: TokenId = self.n_accessories.to_string();
+        let accessory_id: TokenId = (self.n_accessories+1).to_string();
 
         self.accessories.mint(accessory_id.clone(), token_owner_id, Some(token_metadata.clone()));
         self.n_accessories += 1;
@@ -241,7 +250,7 @@ impl Contract {
     // Minar un nuevo token desde contrato externo
     #[payable]
     pub fn mint_token_ext(&mut self,token_owner_id: ValidAccountId, colecction: String, token_metadata: TokenMetadata) -> String {
-        let accessory_id: TokenId = self.n_accessories.to_string();
+        let accessory_id: TokenId = (self.n_accessories+1).to_string();
 
         self.accessories.mint(accessory_id.clone(), token_owner_id.clone(), Some(token_metadata.clone()));
         self.n_accessories += 1;
@@ -280,7 +289,7 @@ impl Contract {
 
     // Obtener accesorio
     pub fn get_accessory(&self, accessory_id: TokenId) -> Accessory {
-        if accessory_id.clone().parse::<u128>().unwrap() > self.n_accessories-1 {
+        if accessory_id.clone().parse::<u128>().unwrap() == 0 || accessory_id.clone().parse::<u128>().unwrap() > self.n_accessories-1 {
             env::panic(b"No existe el accesorio con el id ingresado");
         }
 
@@ -307,211 +316,92 @@ impl Contract {
         accessory
     }
 
-    // Obtener items para batalla pvp
-    pub fn get_items_for_battle(&self, 
-        accesorio1_burrito1_id: TokenId, accesorio2_burrito1_id: TokenId, accesorio3_burrito1_id: TokenId,
-        accesorio1_burrito2_id: TokenId, accesorio2_burrito2_id: TokenId, accesorio3_burrito2_id: TokenId) -> AccessoriesForBattle  {
-
-         // Obtener metadata accesorio 1 burrito 1
-         let metadata_accesorio1_burrito1 = self
-            .accessories
-            .token_metadata_by_id
-            .as_ref()
-            .and_then(|by_id| by_id.get(&accesorio1_burrito1_id))
-            .unwrap();
-
-        // Obtener metadata accesorio 2 burrito 1
-        let metadata_accesorio2_burrito1 = self
-            .accessories
-            .token_metadata_by_id
-            .as_ref()
-            .and_then(|by_id| by_id.get(&accesorio2_burrito1_id))
-            .unwrap();
-
-        // Obtener metadata accesorio 3 burrito 1
-        let metadata_accesorio3_burrito1 = self
-            .accessories
-            .token_metadata_by_id
-            .as_ref()
-            .and_then(|by_id| by_id.get(&accesorio3_burrito1_id))
-            .unwrap();
-
-        
-        // Obtener metadata accesorio 1 burrito 2
-        let metadata_accesorio1_burrito2 = self
-            .accessories
-            .token_metadata_by_id
-            .as_ref()
-            .and_then(|by_id| by_id.get(&accesorio1_burrito2_id))
-            .unwrap();
-
-        // Obtener metadata accesorio 2 burrito 2
-        let metadata_accesorio2_burrito2 = self
-            .accessories
-            .token_metadata_by_id
-            .as_ref()
-            .and_then(|by_id| by_id.get(&accesorio2_burrito2_id))
-            .unwrap();
-
-        // Obtener metadata accesorio 3 burrito 2
-        let metadata_accesorio3_burrito2 = self
-            .accessories
-            .token_metadata_by_id
-            .as_ref()
-            .and_then(|by_id| by_id.get(&accesorio3_burrito2_id))
-            .unwrap();
-
-        // Extraer extras del token accesorios burrito 1
-        let newextradata_accesorio1_burrito1 = str::replace(&metadata_accesorio1_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
-        let newextradata_accesorio2_burrito1 = str::replace(&metadata_accesorio2_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
-        let newextradata_accesorio3_burrito1 = str::replace(&metadata_accesorio3_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
-        
-        // Extraer extras del token accesorios burrito 2
-        let newextradata_accesorio1_burrito2 = str::replace(&metadata_accesorio1_burrito2.extra.as_ref().unwrap().to_string(), "'", "\"");
-        let newextradata_accesorio2_burrito2 = str::replace(&metadata_accesorio2_burrito2.extra.as_ref().unwrap().to_string(), "'", "\"");
-        let newextradata_accesorio3_burrito2 = str::replace(&metadata_accesorio3_burrito2.extra.as_ref().unwrap().to_string(), "'", "\"");
-       
-        // Crear json accesorios burrito 1
-        let extradatajson_accesorio1_burrito1: ExtraAccessory = serde_json::from_str(&newextradata_accesorio1_burrito1).unwrap();
-        let extradatajson_accesorio2_burrito1: ExtraAccessory = serde_json::from_str(&newextradata_accesorio2_burrito1).unwrap();
-        let extradatajson_accesorio3_burrito1: ExtraAccessory = serde_json::from_str(&newextradata_accesorio3_burrito1).unwrap();
-
-        // Crear json accesorios burrito 2
-        let extradatajson_accesorio1_burrito2: ExtraAccessory = serde_json::from_str(&newextradata_accesorio1_burrito2).unwrap();
-        let extradatajson_accesorio2_burrito2: ExtraAccessory = serde_json::from_str(&newextradata_accesorio2_burrito2).unwrap();
-        let extradatajson_accesorio3_burrito2: ExtraAccessory = serde_json::from_str(&newextradata_accesorio3_burrito2).unwrap();
-        
-        // Obtener puntos totales a sumar de cada estadística de los accesorios del burrito 1
-        let accesories_attack_burrito1 : f32 = extradatajson_accesorio1_burrito1.attack.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito1.attack.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito1.attack.parse::<f32>().unwrap();
-        let accesories_defense_burrito1 : f32 = extradatajson_accesorio1_burrito1.defense.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito1.defense.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito1.defense.parse::<f32>().unwrap();
-        let accesories_speed_burrito1 : f32 = extradatajson_accesorio1_burrito1.speed.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito1.speed.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito1.speed.parse::<f32>().unwrap();
-        
-        // Obtener puntos totales a sumar de cada estadística de los accesorios del burrito 2
-        let accesories_attack_burrito2 : f32 = extradatajson_accesorio1_burrito2.attack.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito2.attack.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito2.attack.parse::<f32>().unwrap();
-        let accesories_defense_burrito2 : f32 = extradatajson_accesorio1_burrito2.defense.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito2.defense.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito2.defense.parse::<f32>().unwrap();
-        let accesories_speed_burrito2 : f32 = extradatajson_accesorio1_burrito2.speed.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito2.speed.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito2.speed.parse::<f32>().unwrap();
-        
-        let accessories_for_battle = AccessoriesForBattle {
-            final_attack_b1 : accesories_attack_burrito1.to_string(),
-            final_defense_b1 : accesories_defense_burrito1.to_string(),
-            final_speed_b1 : accesories_speed_burrito1.to_string(),
-            final_attack_b2 : accesories_attack_burrito2.to_string(),
-            final_defense_b2 : accesories_defense_burrito2.to_string(),
-            final_speed_b2 : accesories_speed_burrito2.to_string()
-        };
-
-        accessories_for_battle
-
-    }
-
     // Obtener items para batalla player vs cpu
     pub fn get_items_for_battle_cpu(&self, 
         accesorio1_burrito1_id: TokenId, accesorio2_burrito1_id: TokenId, accesorio3_burrito1_id: TokenId) -> AccessoriesForBattle  {
 
         // Validar que exista el id
-        if accesorio1_burrito1_id.clone().parse::<u128>().unwrap() > self.n_accessories-1 {
+        if accesorio1_burrito1_id.clone().parse::<u128>().unwrap() > 0 && accesorio1_burrito1_id.clone().parse::<u128>().unwrap() > self.n_accessories-1 {
             env::panic(b"No existe el id del accesorio 1");
         }
-        if accesorio2_burrito1_id.clone().parse::<u128>().unwrap() > self.n_accessories-1 {
+        if accesorio2_burrito1_id.clone().parse::<u128>().unwrap() > 0 && accesorio2_burrito1_id.clone().parse::<u128>().unwrap() > self.n_accessories-1 {
             env::panic(b"No existe el id del accesorio 2");
         }
-        if accesorio3_burrito1_id.clone().parse::<u128>().unwrap() > self.n_accessories-1 {
+        if accesorio3_burrito1_id.clone().parse::<u128>().unwrap() > 0 && accesorio3_burrito1_id.clone().parse::<u128>().unwrap() > self.n_accessories-1 {
             env::panic(b"No existe el id del accesorio 3");
         }
 
-        let token_owner_id = env::signer_account_id();
-        let owner_id_a1 = self.accessories.owner_by_id.get(&accesorio1_burrito1_id.clone()).unwrap();
-        let owner_id_a2 = self.accessories.owner_by_id.get(&accesorio2_burrito1_id.clone()).unwrap();
-        let owner_id_a3 = self.accessories.owner_by_id.get(&accesorio3_burrito1_id.clone()).unwrap();
-
-        if token_owner_id.clone() != owner_id_a1.clone() {
-            env::panic(b"El accesorio 1 no te pertenece");
-        }
-        if token_owner_id.clone() != owner_id_a2.clone() {
-            env::panic(b"El accesorio 2 no te pertenece");
-        }
-        if token_owner_id.clone() != owner_id_a3.clone() {
-            env::panic(b"El accesorio 3 no te pertenece");
-        }
-        if (accesorio1_burrito1_id.clone().parse::<u128>().unwrap() == accesorio2_burrito1_id.clone().parse::<u128>().unwrap()) || (accesorio1_burrito1_id.clone().parse::<u128>().unwrap() == accesorio3_burrito1_id.clone().parse::<u128>().unwrap()) || (accesorio2_burrito1_id.clone().parse::<u128>().unwrap() == accesorio3_burrito1_id.clone().parse::<u128>().unwrap()){
-            env::panic(b"Los 3 accesorio deben ser diferentes");
-        }
-
-        // Obtener metadata accesorio 1 burrito 1
-        let metadata_accesorio1_burrito1 = self
-        .accessories
-        .token_metadata_by_id
-        .as_ref()
-        .and_then(|by_id| by_id.get(&accesorio1_burrito1_id))
-        .unwrap();
-
-        // Obtener metadata accesorio 2 burrito 1
-        let metadata_accesorio2_burrito1 = self
-            .accessories
-            .token_metadata_by_id
-            .as_ref()
-            .and_then(|by_id| by_id.get(&accesorio2_burrito1_id))
-            .unwrap();
-
-        // Obtener metadata accesorio 3 burrito 1
-        let metadata_accesorio3_burrito1 = self
-            .accessories
-            .token_metadata_by_id
-            .as_ref()
-            .and_then(|by_id| by_id.get(&accesorio3_burrito1_id))
-            .unwrap();
-
-        // Extraer extras del token accesorios burrito 1
-        let newextradata_accesorio1_burrito1 = str::replace(&metadata_accesorio1_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
-        let newextradata_accesorio2_burrito1 = str::replace(&metadata_accesorio2_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
-        let newextradata_accesorio3_burrito1 = str::replace(&metadata_accesorio3_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
-        
-        // Crear json accesorios burrito 1
-        let extradatajson_accesorio1_burrito1: ExtraAccessory = serde_json::from_str(&newextradata_accesorio1_burrito1).unwrap();
-        let extradatajson_accesorio2_burrito1: ExtraAccessory = serde_json::from_str(&newextradata_accesorio2_burrito1).unwrap();
-        let extradatajson_accesorio3_burrito1: ExtraAccessory = serde_json::from_str(&newextradata_accesorio3_burrito1).unwrap();
-
-        // Obtener puntos totales a sumar de cada estadística de los accesorios del burrito 1
-        let accesories_attack_burrito1 : f32 = extradatajson_accesorio1_burrito1.attack.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito1.attack.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito1.attack.parse::<f32>().unwrap();
-        let accesories_defense_burrito1 : f32 = extradatajson_accesorio1_burrito1.defense.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito1.defense.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito1.defense.parse::<f32>().unwrap();
-        let accesories_speed_burrito1 : f32 = extradatajson_accesorio1_burrito1.speed.parse::<f32>().unwrap()+extradatajson_accesorio2_burrito1.speed.parse::<f32>().unwrap()+extradatajson_accesorio3_burrito1.speed.parse::<f32>().unwrap();
-        
         let mut accessories_for_battle = AccessoriesForBattle {
-            final_attack_b1 : accesories_attack_burrito1.to_string(),
-            final_defense_b1 : accesories_defense_burrito1.to_string(),
-            final_speed_b1 : accesories_speed_burrito1.to_string(),
-            final_attack_b2 : accesories_attack_burrito1.to_string(),
-            final_defense_b2 : accesories_defense_burrito1.to_string(),
-            final_speed_b2 : accesories_speed_burrito1.to_string()
+            final_attack_b1 : "0".to_string(),
+            final_defense_b1 : "0".to_string(),
+            final_speed_b1 : "0".to_string(),
+            final_attack_b2 : "0".to_string(),
+            final_defense_b2 : "0".to_string(),
+            final_speed_b2 : "0".to_string()
         };
 
-        // Generamos incremento o decremento de los accesorios del burrito del CPU
-        let rand_attack = *env::random_seed().get(0).unwrap();
-        let rand_defense = *env::random_seed().get(1).unwrap();
-        let rand_speed = *env::random_seed().get(2).unwrap();
-        let mut attack: f32 = 0.0;
-        let mut defense: f32 = 0.0;
-        let mut speed: f32 = 0.0;
+        let token_owner_id = env::signer_account_id();
+        let mut accesories_attack_burrito1 : f32 = 0.0;
+        let mut accesories_defense_burrito1 : f32 = 0.0;
+        let mut accesories_speed_burrito1 : f32 = 0.0;
+        
+        if accesorio1_burrito1_id.clone().parse::<u128>().unwrap() > 0 {
+            let owner_id_a1 = self.accessories.owner_by_id.get(&accesorio1_burrito1_id.clone()).unwrap();
+            if token_owner_id.clone() != owner_id_a1.clone() {
+                env::panic(b"El accesorio 1 no te pertenece");
+            }
+            let metadata_accesorio1_burrito1 = self
+                .accessories
+                .token_metadata_by_id
+                .as_ref()
+                .and_then(|by_id| by_id.get(&accesorio1_burrito1_id))
+                .unwrap();
+            let newextradata_accesorio1_burrito1 = str::replace(&metadata_accesorio1_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
+            let extradatajson_accesorio1_burrito1: ExtraAccessory = serde_json::from_str(&newextradata_accesorio1_burrito1).unwrap();
+            accesories_attack_burrito1 += extradatajson_accesorio1_burrito1.attack.parse::<f32>().unwrap();
+            accesories_defense_burrito1 += extradatajson_accesorio1_burrito1.defense.parse::<f32>().unwrap();
+            accesories_speed_burrito1 += extradatajson_accesorio1_burrito1.speed.parse::<f32>().unwrap();
+        }
 
-        if rand_attack > 0 &&  rand_attack <= 127 {
-            attack = 3.0;
-        } else {
-            attack = -3.0;
-        }
-        if rand_defense > 0 &&  rand_defense <= 127 {
-            defense = 3.0;
-        } else {
-            defense = -3.0;
-        }
-        if rand_speed > 0 &&  rand_speed <= 127 {
-            speed = 3.0;
-        } else {
-            speed = -3.0;
+        if accesorio2_burrito1_id.clone().parse::<u128>().unwrap() == 0 {
+            let owner_id_a2 = self.accessories.owner_by_id.get(&accesorio2_burrito1_id.clone()).unwrap();
+            if token_owner_id.clone() != owner_id_a2.clone() {
+                env::panic(b"El accesorio 2 no te pertenece");
+            }
+            let metadata_accesorio2_burrito1 = self
+                .accessories
+                .token_metadata_by_id
+                .as_ref()
+                .and_then(|by_id| by_id.get(&accesorio2_burrito1_id))
+                .unwrap();
+            let newextradata_accesorio2_burrito1 = str::replace(&metadata_accesorio2_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
+            let extradatajson_accesorio2_burrito1: ExtraAccessory = serde_json::from_str(&newextradata_accesorio2_burrito1).unwrap();
+            accesories_attack_burrito1 += extradatajson_accesorio2_burrito1.attack.parse::<f32>().unwrap();
+            accesories_defense_burrito1 += extradatajson_accesorio2_burrito1.defense.parse::<f32>().unwrap();
+            accesories_speed_burrito1 += extradatajson_accesorio2_burrito1.speed.parse::<f32>().unwrap();
         }
 
-        accessories_for_battle.final_attack_b2 = (accessories_for_battle.final_attack_b2.parse::<f32>().unwrap()+attack).to_string();
-        accessories_for_battle.final_defense_b2 = (accessories_for_battle.final_defense_b2.parse::<f32>().unwrap()+defense).to_string();
-        accessories_for_battle.final_speed_b2 = (accessories_for_battle.final_speed_b2.parse::<f32>().unwrap()+speed).to_string();
+        if accesorio3_burrito1_id.clone().parse::<u128>().unwrap() == 0 {
+            let owner_id_a3 = self.accessories.owner_by_id.get(&accesorio3_burrito1_id.clone()).unwrap();
+            if token_owner_id.clone() != owner_id_a3.clone() {
+                env::panic(b"El accesorio 3 no te pertenece");
+            }
+            let metadata_accesorio3_burrito1 = self
+                .accessories
+                .token_metadata_by_id
+                .as_ref()
+                .and_then(|by_id| by_id.get(&accesorio3_burrito1_id))
+                .unwrap();
+            let newextradata_accesorio3_burrito1 = str::replace(&metadata_accesorio3_burrito1.extra.as_ref().unwrap().to_string(), "'", "\"");
+            let extradatajson_accesorio3_burrito1: ExtraAccessory = serde_json::from_str(&newextradata_accesorio3_burrito1).unwrap();
+            accesories_attack_burrito1 += extradatajson_accesorio3_burrito1.attack.parse::<f32>().unwrap();
+            accesories_defense_burrito1 += extradatajson_accesorio3_burrito1.defense.parse::<f32>().unwrap();
+            accesories_speed_burrito1 += extradatajson_accesorio3_burrito1.speed.parse::<f32>().unwrap();
+        }
+
+        accessories_for_battle.final_attack_b1 = accesories_attack_burrito1.to_string();
+        accessories_for_battle.final_defense_b1 = accesories_defense_burrito1.to_string();
+        accessories_for_battle.final_speed_b1 = accesories_speed_burrito1.to_string();
 
         accessories_for_battle
 
@@ -526,7 +416,7 @@ impl Contract {
         const BLOCKCHAIN_INTERFACE_NOT_SET_ERR: &str = "Blockchain interface not set.";
         //after upgrade we call *pub fn migrate()* on the NEW CODE
         let current_id = env::current_account_id().into_bytes();
-        // let migrate_method_name = "migrate".as_bytes().to_vec();
+        let migrate_method_name = "migrate".as_bytes().to_vec();
         let _attached_gas = env::prepaid_gas() - env::used_gas() - GAS_FOR_UPGRADE;
         unsafe {
             BLOCKCHAIN_INTERFACE.with(|b| {
@@ -548,19 +438,33 @@ impl Contract {
                     .promise_batch_action_deploy_contract(promise_id, u64::MAX as _, 0);
                 //2nd action, schedule a call to "migrate()".
                 //Will execute on the **new code**
-                // b.borrow()
-                //     .as_ref()
-                //     .expect(BLOCKCHAIN_INTERFACE_NOT_SET_ERR)
-                //     .promise_batch_action_function_call(
-                //         promise_id,
-                //         migrate_method_name.len() as _,
-                //         migrate_method_name.as_ptr() as _,
-                //         0 as _,
-                //         0 as _,
-                //         0 as _,
-                //         _attached_gas,
-                //     );
+                b.borrow()
+                    .as_ref()
+                    .expect(BLOCKCHAIN_INTERFACE_NOT_SET_ERR)
+                    .promise_batch_action_function_call(
+                        promise_id,
+                        migrate_method_name.len() as _,
+                        migrate_method_name.as_ptr() as _,
+                        0 as _,
+                        0 as _,
+                        0 as _,
+                        _attached_gas,
+                    );
             });
+        }
+    }
+
+    #[private]
+    #[init(ignore_state)]
+    pub fn migrate() -> Self {
+        let old_state: OldContract = env::state_read().expect("failed");
+        log!("old state readed {}", old_state.n_accessories);
+        Self {
+            tokens: old_state.tokens,
+            accessories: old_state.accessories,
+            metadata: old_state.metadata,
+            n_tokens: old_state.n_tokens,
+            n_accessories: old_state.n_accessories,
         }
     }
 }

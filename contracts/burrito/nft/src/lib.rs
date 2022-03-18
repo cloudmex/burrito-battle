@@ -55,7 +55,7 @@ pub struct Contract {
 
 const DATA_IMAGE_SVG_NEAR_ICON: &str = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 288 288'%3E%3Cg id='l' data-name='l'%3E%3Cpath d='M187.58,79.81l-30.1,44.69a3.2,3.2,0,0,0,4.75,4.2L191.86,103a1.2,1.2,0,0,1,2,.91v80.46a1.2,1.2,0,0,1-2.12.77L102.18,77.93A15.35,15.35,0,0,0,90.47,72.5H87.34A15.34,15.34,0,0,0,72,87.84V201.16A15.34,15.34,0,0,0,87.34,216.5h0a15.35,15.35,0,0,0,13.08-7.31l30.1-44.69a3.2,3.2,0,0,0-4.75-4.2L96.14,186a1.2,1.2,0,0,1-2-.91V104.61a1.2,1.2,0,0,1,2.12-.77l89.55,107.23a15.35,15.35,0,0,0,11.71,5.43h3.13A15.34,15.34,0,0,0,216,201.16V87.84A15.34,15.34,0,0,0,200.66,72.5h0A15.35,15.35,0,0,0,187.58,79.81Z'/%3E%3C/g%3E%3C/svg%3E";
 
-#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
+#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
 pub struct BattleCPU {
     status : String, // 1 = On Hold , 2 = In Battle , 3 = Finish
@@ -87,7 +87,7 @@ pub struct BattlesHistory {
     status : String, // Battle, Surrender
 }
 
-#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
+#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Burrito {
     // token_id : String,
@@ -1053,7 +1053,7 @@ impl Contract {
     pub fn create_battle_player_cpu(&mut self, burrito_id: TokenId, accesorio1_id: TokenId, accesorio2_id: TokenId, accesorio3_id: TokenId) -> Burrito {
         // Validar que exista el id
         if burrito_id.clone().parse::<u128>().unwrap() > self.n_burritos-1 {
-            env::panic(b"No existe el burrito ingresado");
+            env::panic(b"No existe el Burrito a utilizar para el combate");
         }
 
         // Validar que el burrito pertenezca al signer
@@ -1061,7 +1061,7 @@ impl Contract {
         let owner_id = self.burritos.owner_by_id.get(&burrito_id.clone()).unwrap();
 
         if token_owner_id.clone() != owner_id.clone() {
-            env::panic(b"El burrito no te pertenece");
+            env::panic(b"El Burrito a utilizar no te pertenece");
         }
 
         // Validar que los 3 accesorios sean diferentes
@@ -1074,11 +1074,11 @@ impl Contract {
             (accesorio2_id.clone().parse::<u128>().unwrap() == accesorio3_id.clone().parse::<u128>().unwrap() &&
             accesorio2_id.clone().parse::<u128>().unwrap() != 0 && accesorio3_id.clone().parse::<u128>().unwrap() != 0) 
         {
-            env::panic(b"Los 3 accesorio deben ser diferentes");
+            env::panic(b"Los 3 Items a equipar deben ser diferentes");
         }
 
         // Obtener metadata burrito 1
-        let mut metadata_burrito = self
+        let metadata_burrito = self
         .burritos
         .token_metadata_by_id
         .as_ref()
@@ -1089,9 +1089,13 @@ impl Contract {
         let newextradata_burrito = str::replace(&metadata_burrito.extra.as_ref().unwrap().to_string(), "'", "\"");
 
         // Crear json burrito 1
-        let mut extradatajson_burrito: ExtraBurrito = serde_json::from_str(&newextradata_burrito).unwrap();
+        let extradatajson_burrito: ExtraBurrito = serde_json::from_str(&newextradata_burrito).unwrap();
         let owner_id_burrito = self.burritos.owner_by_id.get(&burrito_id.clone()).unwrap();
         
+        if extradatajson_burrito.hp.clone().parse::<u8>().unwrap() == 0 {
+            env::panic(b"El Burrito a utilizar no tiene vidas");
+        }
+
         // Crear estructura burrito 1
         let burrito = Burrito {
             owner_id : owner_id_burrito.clone().to_string(),
@@ -1251,8 +1255,6 @@ impl Contract {
         self.battle_room_cpu.insert(token_owner_id.clone().to_string(),info);
         self.n_battle_rooms_cpu += 1;
 
-        log!("Sala Creada");
-
         burrito_cpu
 
     }
@@ -1264,7 +1266,7 @@ impl Contract {
         let br = self.battle_room_cpu.get(&token_owner_id.to_string());
         
         if br.is_none() {
-            env::panic(b"No existe sala creada de esta cuenta");
+            env::panic(b"No tienes una batalla activa");
         }
 
         let info = br.unwrap();
@@ -1350,7 +1352,7 @@ impl Contract {
         self.battle_room_cpu.remove(&token_owner_id);
         self.n_battle_rooms_cpu -= 1;
 
-        "Te Rendiste".to_string()
+        "Finalizó batalla".to_string()
     }
     
     // Método combate player vs cpu (type_move 1 = Ataque Debil, 2 = Ataque Fuerte, 3 = No Defenderse 4 = Defenderse)
@@ -1360,7 +1362,7 @@ impl Contract {
         let br = self.battle_room_cpu.get(&token_owner_id.to_string());
         
         if br.is_none() {
-            env::panic(b"No existe sala creada de esta cuenta");
+            env::panic(b"No tienes una batalla activa");
         }
 
         let info = br.unwrap();
@@ -1388,19 +1390,19 @@ impl Contract {
 
 
         if (type_move == "1" || type_move == "2") && battle_room.turn == "CPU"{
-            env::panic(b"No es tu turno de atacar");
+            env::panic(b"No puedes realizar un ataque, debes elegir si defenderte o no");
         }
 
         if (type_move == "3" || type_move == "4") && battle_room.turn == "Player"{
-            env::panic(b"No es tu turno de defender");
+            env::panic(b"No puedes defenderte, debes realizar un ataque");
         }
 
         if type_move == "2" && battle_room.strong_attack_player.parse::<u8>().unwrap() == 0 {
-            env::panic(b"No tienes mas ataques fuertes");
+            env::panic(b"No tienes mas ataques fuertes, debes realizar uno normal");
         }
 
         if type_move == "4" && battle_room.shields_player.parse::<u8>().unwrap() == 0 {
-            env::panic(b"No tienes mas escudos");
+            env::panic(b"No tienes mas escudos, no puedes defenderte");
         }
 
         // Invocar un método en otro contrato
@@ -1432,7 +1434,7 @@ impl Contract {
         );
         match env::promise_result(0) {
             PromiseResult::NotReady => unreachable!(),
-            PromiseResult::Failed => "oops!".to_string(),
+            PromiseResult::Failed => "Surgio un error durante el combate".to_string(),
             PromiseResult::Successful(result) => {
                 let value = str::from_utf8(&result).unwrap();
                 let mut accessories_for_battle: AccessoriesForBattle = serde_json::from_str(&value).unwrap();
@@ -1452,8 +1454,9 @@ impl Contract {
                             old_battle_room.shields_cpu = (old_battle_room.shields_cpu.parse::<u8>().unwrap()-1).to_string();
                             old_battle_room.turn = "CPU".to_string();
                             self.battle_room_cpu.remove(&old_battle_room.payer_id);
-                            self.battle_room_cpu.insert(old_battle_room.payer_id.to_string(),old_battle_room);
-                            return "CPU utilizó escudo".to_string();
+                            self.battle_room_cpu.insert(old_battle_room.payer_id.to_string(),old_battle_room.clone());
+                            log!("CPU utilizó escudo");
+                            return str::replace(&serde_json::to_string(&old_battle_room.clone()).unwrap(), "\"", "'");
                         }
                     }
                 } else {
@@ -1475,8 +1478,9 @@ impl Contract {
                         old_battle_room.shields_player = (old_battle_room.shields_player.parse::<u8>().unwrap()-1).to_string();
                         old_battle_room.turn = "Player".to_string();
                         self.battle_room_cpu.remove(&old_battle_room.payer_id);
-                        self.battle_room_cpu.insert(old_battle_room.payer_id.to_string(),old_battle_room);
-                        return "Jugador utilizó escudo".to_string();
+                        self.battle_room_cpu.insert(old_battle_room.payer_id.to_string(),old_battle_room.clone());
+                        log!("Jugador utilizó escudo");
+                        return str::replace(&serde_json::to_string(&old_battle_room.clone()).unwrap(), "\"", "'");
                     }
                 }
 
@@ -1550,12 +1554,12 @@ impl Contract {
                 let mut old_health_burrito_defender: f32 = 0.0;
 
                 if old_battle_room.turn == "Player"{
-                    burrito_attacker = burrito;
+                    burrito_attacker = burrito.clone();
                     burrito_defender = burrito_cpu;
                     old_health_burrito_defender = old_battle_room.health_cpu.parse::<f32>().unwrap();
                 } else {
                     burrito_attacker = burrito_cpu;
-                    burrito_defender = burrito;
+                    burrito_defender = burrito.clone();
                     old_health_burrito_defender = old_battle_room.health_player.parse::<f32>().unwrap();
                     accessories_for_battle.final_attack_b1 = "0".to_string();
                 }
@@ -1627,12 +1631,13 @@ impl Contract {
                         // Eliminar sala activa
                         self.battle_room_cpu.remove(&old_battle_room.payer_id);
                         self.n_battle_rooms_cpu -= 1;
-                        return "Batalla Finalizada, Ganó Jugador".to_string();
+                        log!("Batalla Finalizada, Ganó Jugador");
+                        return str::replace(&serde_json::to_string(&old_battle_room.clone()).unwrap(), "\"", "'");
                     } else {
                         old_battle_room.health_cpu = new_health_burrito_defender.to_string();
                         old_battle_room.turn = "CPU".to_string();
                         self.battle_room_cpu.remove(&old_battle_room.payer_id);
-                        self.battle_room_cpu.insert(old_battle_room.payer_id.to_string(),old_battle_room);
+                        self.battle_room_cpu.insert(old_battle_room.payer_id.to_string(),old_battle_room.clone());
                     }
                 } else {
                     if new_health_burrito_defender <= 0.0 {
@@ -1648,17 +1653,32 @@ impl Contract {
                         // Eliminar sala activa
                         self.battle_room_cpu.remove(&old_battle_room.payer_id);
                         self.n_battle_rooms_cpu -= 1;
-                        return "Batalla Finalizada, Ganó CPU".to_string();
+                        log!("Batalla Finalizada, Ganó CPU");
+
+                        // Restar una vida al burrito
+                        let new_hp_burrito = burrito.hp.parse::<u8>().unwrap()-1;
+                        extradatajson_burrito.hp = new_hp_burrito.to_string();
+            
+                        let mut extra_string_burrito = serde_json::to_string(&extradatajson_burrito).unwrap();
+                        extra_string_burrito = str::replace(&extra_string_burrito, "\"", "'");
+                        metadata_burrito.extra = Some(extra_string_burrito.clone());
+                        
+                        self.burritos
+                        .token_metadata_by_id
+                        .as_mut()
+                        .and_then(|by_id| by_id.insert(&old_battle_room.burrito_id.clone(), &metadata_burrito));
+
+                        return str::replace(&serde_json::to_string(&old_battle_room.clone()).unwrap(), "\"", "'");
                     } else {
                         old_battle_room.health_player = new_health_burrito_defender.to_string();
                         old_battle_room.turn = "Player".to_string();
                         self.battle_room_cpu.remove(&old_battle_room.payer_id);
-                        self.battle_room_cpu.insert(old_battle_room.payer_id.to_string(),old_battle_room);
+                        self.battle_room_cpu.insert(old_battle_room.payer_id.to_string(),old_battle_room.clone());
                     }                
                 }
 
-                "Ronda Finalizada".to_string()
-
+                log!("Ronda Finalizada");
+                str::replace(&serde_json::to_string(&old_battle_room.clone()).unwrap(), "\"", "'")
             }
         }
     }

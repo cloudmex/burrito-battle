@@ -1051,6 +1051,14 @@ impl Contract {
 
     // Guardar sala de combate Player vs CPU
     pub fn create_battle_player_cpu(&mut self, burrito_id: TokenId, accesorio1_id: TokenId, accesorio2_id: TokenId, accesorio3_id: TokenId) -> Burrito {
+        let token_owner_id = env::signer_account_id();
+
+        let br = self.battle_room_cpu.get(&token_owner_id.to_string());
+        
+        if br.is_some() {
+            env::panic(b"Ya tienes una partida iniciada, debes terminarla o rendirte");
+        }
+        
         // Validar que exista el id
         if burrito_id.clone().parse::<u128>().unwrap() > self.n_burritos-1 {
             env::panic(b"No existe el Burrito a utilizar para el combate");

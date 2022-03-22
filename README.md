@@ -65,11 +65,11 @@ Desplegar y Migrar Contratos:
 Asignamos el identificador de nuestro contrato desplegado a una constante (Sustituir el ID por el del contrato desplegado):
 
     Burrito
-    ID=dev-1647245153470-55139133456484
+    ID=dev-1647985436450-35354495406457
     echo $ID
 
     Accesorios
-    ID=dev-1645212248150-33385648447581
+    ID=dev-1647986467816-61735125036881
     echo $ID
 
     STRW-TOKEN
@@ -117,7 +117,7 @@ Obtener datos de un burrito:
 
 Crear una partida Jugador vs CPU:
 
-    near call $ID create_battle_player_cpu '{"burrito_id":"'0'", "accesorio1_id":"'0'", "accesorio2_id":"'1'", "accesorio3_id":"'2'"}' --accountId yairnava.testnet
+    near call $ID create_battle_player_cpu '{"burrito_id":"'0'", "accesorio1_id":"'0'", "accesorio2_id":"'1'", "accesorio3_id":"'2'"}' --accountId yairnava.testnet --gas=300000000000000
 
 Obtener cantidad de batallas finalizadas:
 

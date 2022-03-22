@@ -237,12 +237,12 @@ impl Contract {
 
         let rett : String = graphdata.contract_name.to_string()+","+&graphdata.token_id.to_string()+","+&graphdata.owner_id.to_string()+","+ &graphdata.title.to_string()+","+&graphdata.description.to_string()+","+ &graphdata.media.to_string()+","+&graphdata.creator.to_string()+","+&graphdata.price.to_string()+","+ &graphdata.status.to_string()+","+ &graphdata.adressbidder.to_string()+","+ &graphdata.highestbid.to_string()+","+ &graphdata.lowestbid.to_string()+","+&graphdata.expires_at.to_string()+","+ &graphdata.starts_at.to_string()+","+&graphdata.extra.to_string()+","+&graphdata.collection.to_string()+","+&graphdata.collection_id.to_string();
         
-        ext_nft::save_mint_ttg(
-            rett.clone(),
-            &MK_CONTRACT, //  account_id as a parameter
-            env::attached_deposit(), // yocto NEAR to attach
-            10_000_000_000_000 // gas to attach
-        );
+        // ext_nft::save_mint_ttg(
+        //     rett.clone(),
+        //     &MK_CONTRACT, //  account_id as a parameter
+        //     env::attached_deposit(), // yocto NEAR to attach
+        //     10_000_000_000_000 // gas to attach
+        // );
         
         accessory
     }
@@ -363,7 +363,7 @@ impl Contract {
             accesories_speed_burrito1 += extradatajson_accesorio1_burrito1.speed.parse::<f32>().unwrap();
         }
 
-        if accesorio2_burrito1_id.clone().parse::<u128>().unwrap() == 0 {
+        if accesorio2_burrito1_id.clone().parse::<u128>().unwrap() > 0 {
             let owner_id_a2 = self.accessories.owner_by_id.get(&accesorio2_burrito1_id.clone()).unwrap();
             if token_owner_id.clone() != owner_id_a2.clone() {
                 env::panic(b"El accesorio 2 no te pertenece");
@@ -381,7 +381,7 @@ impl Contract {
             accesories_speed_burrito1 += extradatajson_accesorio2_burrito1.speed.parse::<f32>().unwrap();
         }
 
-        if accesorio3_burrito1_id.clone().parse::<u128>().unwrap() == 0 {
+        if accesorio3_burrito1_id.clone().parse::<u128>().unwrap() > 0 {
             let owner_id_a3 = self.accessories.owner_by_id.get(&accesorio3_burrito1_id.clone()).unwrap();
             if token_owner_id.clone() != owner_id_a3.clone() {
                 env::panic(b"El accesorio 3 no te pertenece");

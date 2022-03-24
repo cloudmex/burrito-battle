@@ -17,7 +17,7 @@ use std::convert::TryInto;
 use near_sdk::env::BLOCKCHAIN_INTERFACE;
 
 // Contrato de items
-const BURRITO_CONTRACT: &str = "dev-1648020275427-95711028565552";
+const BURRITO_CONTRACT: &str = "dev-1648154149121-91041924696178";
 const ITEMS_CONTRACT: &str = "dev-1647986467816-61735125036881";
 const MK_CONTRACT: &str = "dev-1646163482135-99250841517221";
 const STRWTOKEN_CONTRACT: &str = "dev-1645837411235-48460272126519";
@@ -779,6 +779,13 @@ impl Contract {
         let newextradata_burrito = str::replace(&metadata_burrito.extra.as_ref().unwrap().to_string(), "'", "\"");
         let extradatajson_burrito: ExtraBurrito = serde_json::from_str(&newextradata_burrito).unwrap();
         let win_burrito = extradatajson_burrito.win.clone().parse::<u8>().unwrap();
+        let level_burrito = extradatajson_burrito.level.clone().parse::<u8>().unwrap();
+
+        if level_burrito == 40 {
+            env::panic(
+                format!("El burrito ya no puede evolucionar, el nivel máximo es el 40").as_bytes(),
+            );
+        }
 
         if win_burrito < 10 {
             env::panic(
@@ -1161,6 +1168,33 @@ impl Contract {
                     level : extradatajson_burrito.level.clone()
                 };
         
+                // Generar nivel del burrito cpu --> nivel del burrito como minimo + 5 maximo
+                let rand_level = *env::random_seed().get(4).unwrap();
+                let mut level_cpu: u8 = 0;
+
+                if rand_level > 0 &&  rand_level <= 70 {
+                    level_cpu = extradatajson_burrito.level.clone().parse::<u8>().unwrap();
+                }
+                if rand_level >= 71 &&  rand_level <= 130 {
+                    level_cpu = extradatajson_burrito.level.clone().parse::<u8>().unwrap() + 1;
+                }
+                if rand_level >= 131 &&  rand_level <= 180 {
+                    level_cpu = extradatajson_burrito.level.clone().parse::<u8>().unwrap() + 2;
+                }
+                if rand_level >= 181 &&  rand_level <= 220 {
+                    level_cpu = extradatajson_burrito.level.clone().parse::<u8>().unwrap() + 3;
+                }
+                if rand_level >= 221 &&  rand_level <= 250 {
+                    level_cpu = extradatajson_burrito.level.clone().parse::<u8>().unwrap() + 4;
+                }
+                if rand_level >= 251 &&  rand_level < 255 {
+                    level_cpu = extradatajson_burrito.level.clone().parse::<u8>().unwrap() + 5;
+                }
+
+                if level_cpu > 40 {
+                    level_cpu = 40;
+                }
+
                 // Generar burrito aleatorio
                 let mut burrito_cpu = Burrito {
                     owner_id : "BB CPU".to_string(),
@@ -1173,7 +1207,7 @@ impl Contract {
                     speed : "5".to_string(),
                     win : "0".to_string(),
                     global_win : "0".to_string(),
-                    level : extradatajson_burrito.level.clone().to_string()
+                    level : level_cpu.clone().to_string()
                 };
         
                 // Crear estadisticas aleatorias para burrito cpu
@@ -1187,66 +1221,137 @@ impl Contract {
                 let mut defense: u8 = 0;
                 let mut speed: u8 = 0;
                 let mut burrito_type: String = "Fuego".to_string();
-                let burrito_cpu_level = extradatajson_burrito.level.clone().parse::<u8>().unwrap();
+                let burrito_cpu_level = burrito_cpu.level.clone().parse::<u8>().unwrap();
         
                 // Obtener ataque aleatorio
                 if rand_attack > 0 &&  rand_attack <= 70 {
-                    attack = 5+(burrito_cpu_level.clone()*2);
+                    if rand_attack % 2 == 1 {
+                        attack = 5+(burrito_cpu_level.clone());
+                    } else {
+                        attack = 5+(burrito_cpu_level.clone()*2);
+                    }    
                 }
                 if rand_attack >= 71 &&  rand_attack <= 130 {
-                    attack = 6+(burrito_cpu_level.clone()*2);
+                    if rand_attack % 2 == 1 {
+                        attack = 6+(burrito_cpu_level.clone());
+                    } else {
+                        attack = 6+(burrito_cpu_level.clone()*2);
+                    }                 
                 }
                 if rand_attack >= 131 &&  rand_attack <= 180 {
-                    attack = 7+(burrito_cpu_level.clone()*2);
+                    if rand_attack % 2 == 1 {
+                        attack = 7+(burrito_cpu_level.clone());
+                    } else {
+                        attack = 7+(burrito_cpu_level.clone()*2);
+                    } 
                 }
                 if rand_attack >= 181 &&  rand_attack <= 220 {
-                    attack = 8+(burrito_cpu_level.clone()*2);
+                    if rand_attack % 2 == 1 {
+                        attack = 8+(burrito_cpu_level.clone());
+                    } else {
+                        attack = 8+(burrito_cpu_level.clone()*2);
+                    } 
                 }
                 if rand_attack >= 221 &&  rand_attack <= 250 {
-                    attack = 9+(burrito_cpu_level.clone()*2);
+                    if rand_attack % 2 == 1 {
+                        attack = 9+(burrito_cpu_level.clone());
+                    } else {
+                        attack = 9+(burrito_cpu_level.clone()*2);
+                    } 
                 }
                 if rand_attack >= 251 &&  rand_attack < 255 {
-                    attack = 10+(burrito_cpu_level.clone()*2);
+                    if rand_attack % 2 == 1 {
+                        attack = 10+(burrito_cpu_level.clone());
+                    } else {
+                        attack = 10+(burrito_cpu_level.clone()*2);
+                    } 
                 }
         
                 // Obtener defensa aleatoria
                 if rand_defense > 0 &&  rand_defense <= 70 {
-                    defense = 5+(burrito_cpu_level.clone()*2);
+                    if rand_defense % 2 == 1 {
+                        defense = 5+(burrito_cpu_level.clone());
+                    } else {
+                        defense = 5+(burrito_cpu_level.clone()*2);
+                    }
                 }
                 if rand_defense >= 71 &&  rand_defense <= 130 {
-                    defense = 6+(burrito_cpu_level.clone()*2);
-                }
+                    if rand_defense % 2 == 1 {
+                        defense = 6+(burrito_cpu_level.clone());
+                    } else {
+                        defense = 6+(burrito_cpu_level.clone()*2);
+                    }                }
                 if rand_defense >= 131 &&  rand_defense <= 180 {
-                    defense = 7+(burrito_cpu_level.clone()*2);
+                    if rand_defense % 2 == 1 {
+                        defense = 7+(burrito_cpu_level.clone());
+                    } else {
+                        defense = 7+(burrito_cpu_level.clone()*2);
+                    }                
                 }
                 if rand_defense >= 181 &&  rand_defense <= 220 {
-                    defense = 8+(burrito_cpu_level.clone()*2);
+                    if rand_defense % 2 == 1 {
+                        defense = 8+(burrito_cpu_level.clone());
+                    } else {
+                        defense = 8+(burrito_cpu_level.clone()*2);
+                    }                
                 }
                 if rand_defense >= 221 &&  rand_defense <= 250 {
-                    defense = 9+(burrito_cpu_level.clone()*2);
+                    if rand_defense % 2 == 1 {
+                        defense = 9+(burrito_cpu_level.clone());
+                    } else {
+                        defense = 9+(burrito_cpu_level.clone()*2);
+                    }                
                 }
                 if rand_defense >= 251 &&  rand_defense < 255 {
-                    defense = 10+(burrito_cpu_level.clone()*2);
+                    if rand_defense % 2 == 1 {
+                        defense = 10+(burrito_cpu_level.clone());
+                    } else {
+                        defense = 10+(burrito_cpu_level.clone()*2);
+                    }                
                 }
         
                 // Obtener velociad aleatoria
                 if rand_speed > 0 &&  rand_speed <= 70 {
-                    speed = 5+(burrito_cpu_level.clone()*2);
+                    if rand_speed % 2 == 1 {
+                        speed = 5+(burrito_cpu_level.clone());
+                    } else {
+                        speed = 5+(burrito_cpu_level.clone()*2);
+                    } 
                 }
                 if rand_speed >= 71 &&  rand_speed <= 130 {
-                    speed = 6+(burrito_cpu_level.clone()*2);
+                    if rand_speed % 2 == 1 {
+                        speed = 6+(burrito_cpu_level.clone());
+                    } else {
+                        speed = 6+(burrito_cpu_level.clone()*2);
+                    } 
                 }
                 if rand_speed >= 131 &&  rand_speed <= 180 {
-                    speed = 7+(burrito_cpu_level.clone()*2);
+                    if rand_speed % 2 == 1 {
+                        speed = 7+(burrito_cpu_level.clone());
+                    } else {
+                        speed = 7+(burrito_cpu_level.clone()*2);
+                    } 
                 }
                 if rand_speed >= 181 &&  rand_speed <= 220 {
-                    speed = 8+(burrito_cpu_level.clone()*2);
+                    if rand_speed % 2 == 1 {
+                        speed = 8+(burrito_cpu_level.clone());
+                    } else {
+                        speed = 8+(burrito_cpu_level.clone()*2);
+                    } 
                 }
                 if rand_speed >= 221 &&  rand_speed <= 250 {
-                    speed = 9+(burrito_cpu_level.clone()*2);
+                    if rand_speed % 2 == 1 {
+                        speed = 9+(burrito_cpu_level.clone());
+                    } else {
+                        speed = 9+(burrito_cpu_level.clone()*2);
+                    } 
                 }
                 if rand_speed >= 251 &&  rand_speed < 255 {
-                    speed = 10+(burrito_cpu_level.clone()*2);
+                    if rand_speed % 2 == 1 {
+                        speed = 10+(burrito_cpu_level.clone());
+                    } else {
+                        speed = 10+(burrito_cpu_level.clone()*2);
+                    } 
                 }
         
                 // Obtener tipo
@@ -1275,12 +1380,12 @@ impl Contract {
                 // Determinar burrito mas veloz
                 let mut burrito_first_atack = "";
         
-                if burrito_cpu.speed.parse::<u8>().unwrap() > burrito.speed.parse::<u8>().unwrap() {
+                if burrito_cpu.speed.parse::<u8>().unwrap() > (burrito.speed.parse::<u8>().unwrap() + accessories_for_battle.final_speed_b1.clone().parse::<u8>().unwrap()) {
                     burrito_first_atack = "CPU";
                 } else {
                     burrito_first_atack = "Player";
                 }
-        
+                
                 let info = BattleCPU {
                     status : "1".to_string(),
                     payer_id : token_owner_id.clone().to_string(),
@@ -1298,17 +1403,17 @@ impl Contract {
                     strong_attack_cpu : "3".to_string(),
                     shields_cpu : "3".to_string(),
                     health_cpu : (burrito_cpu.attack.parse::<u8>().unwrap()+burrito_cpu.defense.parse::<u8>().unwrap()+burrito_cpu.speed.parse::<u8>().unwrap()).to_string(),
-                    burrito_cpu_level : burrito.level.to_string(),
+                    burrito_cpu_level : level_cpu.clone().to_string(),
                     burrito_cpu_type : burrito_cpu.burrito_type.to_string(),
                     burrito_cpu_attack : burrito_cpu.attack.to_string(),
                     burrito_cpu_defense : burrito_cpu.defense.to_string(),
                     burrito_cpu_speed : burrito_cpu.speed.to_string()
                 };
         
-                self.battle_room_cpu.insert(token_owner_id.clone().to_string(),info);
+                self.battle_room_cpu.insert(token_owner_id.clone().to_string(),info.clone());
                 self.n_battle_rooms_cpu += 1;
         
-                serde_json::to_string(&accessories_for_battle).unwrap()
+                serde_json::to_string(&info).unwrap()
 
             }
         }
@@ -1430,7 +1535,7 @@ impl Contract {
         let battle_room = BattleCPU {
             status : info.status.to_string(),
             payer_id : info.payer_id.to_string(),
-            burrito_id : info.burrito_id.to_string(),
+            burrito_id : info.burrito_id.clone().to_string(),
             accesories_attack_b1 : info.accesories_attack_b1.to_string(),
             accesories_defense_b1 : info.accesories_defense_b1.to_string(),
             accesories_speed_b1 : info.accesories_speed_b1.to_string(),
@@ -1666,7 +1771,28 @@ impl Contract {
                 self.battle_room_cpu.remove(&old_battle_room.payer_id);
                 self.n_battle_rooms_cpu -= 1;
                 log!("Batalla Finalizada, Ganó Jugador");
+                
+                // Incrementar victorias del burrito si son < 10
+                let mut new_win_burrito1 = extradatajson_burrito.win.parse::<u8>().unwrap();
+                let new_global_win_burrito1 = extradatajson_burrito.global_win.parse::<u8>().unwrap()+1;
 
+                if new_win_burrito1 < 10 {
+                    new_win_burrito1 += 1;
+                }
+
+                extradatajson_burrito.win = new_win_burrito1.to_string();
+                extradatajson_burrito.global_win = new_global_win_burrito1.to_string();
+
+                let mut extra_string_burrito1 = serde_json::to_string(&extradatajson_burrito).unwrap();
+                extra_string_burrito1 = str::replace(&extra_string_burrito1, "\"", "'");
+                metadata_burrito.extra = Some(extra_string_burrito1.clone());
+    
+                self.burritos
+                    .token_metadata_by_id
+                    .as_mut()
+                    .and_then(|by_id| by_id.insert(&old_battle_room.burrito_id.clone(), &metadata_burrito));
+
+                // Minar recompensa STRW Tokens
                 log!("Nivel burrito cpu {}",burrito_defender.level.clone().to_string().parse::<f32>().unwrap());
                 let mut tokens_mint : f32 = 0.0;
 

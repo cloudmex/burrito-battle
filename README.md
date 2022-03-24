@@ -65,7 +65,7 @@ Desplegar y Migrar Contratos:
 Asignamos el identificador de nuestro contrato desplegado a una constante (Sustituir el ID por el del contrato desplegado):
 
     Burrito
-    ID=dev-1647985436450-35354495406457
+    ID=dev-1648154149121-91041924696178
     echo $ID
 
     Accesorios

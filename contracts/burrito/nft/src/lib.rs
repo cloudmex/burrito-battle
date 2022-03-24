@@ -17,7 +17,7 @@ use std::convert::TryInto;
 use near_sdk::env::BLOCKCHAIN_INTERFACE;
 
 // Contrato de items
-const BURRITO_CONTRACT: &str = "dev-1647985436450-35354495406457";
+const BURRITO_CONTRACT: &str = "dev-1648020275427-95711028565552";
 const ITEMS_CONTRACT: &str = "dev-1647986467816-61735125036881";
 const MK_CONTRACT: &str = "dev-1646163482135-99250841517221";
 const STRWTOKEN_CONTRACT: &str = "dev-1645837411235-48460272126519";
@@ -1666,6 +1666,45 @@ impl Contract {
                 self.battle_room_cpu.remove(&old_battle_room.payer_id);
                 self.n_battle_rooms_cpu -= 1;
                 log!("Batalla Finalizada, Ganó Jugador");
+
+                log!("Nivel burrito cpu {}",burrito_defender.level.clone().to_string().parse::<f32>().unwrap());
+                let mut tokens_mint : f32 = 0.0;
+
+                if burrito_attacker.level.clone().parse::<u8>().unwrap() < 10 {
+                    tokens_mint = 5.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                }
+                if burrito_attacker.level.clone().parse::<u8>().unwrap() >= 10 && burrito_attacker.level.clone().parse::<u8>().unwrap() <= 14 {
+                    tokens_mint = 10.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                }
+                if burrito_attacker.level.clone().parse::<u8>().unwrap() >= 15 && burrito_attacker.level.clone().parse::<u8>().unwrap() <= 19 {
+                    tokens_mint = 15.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                }
+                if burrito_attacker.level.clone().parse::<u8>().unwrap() >= 20 && burrito_attacker.level.clone().parse::<u8>().unwrap() <= 24 {
+                    tokens_mint = 25.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                }
+                if burrito_attacker.level.clone().parse::<u8>().unwrap() >= 25 && burrito_attacker.level.clone().parse::<u8>().unwrap() <= 29 {
+                    tokens_mint = 40.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                }
+                if burrito_attacker.level.clone().parse::<u8>().unwrap() >= 30 && burrito_attacker.level.clone().parse::<u8>().unwrap() <= 34 {
+                    tokens_mint = 50.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                }
+                if burrito_attacker.level.clone().parse::<u8>().unwrap() >= 35 && burrito_attacker.level.clone().parse::<u8>().unwrap() <= 39 {
+                    tokens_mint = 55.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                }
+                if burrito_attacker.level.clone().parse::<u8>().unwrap() == 40 {
+                    tokens_mint = 60.0;
+                }
+
+                log!("Tokens a minar {}",tokens_mint*1000000000000000000000000.0);
+                let tokens_to_mint = tokens_mint*1000000000000000000000000.0;
+                ext_nft::reward_player(
+                    old_battle_room.payer_id.clone().to_string(),
+                    tokens_to_mint.to_string(),
+                    &STRWTOKEN_CONTRACT,
+                    0000000000000000000000001,
+                    100_000_000_000_000
+                );
+
                 return str::replace(&serde_json::to_string(&old_battle_room.clone()).unwrap(), "\"", "'");
             } else {
                 old_battle_room.health_cpu = new_health_burrito_defender.to_string();

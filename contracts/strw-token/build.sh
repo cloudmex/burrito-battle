@@ -1,17 +1,17 @@
 #!/bin/bash
 set -e
+cd "`dirname $0`"
+source flags.sh
+cargo build --all --target wasm32-unknown-unknown --release
 
-RUSTFLAGS='-C link-arg=-s' cargo +stable build --all --target wasm32-unknown-unknown --release
-rsync -u target/wasm32-unknown-unknown/release/strw_token.wasm res/
+if [ ! -d res/ ];
+then
+mkdir res
+fi
 
-set -ex
-NETWORK=testnet
-OWNER=strw-token.$NETWORK
-MASTER_ACC=strw-token.$NETWORK
-CONTRACT_ACC=$MASTER_ACC
-export NODE_ENV=$NETWORK
+cp target/wasm32-unknown-unknown/release/strw_token.wasm ./res/
 
-echo "¿Quieres desplegar el contrato?"
+echo "¿Quieres desplegar el contrato de strw tokens?"
 select yn in "Si" "No"; do
     case $yn in
         Si ) near dev-deploy --wasmFile res/strw_token.wasm; break;;

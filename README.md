@@ -4,23 +4,17 @@
 
 Burrito Battle es un videojuego hecho en Rust y basado en el Protocolo de NEAR, el cual permite adquirir burritos (NFTs) y equiparlos con diferentes accesorios intercambiables que les permite aumentar sus habilidades en batalla.
 
-Elige hasta 3 de tus mejores burritos, equípalos con hasta 3 accesorios y enfréntalos contra los de tus rivales.
-
-## Diapositivas de proyecto 🖥️
-
-    https://docs.google.com/presentation/d/1TZpxOEumc4svX0-PUf6RAsr-8uzvaWEWvXAaXoHIK9M/edit#slide=id.p
+Elige uno de tus burritos, equípalo con hasta 3 accesorios y enfréntalo contra los de tus rivales.
 
 ### Dinámica de batalla
 
-Las batallas se conforman de máximo 5 rondas o peleas, cada jugador selecciona hasta 3 de sus burritos para la batalla, en cada ronda o pelea el jugador selecciona 1 burrito y hasta 3 accesorios con los cuales combatir al burrito rival, cada burrito cuenta con una cantidad de vidas, y solo podrán ser usados en una pelea aquellos burritos que tengan por lo menos 1 vida.
+Las batallas consisten en que cada jugador selecciona uno de sus burritos y cada uno selecciona hasta 3 accesorios con los cuales combatir al burrito rival, cada burrito cuenta con una cantidad de vidas, y solo podrán ser usados en una pelea aquellos burritos que tengan por lo menos 1 vida.
 
 ### Determinar ganador de una batalla
 
-Los combates serán por turnos, para cada turno se define que burrito será el primero en atacar tomando en cuenta su estadística de velocidad, el accesorio equipado y un número generado aleatoriamente en un rango de 0.1 y 1.0, se toma con la formula (velocidad + accesorios) *número aleatorio. El burrito con el resultado mayor será el primero en atacar.
+Los combates serán por turnos, para determinar quien será el jugador en atacar primero se tomará en cuenta su estadística de velocidad, el accesorio equipado y un número generado aleatoriamente en un rango de 0.1 y 1.0, se toma con la formula (velocidad + accesorios) * número aleatorio. El burrito con el resultado mayor será el primero en atacar.
 
-Una vez definida la prioridad se comienza con los ataques, el burrito con la prioridad de ataque hace el primer movimiento tomando en cuenta su estadística de ataque, su accesorio, su tipo y un número generado aleatoriamente, la fórmula es (ataque+accesorios)*número aleatorio, si el burrito atacante tiene ventaja por tipo a este resultado se le suma un 25% de su ataque final, este resultado son los puntos con que se realizara el ataque restándolos a los puntos de defensa del burrito que está siendo atacado, a continuación se evalúa si la defensa del burrito atacado es menor de 0, en este caso el ganador de la pelea es el burrito atacante, en caso contrario el burrito atacado ahora pasa a ser el atacante tomando en cuenta todo lo antes mencionado, los burritos solo pueden atacar 1 vez por turno, la pelea puede tener n turnos hasta que alguno de los burritos tenga su defensa menor que 0, cuando esto pasa el burrito atacante gana la pelea además de incrementar su contador de victorias en 1 (Este contador será utilizado para incrementar el nivel y estadísticas bases del burrito en algún momento) y el burrito perdedor pierde una vida.
-
-La batalla continua con la siguiente pelea donde se repite todo el proceso anterior, el ganador de la batalla es el que logre ganar 3 de 5 peleas.
+Una vez definida la prioridad se comienza con los ataques, el burrito con la prioridad de ataque hace el primer movimiento tomando en cuenta su estadística de ataque, su accesorio, su tipo y un número generado aleatoriamente, la fórmula es (ataque+accesorios)*número aleatorio, si el burrito atacante tiene ventaja por tipo a este resultado se le suma un 25% de su ataque final, este resultado son los puntos con que se realizara el ataque restándolos a los puntos de salud del burrito rival, los cuales serán el total de la suma de todas sus estadísticas base del burrito que está siendo atacado, a continuación se evalúa si los puntos de salud del burrito atacado es menor de 0, en este caso el ganador de la pelea es el burrito atacante, en caso contrario el burrito atacado ahora pasa a ser el atacante tomando en cuenta todo lo antes mencionado, los burritos solo pueden atacar 1 vez por turno, teniendo la capacidad de realizar un ataque normal y un ataque pesado (máximo 3 por batalla) y el burrito defensor tendrá la capacidad de utilizar un escudo para defenderse (máximo 3 escudos por batalla) la pelea puede tener n turnos hasta que alguno de los burritos tenga sus puntos de salud sean menor que 0, cuando esto pasa el burrito atacante gana la pelea además de incrementar su contador de victorias en 1 (Este contador será utilizado para incrementar el nivel y estadísticas bases del burrito en algún momento) y el burrito perdedor pierde una vida.
 
 ### Típos de burritos
 | VS | Fuego🔥| Agua💧 | Planta🌱 | Eléctrico⚡ | Volador💨 |
@@ -52,20 +46,16 @@ Configure su near-cli para autorizar su cuenta de prueba creada recientemente:
     
 ## Despliegue 📦
 
-Ejecute el siguiente comando dentro de cada carpeta (Burrito, Items y STRW-Tokens) el cual generará nuestro archivo WASM en el directorio correspondiente (contracts/burrito/ , contracts/items/ y contracts/strw-token/ ). Además de que la consola preguntará si deseamos desplegar el contrato.
+Ejecute el siguiente comando dentro de cada carpeta (Burrito, Items y STRW-Tokens) el cual generará nuestro archivo WASM en el directorio correspondiente (contracts/burrito/ , contracts/items/ y contracts/strw-token/ ). Además de que la consola preguntará si deseamos desplegar el contrato correspondiente.
     
     ./build.sh
-
-Desplegar y Migrar Contratos:
-
-    near deploy --wasmFile wasmFile.wasm --initFunction "migrate" --initArgs "{}" --accountId $ID
 
 ## Métodos de los contratos 🚀
 
 Asignamos el identificador de nuestro contrato desplegado a una constante (Sustituir el ID por el del contrato desplegado):
 
     Burrito
-    ID=dev-1648154149121-91041924696178
+    ID=dev-1648617264516-11344063287174
     echo $ID
 
     Accesorios
@@ -73,13 +63,14 @@ Asignamos el identificador de nuestro contrato desplegado a una constante (Susti
     echo $ID
 
     STRW-TOKEN
-    ID=dev-1645837411235-48460272126519
+    ID=dev-1648670250060-81886958025263
     echo $ID
 
 Los 3 contratos deben inicializarse antes de su uso, por lo que lo haremos con los siguientes comandos dependiendo del contrato:
 
     Burrito
     near call $ID init_contract '{"owner_id":"'$ID'"}' --accountId $ID
+    near view $ID nft_metadata
 
     Accesorios
     near call $ID init_contract '{"owner_id": "'$ID'"}' --accountId $ID
@@ -95,11 +86,11 @@ Obtener cantidad de burritos creados:
     
 Crear nuevo burrito:
 
-    near call $ID mint_token '{"token_owner_id": "'yairnava.testnet'", "colecction": "Burritos BB", "token_metadata": { "title": "Burrito Name", "description": "This is a burrito", "media": "", "extra":""}}' --accountId yairnava.testnet --deposit 5 --gas=300000000000000
+near call $ID mint_token '{"token_owner_id": "'yairnava.testnet'", "token_metadata": { "title": "Burrito 2", "description": "This is a burrito", "media": "https://s3-us-west-2.amazonaws.com/melingoimages/Images/28098.jpg", "extra":""}}' --accountId yairnava.testnet --deposit 5 --gas=300000000000000
     
 Modificar burrito:
 
-    near call $ID update_burrito '{"burrito_id": "0", "extra":"{'"'burrito_type'":"'Fuego'","'hp'":"'5'","'attack'":"'9'","'defense'":"'5'","'speed'":"'7'","'level'":"'1'","'win'":"'10'","'global_win'":"'10'"}'"}' --accountId yairnava.testnet 
+    near call $ID update_burrito '{"burrito_id": "0", "extra":"{'"'burrito_type'":"'Fuego'","'hp'":"'3'","'attack'":"'7'","'defense'":"'7'","'speed'":"'7'","'level'":"'1'","'win'":"'10'","'global_win'":"'10'"}'"}' --accountId yairnava.testnet 
 
 Evolucionar burrito:
 
@@ -113,8 +104,12 @@ Obtener datos de un burrito:
 
     near view $ID get_burrito '{"burrito_id": "0"}'
 
-    near view $ID nft_token '{"token_id":"0"}' --accountId yairnava.testnet
+    near view $ID nft_token '{"token_id": "0"}'
 
+    near call $ID nft_tokens '{"from_index": "0", "limit": 3}' --accountId yairnava.testnet
+
+
+//////////////////////////////// FALTAN DE IMPLEMENTAR////////////////////////////////
 Crear una partida Jugador vs CPU:
 
     near call $ID create_battle_player_cpu '{"burrito_id":"'0'", "accesorio1_id":"'0'", "accesorio2_id":"'1'", "accesorio3_id":"'2'"}' --accountId yairnava.testnet --gas=300000000000000
@@ -148,6 +143,7 @@ Combatir Ronda Player vs CPU [type_move => (1 = Ataque Debil, 2 = Ataque Fuerte,
     near call $ID battle_player_cpu '{"type_move":"'3'"}' --accountId yairnava.testnet --gas=300000000000000
     
     near call $ID battle_player_cpu '{"type_move":"'4'"}' --accountId yairnava.testnet --gas=300000000000000
+//////////////////////////////// FALTAN DE IMPLEMENTAR ////////////////////////////////
 
 ### Items
 
@@ -214,4 +210,6 @@ Minar tokens y agregarlos al wallet
 ## Construido con 🛠️
 
 * [RUST](https://www.rust-lang.org/) - Lenguaje de programación usado para contrato inteligente.
+* [Rust Toolchain](https://docs.near.org/docs/develop/contracts/rust/intro#installing-the-rust-toolchain)
 * [NEAR CLI](https://docs.near.org/docs/tools/near-cli) - Herramienta de interfaz de línea de comandos para interactuar con cuentas y contratos inteligentes en NEAR.
+* [yarn](https://classic.yarnpkg.com/en/docs/install#mac-stable)

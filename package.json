@@ -1,0 +1,10 @@
+{
+    "name": "burrito-battle",
+    "version": "1.0.0",
+    "description": "Burrito Battle smart contracts",
+    "author": "CloudMex Analytics",
+    "license": "ISC",
+    "scripts": {
+        "build": "cd contracts/burrito && bash build.sh && cd .. && cd items && bash build.sh && cd .. && cd strw-token && bash build.sh && cd .. && cd .."
+    }
+}

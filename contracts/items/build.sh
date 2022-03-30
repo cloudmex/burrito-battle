@@ -5,7 +5,7 @@ source flags.sh
 cargo build --all --target wasm32-unknown-unknown --release
 cp target/wasm32-unknown-unknown/release/*.wasm ./res/
 
-echo "¿Quieres desplegar el contrato?"
+echo "¿Quieres desplegar el contrato de items?"
 select yn in "Si" "No"; do
     case $yn in
         Si ) near dev-deploy --wasmFile res/non_fungible_token.wasm; break;;

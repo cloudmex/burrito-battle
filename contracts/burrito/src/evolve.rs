@@ -90,7 +90,8 @@ impl Contract {
                        speed : extradatajson_burrito.speed.clone(),
                        win : extradatajson_burrito.win.clone(),
                        global_win : extradatajson_burrito.global_win.clone(),
-                       level : extradatajson_burrito.level.clone()
+                       level : extradatajson_burrito.level.clone(),
+                        media : metadata_burrito.media.as_ref().unwrap().to_string()
                    };
                    
                    let win_burrito = 0;                

@@ -160,7 +160,8 @@ impl Contract {
                     speed : extradatajson_burrito.speed.clone(),
                     win : extradatajson_burrito.win.clone(),
                     global_win : extradatajson_burrito.global_win.clone(),
-                    level : extradatajson_burrito.level.clone()
+                    level : extradatajson_burrito.level.clone(),
+                    media : metadata_burrito.media.as_ref().unwrap().to_string()
                 };
         
                 // Generar nivel del burrito cpu --> nivel del burrito como minimo + 5 maximo
@@ -202,7 +203,8 @@ impl Contract {
                     speed : "5".to_string(),
                     win : "0".to_string(),
                     global_win : "0".to_string(),
-                    level : level_cpu.clone().to_string()
+                    level : level_cpu.clone().to_string(),
+                    media : "".to_string()
                 };
         
                 // Crear estadisticas aleatorias para burrito cpu
@@ -476,7 +478,8 @@ impl Contract {
             speed : extradatajson_burrito.speed.clone(),
             win : extradatajson_burrito.win.clone(),
             global_win : extradatajson_burrito.global_win.clone(),
-            level : extradatajson_burrito.level.clone()
+            level : extradatajson_burrito.level.clone(),
+            media : metadata_burrito.media.as_ref().unwrap().to_string()
         };
 
         let new_hp_burrito = burrito.hp.parse::<u8>().unwrap()-1;
@@ -506,4 +509,337 @@ impl Contract {
         "Finalizó batalla".to_string()
     }
 
+    // Método combate player vs cpu (type_move 1 = Ataque Debil, 2 = Ataque Fuerte, 3 = No Defenderse 4 = Defenderse)
+    pub fn battle_player_cpu(&mut self, type_move: String) -> String {
+        let token_owner_id = env::signer_account_id();
+
+        let br = self.battle_room_cpu.get(&token_owner_id.to_string());
+        
+        if br.is_none() {
+            env::panic_str("No tienes una batalla activa");
+        }
+
+        let info = br.unwrap();
+
+        let battle_room = BattleCPU {
+            status : info.status.to_string(),
+            payer_id : info.payer_id.to_string(),
+            burrito_id : info.burrito_id.clone().to_string(),
+            accesories_attack_b1 : info.accesories_attack_b1.to_string(),
+            accesories_defense_b1 : info.accesories_defense_b1.to_string(),
+            accesories_speed_b1 : info.accesories_speed_b1.to_string(),
+            accesories_attack_b2 : info.accesories_attack_b2.to_string(),
+            accesories_defense_b2 : info.accesories_defense_b2.to_string(),
+            accesories_speed_b2 : info.accesories_speed_b2.to_string(),
+            turn : info.turn.to_string(),
+            strong_attack_player : info.strong_attack_player.to_string(),
+            shields_player : info.shields_player.to_string(),
+            health_player : info.health_player.to_string(),
+            strong_attack_cpu : info.strong_attack_cpu.to_string(),
+            shields_cpu : info.shields_cpu.to_string(),
+            health_cpu : info.health_cpu.to_string(),
+            burrito_cpu_level : info.burrito_cpu_level.to_string(),
+            burrito_cpu_type : info.burrito_cpu_type.to_string(),
+            burrito_cpu_attack : info.burrito_cpu_attack.to_string(),
+            burrito_cpu_defense : info.burrito_cpu_defense.to_string(),
+            burrito_cpu_speed : info.burrito_cpu_speed.to_string()
+        };
+
+
+        if (type_move == "1" || type_move == "2") && battle_room.turn == "CPU"{
+            env::panic_str("No puedes realizar un ataque, debes elegir si defenderte o no");
+        }
+
+        if (type_move == "3" || type_move == "4") && battle_room.turn == "Player"{
+            env::panic_str("No puedes defenderte, debes realizar un ataque");
+        }
+
+        if type_move == "2" && battle_room.strong_attack_player.parse::<u8>().unwrap() == 0 {
+            env::panic_str("No tienes mas ataques fuertes, debes realizar uno normal");
+        }
+
+        if type_move == "4" && battle_room.shields_player.parse::<u8>().unwrap() == 0 {
+            env::panic_str("No tienes mas escudos, no puedes defenderte");
+        }
+
+        let mut old_battle_room = battle_room;
+        let mut cpu_type_move = "1";
+
+        // Verificar si se utilizo un escudo para finalizar la ronda
+        if old_battle_room.turn == "Player"{
+            if type_move == "2"{
+                old_battle_room.strong_attack_player = (old_battle_room.strong_attack_player.parse::<u8>().unwrap()-1).to_string();
+                log!("Jugador utilizó ataque fuerte");
+            }
+            // Validar si el CPU aun tiene escudos y elegir aleatoriamente si utilizara uno o no
+            if old_battle_room.shields_cpu.parse::<u8>().unwrap() > 0 {
+                let use_shield: u8 = *env::random_seed().get(0).unwrap();
+                if use_shield % 2 == 1 {
+                    old_battle_room.shields_cpu = (old_battle_room.shields_cpu.parse::<u8>().unwrap()-1).to_string();
+                    old_battle_room.turn = "CPU".to_string();
+                    self.battle_room_cpu.remove(&old_battle_room.payer_id);
+                    self.battle_room_cpu.insert(old_battle_room.payer_id.to_string(),old_battle_room.clone());
+                    log!("CPU utilizó escudo");
+                    return str::replace(&serde_json::to_string(&old_battle_room.clone()).unwrap(), "\"", "'");
+                }
+            }
+        } else {
+            if old_battle_room.strong_attack_cpu.parse::<u8>().unwrap() > 0 {
+                let use_strong_attack: u8 = *env::random_seed().get(0).unwrap();
+                if old_battle_room.shields_player.parse::<u8>().unwrap() == 0 {
+                    old_battle_room.strong_attack_cpu = (old_battle_room.strong_attack_cpu.parse::<u8>().unwrap()-1).to_string();
+                    cpu_type_move = "2";
+                    log!("CPU utilizó ataque fuerte");
+                } else {
+                    if use_strong_attack % 2 == 1 {
+                        old_battle_room.strong_attack_cpu = (old_battle_room.strong_attack_cpu.parse::<u8>().unwrap()-1).to_string();
+                        cpu_type_move = "2";
+                        log!("CPU utilizó ataque fuerte");
+                    }
+                }
+            }
+            if type_move == "4"{
+                old_battle_room.shields_player = (old_battle_room.shields_player.parse::<u8>().unwrap()-1).to_string();
+                old_battle_room.turn = "Player".to_string();
+                self.battle_room_cpu.remove(&old_battle_room.payer_id);
+                self.battle_room_cpu.insert(old_battle_room.payer_id.to_string(),old_battle_room.clone());
+                log!("Jugador utilizó escudo");
+                return str::replace(&serde_json::to_string(&old_battle_room.clone()).unwrap(), "\"", "'");
+            }
+        }
+
+        // Obtener metadata burrito
+        let mut metadata_burrito = self.token_metadata_by_id.get(&old_battle_room.burrito_id.clone()).unwrap();
+        
+        // Extraer extras del token burrito 1
+        let newextradata_burrito = str::replace(&metadata_burrito.extra.as_ref().unwrap().to_string(), "'", "\"");
+
+        // Crear json burrito 1
+        let mut extradatajson_burrito: ExtraBurrito = serde_json::from_str(&newextradata_burrito).unwrap();
+
+        let token = self.tokens_by_id.get(&old_battle_room.burrito_id.clone());        
+        let owner_id_burrito = token.unwrap().owner_id.to_string();
+        
+        // Crear estructura burrito
+        let burrito = Burrito {
+            owner_id : owner_id_burrito.clone().to_string(),
+            name : metadata_burrito.title.as_ref().unwrap().to_string(),
+            description : metadata_burrito.description.as_ref().unwrap().to_string(),
+            burrito_type : extradatajson_burrito.burrito_type.clone(),
+            hp : extradatajson_burrito.hp.clone(),
+            attack : extradatajson_burrito.attack.clone(),
+            defense : extradatajson_burrito.defense.clone(),
+            speed : extradatajson_burrito.speed.clone(),
+            win : extradatajson_burrito.win.clone(),
+            global_win : extradatajson_burrito.global_win.clone(),
+            level : extradatajson_burrito.level.clone(),
+            media : metadata_burrito.media.as_ref().unwrap().to_string()
+        };
+
+        // Crear estructura burrito cpu
+        let burrito_cpu = Burrito {
+            owner_id : "BB CPU".to_string(),
+            name : "Burrito CPU".to_string(),
+            description : "This is a random burrito cpu".to_string(),
+            burrito_type : old_battle_room.burrito_cpu_type.to_string(),
+            hp : "5".to_string(),
+            attack : old_battle_room.burrito_cpu_attack.to_string(),
+            defense : old_battle_room.burrito_cpu_defense.to_string(),
+            speed : old_battle_room.burrito_cpu_speed.to_string(),
+            win : "0".to_string(),
+            global_win : "0".to_string(),
+            level : old_battle_room.burrito_cpu_level.to_string(),
+            media : "".to_string()
+        };
+
+        // Calculos de daño
+
+        let rand_attack: u8 = *env::random_seed().get(0).unwrap();
+
+        let mut attack_mult: f32 = 0.0;
+        let mut type_mult: f32 = 0.0;
+
+        let burrito_attacker;
+        let burrito_defender;
+        let mut old_health_burrito_defender: f32 = 0.0;
+
+        if old_battle_room.turn == "Player"{
+            burrito_attacker = burrito.clone();
+            burrito_defender = burrito_cpu;
+            old_health_burrito_defender = old_battle_room.health_cpu.parse::<f32>().unwrap();
+        } else {
+            burrito_attacker = burrito_cpu;
+            burrito_defender = burrito.clone();
+            old_health_burrito_defender = old_battle_room.health_player.parse::<f32>().unwrap();
+        }
+
+        if rand_attack < 10 {
+            attack_mult = rand_attack as f32 * 0.1;
+        }
+        if rand_attack >= 10 && rand_attack < 100 {
+            attack_mult = rand_attack as f32 * 0.01;
+        }
+        if rand_attack >= 100 && rand_attack < 255 {
+            attack_mult = rand_attack as f32 * 0.001;
+        }
+        if burrito_attacker.burrito_type == "Fuego" && burrito_defender.burrito_type == "Planta"{
+            type_mult = (burrito_attacker.attack.parse::<f32>().unwrap()*attack_mult)*0.25
+        }
+        if burrito_attacker.burrito_type == "Agua" && burrito_defender.burrito_type == "Fuego"{
+            type_mult = (burrito_attacker.attack.parse::<f32>().unwrap()*attack_mult)*0.25
+        }
+        if burrito_attacker.burrito_type == "Planta" && burrito_defender.burrito_type == "Eléctrico"{
+            type_mult = (burrito_attacker.attack.parse::<f32>().unwrap()*attack_mult)*0.25
+        }
+        if burrito_attacker.burrito_type == "Eléctrico" && burrito_defender.burrito_type == "Volador"{
+            type_mult = (burrito_attacker.attack.parse::<f32>().unwrap()*attack_mult)*0.25
+        }
+        if burrito_attacker.burrito_type == "Volador" && burrito_defender.burrito_type == "Agua"{
+            type_mult = (burrito_attacker.attack.parse::<f32>().unwrap()*attack_mult)*0.25
+        }
+
+        log!("Vida vieja burrito defensor: {}",old_health_burrito_defender);
+
+        let mut attack = 0.0;
+        if old_battle_room.turn == "Player"{
+            attack = (burrito_attacker.attack.parse::<f32>().unwrap()*attack_mult)+type_mult+old_battle_room.accesories_attack_b1.parse::<f32>().unwrap();
+        } else {
+            attack = (burrito_attacker.attack.parse::<f32>().unwrap()*attack_mult)+type_mult+old_battle_room.accesories_attack_b2.parse::<f32>().unwrap();
+        }
+        log!("Cantidad de daño a realizar: {}",attack);
+
+        // Verificar el tipo de ataque
+        if old_battle_room.turn == "Player"{
+            if type_move == "2"{
+                attack += attack*0.5;
+                log!("Cantidad de daño fuerte a realizar: {}",attack);
+            }
+        } else {
+            if cpu_type_move == "2"{
+                attack += attack*0.5;
+                log!("Cantidad de daño fuerte a realizar: {}",attack);
+            }
+        }
+        
+        let new_health_burrito_defender = old_health_burrito_defender - attack;
+        log!("Vida nueva burrito defensor: {}",new_health_burrito_defender);
+        
+        // Actualizar registro de sala de batalla
+        if old_battle_room.turn == "Player"{
+            if new_health_burrito_defender <= 0.0 {
+                // Guardar registro general de la batalla (Jugador, Burrito, Estatus)
+                let info = BattlesHistory {
+                    payer1_id : old_battle_room.payer_id.to_string(),
+                    payer2_id : "CPU".to_string(),
+                    winner : old_battle_room.payer_id.to_string(),
+                    status : "Battle".to_string()
+                };
+                self.battle_history.insert(old_battle_room.payer_id.to_string()+&"-".to_string()+ &self.n_battles.to_string(),info);
+                self.n_battles += 1;
+                // Eliminar sala activa
+                self.battle_room_cpu.remove(&old_battle_room.payer_id);
+                self.n_battle_rooms_cpu -= 1;
+                log!("Batalla Finalizada, Ganó Jugador");
+                
+                // Incrementar victorias del burrito si son < 10
+                let mut new_win_burrito1 = extradatajson_burrito.win.parse::<u8>().unwrap();
+                let new_global_win_burrito1 = extradatajson_burrito.global_win.parse::<u8>().unwrap()+1;
+
+                if new_win_burrito1 < 10 {
+                    new_win_burrito1 += 1;
+                }
+
+                extradatajson_burrito.win = new_win_burrito1.to_string();
+                extradatajson_burrito.global_win = new_global_win_burrito1.to_string();
+
+                let mut extra_string_burrito1 = serde_json::to_string(&extradatajson_burrito).unwrap();
+                extra_string_burrito1 = str::replace(&extra_string_burrito1, "\"", "'");
+                metadata_burrito.extra = Some(extra_string_burrito1.clone());
+
+                self.token_metadata_by_id.insert(&old_battle_room.burrito_id.clone(), &metadata_burrito);
+
+                // Minar recompensa STRW Tokens
+                log!("Nivel burrito cpu {}",burrito_defender.level.clone().to_string().parse::<f32>().unwrap());
+                let mut tokens_mint : f32 = 0.0;
+
+                if burrito_attacker.level.clone().parse::<u8>().unwrap() < 10 {
+                    tokens_mint = 5.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                }
+                if burrito_attacker.level.clone().parse::<u8>().unwrap() >= 10 && burrito_attacker.level.clone().parse::<u8>().unwrap() <= 14 {
+                    tokens_mint = 10.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                }
+                if burrito_attacker.level.clone().parse::<u8>().unwrap() >= 15 && burrito_attacker.level.clone().parse::<u8>().unwrap() <= 19 {
+                    tokens_mint = 15.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                }
+                if burrito_attacker.level.clone().parse::<u8>().unwrap() >= 20 && burrito_attacker.level.clone().parse::<u8>().unwrap() <= 24 {
+                    tokens_mint = 25.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                }
+                if burrito_attacker.level.clone().parse::<u8>().unwrap() >= 25 && burrito_attacker.level.clone().parse::<u8>().unwrap() <= 29 {
+                    tokens_mint = 40.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                }
+                if burrito_attacker.level.clone().parse::<u8>().unwrap() >= 30 && burrito_attacker.level.clone().parse::<u8>().unwrap() <= 34 {
+                    tokens_mint = 50.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                }
+                if burrito_attacker.level.clone().parse::<u8>().unwrap() >= 35 && burrito_attacker.level.clone().parse::<u8>().unwrap() <= 39 {
+                    tokens_mint = 55.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                }
+                if burrito_attacker.level.clone().parse::<u8>().unwrap() == 40 {
+                    tokens_mint = 60.0;
+                }
+
+                log!("Tokens a minar {}",tokens_mint*1000000000000000000000000.0);
+                let tokens_to_mint = tokens_mint*1000000000000000000000000.0;
+                ext_nft::reward_player(
+                    old_battle_room.payer_id.clone().to_string(),
+                    tokens_to_mint.to_string(),
+                    STRWTOKEN_CONTRACT.parse::<AccountId>().unwrap(),
+                    0000000000000000000000001,
+                    GAS_FOR_NFT_TRANSFER_CALL
+                );
+
+                return str::replace(&serde_json::to_string(&old_battle_room.clone()).unwrap(), "\"", "'");
+            } else {
+                old_battle_room.health_cpu = new_health_burrito_defender.to_string();
+                old_battle_room.turn = "CPU".to_string();
+                self.battle_room_cpu.remove(&old_battle_room.payer_id);
+                self.battle_room_cpu.insert(old_battle_room.payer_id.to_string(),old_battle_room.clone());
+            }
+        } else {
+            if new_health_burrito_defender <= 0.0 {
+                // Guardar registro general de la batalla (Jugador, Burrito, Estatus)
+                let info = BattlesHistory {
+                    payer1_id : old_battle_room.payer_id.to_string(),
+                    payer2_id : "CPU".to_string(),
+                    winner : "CPU".to_string(),
+                    status : "Battle".to_string()
+                };
+                self.battle_history.insert(old_battle_room.payer_id.to_string()+&"-".to_string()+ &self.n_battles.to_string(),info);
+                self.n_battles += 1;
+                // Eliminar sala activa
+                self.battle_room_cpu.remove(&old_battle_room.payer_id);
+                self.n_battle_rooms_cpu -= 1;
+                log!("Batalla Finalizada, Ganó CPU");
+
+                // Restar una vida al burrito
+                let new_hp_burrito = burrito.hp.parse::<u8>().unwrap()-1;
+                extradatajson_burrito.hp = new_hp_burrito.to_string();
+    
+                let mut extra_string_burrito = serde_json::to_string(&extradatajson_burrito).unwrap();
+                extra_string_burrito = str::replace(&extra_string_burrito, "\"", "'");
+                metadata_burrito.extra = Some(extra_string_burrito.clone());
+
+                self.token_metadata_by_id.insert(&old_battle_room.burrito_id.clone(), &metadata_burrito);
+
+                return str::replace(&serde_json::to_string(&old_battle_room.clone()).unwrap(), "\"", "'");
+            } else {
+                old_battle_room.health_player = new_health_burrito_defender.to_string();
+                old_battle_room.turn = "Player".to_string();
+                self.battle_room_cpu.remove(&old_battle_room.payer_id);
+                self.battle_room_cpu.insert(old_battle_room.payer_id.to_string(),old_battle_room.clone());
+            }                
+        }
+
+        log!("Ronda Finalizada");
+        str::replace(&serde_json::to_string(&old_battle_room.clone()).unwrap(), "\"", "'")
+    }
 }

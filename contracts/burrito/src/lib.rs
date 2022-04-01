@@ -40,10 +40,15 @@ pub const NFT_METADATA_SPEC: &str = "nft-1.0.0";
 /// This is the name of the NFT standard we're using
 pub const NFT_STANDARD_NAME: &str = "nep171";
 
-pub const BURRITO_CONTRACT: &str = "dev-1648671153636-80852085628874";
+pub const BURRITO_CONTRACT: &str = "dev-1648843231450-76383111338516";
 pub const ITEMS_CONTRACT: &str = "dev-1647986467816-61735125036881";
-pub const MK_CONTRACT: &str = "dev-1646163482135-99250841517221";
-pub const STRWTOKEN_CONTRACT: &str = "dev-1645837411235-48460272126519";
+pub const STRWTOKEN_CONTRACT: &str = "dev-1648843322449-70578827831792";
+
+pub const BURRITO1: &str = "QmULzZNvTGrRxEMvFVYPf1qaBc4tQtz6c3MVGgRNx36gAq";
+pub const BURRITO2: &str = "QmZEK32JEbJH3rQtXL9BqQJa2omXfpjuXGjbFXLiV2Ge9D";
+pub const BURRITO3: &str = "QmQcTRnmdFhWa1j47JZAxr5CT1Cdr5AfqdhnrGpSdr28t6";
+pub const BURRITO4: &str = "QmbMS3P3gn2yivKDFvHSxYjVZEZrBdxyZtnnnJ62tVuSVk";
+
 
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
@@ -59,7 +64,8 @@ pub struct Burrito {
     speed : String,
     win : String,
     global_win : String,
-    level : String
+    level : String,
+    media : String
 }
 
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Debug)]

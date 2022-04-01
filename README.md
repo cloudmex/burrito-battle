@@ -55,7 +55,7 @@ Ejecute el siguiente comando dentro de cada carpeta (Burrito, Items y STRW-Token
 Asignamos el identificador de nuestro contrato desplegado a una constante (Sustituir el ID por el del contrato desplegado):
 
     Burrito
-    ID=dev-1648671153636-80852085628874
+    ID=dev-1648843231450-76383111338516
     echo $ID
 
     Accesorios
@@ -63,7 +63,7 @@ Asignamos el identificador de nuestro contrato desplegado a una constante (Susti
     echo $ID
 
     STRW-TOKEN
-    ID=dev-1645837411235-48460272126519
+    ID=dev-1648843322449-70578827831792
     echo $ID
 
 Los 3 contratos deben inicializarse antes de su uso, por lo que lo haremos con los siguientes comandos dependiendo del contrato:
@@ -86,7 +86,7 @@ Obtener cantidad de burritos creados:
     
 Crear nuevo burrito:
 
-near call $ID mint_token '{"token_owner_id": "'yairnava.testnet'", "token_metadata": { "title": "Burrito 1", "description": "This is a burrito", "media": "https://s3-us-west-2.amazonaws.com/melingoimages/Images/28098.jpg", "extra":""}}' --accountId yairnava.testnet --deposit 5 --gas=300000000000000
+near call $ID mint_token '{"token_owner_id": "'yairnava.testnet'", "token_metadata": { "title": "", "description": "", "media": "", "extra":""}}' --accountId yairnava.testnet --deposit 5 --gas=300000000000000
     
 Modificar burrito:
 
@@ -128,7 +128,6 @@ Rendirse y finalizar combate activo
 
     near call $ID surrender_cpu '{}' --accountId yairnava.testnet
 
-//////////////////////////////// FALTAN DE IMPLEMENTAR////////////////////////////////
 Combatir Ronda Player vs CPU [type_move => (1 = Ataque Debil, 2 = Ataque Fuerte, 3 = No Defenderse, 4 = Defenderse)]
     
     near call $ID battle_player_cpu '{"type_move":"'1'"}' --accountId yairnava.testnet --gas=300000000000000
@@ -138,7 +137,6 @@ Combatir Ronda Player vs CPU [type_move => (1 = Ataque Debil, 2 = Ataque Fuerte,
     near call $ID battle_player_cpu '{"type_move":"'3'"}' --accountId yairnava.testnet --gas=300000000000000
     
     near call $ID battle_player_cpu '{"type_move":"'4'"}' --accountId yairnava.testnet --gas=300000000000000
-//////////////////////////////// FALTAN DE IMPLEMENTAR ////////////////////////////////
 
 ### Items
 

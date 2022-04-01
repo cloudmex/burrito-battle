@@ -1,5 +1,5 @@
 use near_sdk::{
-    env
+    env, serde_json::json
 };
 
 use crate::*;
@@ -73,11 +73,13 @@ impl Contract {
                 let rand_defense = *env::random_seed().get(1).unwrap();
                 let rand_speed = *env::random_seed().get(2).unwrap();
                 let rand_type = *env::random_seed().get(3).unwrap();
+                let rand_image = *env::random_seed().get(4).unwrap();
 
                 let mut attack: u8 = 5;
                 let mut defense: u8 = 5;
                 let mut speed: u8 = 5;
                 let mut burrito_type: String = "Fuego".to_string();
+                let mut burrito_image: String = BURRITO1.to_string();
 
                 // Obtener ataque aleatorio
                 if rand_attack > 0 &&  rand_attack <= 70 {
@@ -156,6 +158,20 @@ impl Contract {
                     burrito_type = "Volador".to_string();
                 }
 
+                // Obtener imagen
+                if rand_image > 0 &&  rand_image <= 64 {
+                    burrito_image = BURRITO1.to_string();
+                }
+                if rand_image > 64 &&  rand_image <= 128 {
+                    burrito_image = BURRITO2.to_string();
+                }
+                if rand_image > 128 &&  rand_image <= 192 {
+                    burrito_image = BURRITO3.to_string();
+                }
+                if rand_image > 192 &&  rand_image < 255 {
+                    burrito_image = BURRITO4.to_string();
+                }
+
                 // Asignamos valores a las estadisticas del burrito
                 burrito_data.attack = attack.to_string();
                 burrito_data.defense = defense.to_string();
@@ -165,6 +181,12 @@ impl Contract {
                 let mut extra_data_string = serde_json::to_string(&burrito_data).unwrap();
                 extra_data_string = str::replace(&extra_data_string, "\"", "'");
                 new_burrito.extra = Some(extra_data_string);
+                new_burrito.media = Some(burrito_image);
+                let name_burrito = "Nuevo Burrito".to_string();
+                let desription_burrito = "Este es un burrito de tipo ".to_string()+&burrito_type.to_string();;
+
+                new_burrito.title = Some(name_burrito);
+                new_burrito.description = Some(desription_burrito);
 
                 let royalty = HashMap::new();
 
@@ -229,8 +251,15 @@ impl Contract {
                     speed : burrito_data.speed,
                     win : burrito_data.win,
                     global_win : burrito_data.global_win,
-                    level : burrito_data.level
+                    level : burrito_data.level,
+                    media : new_burrito.media.as_ref().unwrap().to_string()
                 };
+
+                env::log(
+                    json!(burrito)
+                    .to_string()
+                    .as_bytes(),
+                );
 
                 serde_json::to_string(&burrito).unwrap()
             }
@@ -265,7 +294,8 @@ impl Contract {
             speed : extradatajson.speed,
             win : extradatajson.win,
             global_win : extradatajson.global_win,
-            level : extradatajson.level
+            level : extradatajson.level,
+            media : metadata.media.as_ref().unwrap().to_string()
         };
 
         burrito
@@ -306,7 +336,8 @@ impl Contract {
             speed : extradatajson.speed,
             win : extradatajson.win,
             global_win : extradatajson.global_win,
-            level : extradatajson.level
+            level : extradatajson.level,
+            media : metadata_burrito.media.as_ref().unwrap().to_string()
         };
 
         burrito

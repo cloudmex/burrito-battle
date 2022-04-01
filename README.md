@@ -1,4 +1,4 @@
-# Burrito Battle
+![Image text](https://github.com/cloudmex/burrito-battle/blob/new_standard/assets/Logotipo.png)
 
 ## Descripción 📄
 
@@ -55,7 +55,7 @@ Ejecute el siguiente comando dentro de cada carpeta (Burrito, Items y STRW-Token
 Asignamos el identificador de nuestro contrato desplegado a una constante (Sustituir el ID por el del contrato desplegado):
 
     Burrito
-    ID=dev-1648617264516-11344063287174
+    ID=dev-1648671153636-80852085628874
     echo $ID
 
     Accesorios
@@ -63,7 +63,7 @@ Asignamos el identificador de nuestro contrato desplegado a una constante (Susti
     echo $ID
 
     STRW-TOKEN
-    ID=dev-1648670250060-81886958025263
+    ID=dev-1645837411235-48460272126519
     echo $ID
 
 Los 3 contratos deben inicializarse antes de su uso, por lo que lo haremos con los siguientes comandos dependiendo del contrato:
@@ -86,7 +86,7 @@ Obtener cantidad de burritos creados:
     
 Crear nuevo burrito:
 
-near call $ID mint_token '{"token_owner_id": "'yairnava.testnet'", "token_metadata": { "title": "Burrito 2", "description": "This is a burrito", "media": "https://s3-us-west-2.amazonaws.com/melingoimages/Images/28098.jpg", "extra":""}}' --accountId yairnava.testnet --deposit 5 --gas=300000000000000
+near call $ID mint_token '{"token_owner_id": "'yairnava.testnet'", "token_metadata": { "title": "Burrito 1", "description": "This is a burrito", "media": "https://s3-us-west-2.amazonaws.com/melingoimages/Images/28098.jpg", "extra":""}}' --accountId yairnava.testnet --deposit 5 --gas=300000000000000
     
 Modificar burrito:
 
@@ -108,19 +108,9 @@ Obtener datos de un burrito:
 
     near call $ID nft_tokens '{"from_index": "0", "limit": 3}' --accountId yairnava.testnet
 
-
-//////////////////////////////// FALTAN DE IMPLEMENTAR////////////////////////////////
-Crear una partida Jugador vs CPU:
-
-    near call $ID create_battle_player_cpu '{"burrito_id":"'0'", "accesorio1_id":"'0'", "accesorio2_id":"'1'", "accesorio3_id":"'2'"}' --accountId yairnava.testnet --gas=300000000000000
-
 Obtener cantidad de batallas finalizadas:
 
     near view $ID get_number_battles
-
-Mostrar todo el historial de batallas finalizadas del jugador:
-
-    near call $ID get_battle_rooms_history --accountId yairnava.testnet 
 
 Obtener cantidad de batallas activas:
 
@@ -130,10 +120,15 @@ Obtener la sala activa del jugador
 
     near call $ID get_battle_active_cpu '{}' --accountId yairnava.testnet
 
+Crear una partida Jugador vs CPU:
+
+    near call $ID create_battle_player_cpu '{"burrito_id":"'0'", "accesorio1_id":"'0'", "accesorio2_id":"'1'", "accesorio3_id":"'2'"}' --accountId yairnava.testnet --gas=300000000000000
+
 Rendirse y finalizar combate activo
 
     near call $ID surrender_cpu '{}' --accountId yairnava.testnet
 
+//////////////////////////////// FALTAN DE IMPLEMENTAR////////////////////////////////
 Combatir Ronda Player vs CPU [type_move => (1 = Ataque Debil, 2 = Ataque Fuerte, 3 = No Defenderse, 4 = Defenderse)]
     
     near call $ID battle_player_cpu '{"type_move":"'1'"}' --accountId yairnava.testnet --gas=300000000000000

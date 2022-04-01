@@ -13,6 +13,7 @@ use crate::internal::*;
 pub use crate::burritos::*;
 pub use crate::evolve::*;
 pub use crate::reset_conditions::*;
+pub use crate::fights_cpu::*;
 
 pub use crate::metadata::*;
 pub use crate::nft_core::*;
@@ -25,6 +26,7 @@ mod internal;
 mod burritos;
 mod evolve;
 mod reset_conditions;
+mod fights_cpu;
 
 mod approval; 
 mod enumeration; 
@@ -38,7 +40,7 @@ pub const NFT_METADATA_SPEC: &str = "nft-1.0.0";
 /// This is the name of the NFT standard we're using
 pub const NFT_STANDARD_NAME: &str = "nep171";
 
-pub const BURRITO_CONTRACT: &str = "dev-1648617264516-11344063287174";
+pub const BURRITO_CONTRACT: &str = "dev-1648671153636-80852085628874";
 pub const ITEMS_CONTRACT: &str = "dev-1647986467816-61735125036881";
 pub const MK_CONTRACT: &str = "dev-1646163482135-99250841517221";
 pub const STRWTOKEN_CONTRACT: &str = "dev-1645837411235-48460272126519";

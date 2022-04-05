@@ -13,7 +13,7 @@ const MIN_GAS_FOR_NFT_TRANSFER_CALL: Gas = Gas(100_000_000_000_000);
 impl Contract {
     // Minar un nuevo token 600,000 $STRW tokens + 5 $NEAR tokens
     #[payable]
-    pub fn mint_token(&mut self,token_owner_id: AccountId, token_metadata: TokenMetadata) -> Promise {
+    pub fn nft_mint(&mut self,token_owner_id: AccountId, token_metadata: TokenMetadata) -> Promise {
         let account_id = env::signer_account_id();
         
         let deposit = env::attached_deposit();
@@ -182,8 +182,8 @@ impl Contract {
                 extra_data_string = str::replace(&extra_data_string, "\"", "'");
                 new_burrito.extra = Some(extra_data_string);
                 new_burrito.media = Some(burrito_image);
-                let name_burrito = "Nuevo Burrito".to_string();
-                let desription_burrito = "Este es un burrito de tipo ".to_string()+&burrito_type.to_string();;
+                let name_burrito = "Burrito ".to_string()+&burrito_type.to_string()+&" #".to_string()+&self.token_metadata_by_id.len().to_string();
+                let desription_burrito = "Este es un burrito de tipo ".to_string()+&burrito_type.to_string();
 
                 new_burrito.title = Some(name_burrito);
                 new_burrito.description = Some(desription_burrito);

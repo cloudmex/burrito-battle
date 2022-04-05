@@ -219,4 +219,10 @@ impl Contract {
         //return the Contract object
         this
     }
+
+    pub fn update_metadata_icon(&mut self, icon: String) {
+        let mut metadata = self.metadata.get().unwrap();
+        metadata.icon = Some(icon);
+        self.metadata.set(&metadata);
+    }
 }

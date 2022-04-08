@@ -1,5 +1,5 @@
 use near_sdk::{
-    env
+    env, serde_json::json
 };
 
 use crate::*;
@@ -409,6 +409,12 @@ impl Contract {
                 self.battle_room_cpu.insert(token_owner_id.clone().to_string(),info.clone());
                 self.n_battle_rooms_cpu += 1;
         
+                env::log(
+                    json!(info.clone())
+                    .to_string()
+                    .as_bytes(),
+                );
+
                 serde_json::to_string(&info).unwrap()
 
             }

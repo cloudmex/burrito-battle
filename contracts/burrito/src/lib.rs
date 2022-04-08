@@ -20,6 +20,7 @@ pub use crate::nft_core::*;
 pub use crate::approval::*;
 pub use crate::royalty::*;
 pub use crate::events::*;
+pub use crate::migrate::*;
 
 mod internal;
 
@@ -34,6 +35,7 @@ mod metadata;
 mod nft_core; 
 mod royalty; 
 mod events;
+mod migrate;
 
 /// This spec can be treated like a version of the standard.
 pub const NFT_METADATA_SPEC: &str = "nft-1.0.0";
@@ -125,6 +127,31 @@ pub struct AccessoriesForBattle {
     final_attack_b2 : String,
     final_defense_b2 : String,
     final_speed_b2 : String,
+}
+
+#[near_bindgen]
+#[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
+pub struct OldContract {
+    //contract owner
+    pub owner_id: AccountId,
+
+    //keeps track of all the token IDs for a given account
+    pub tokens_per_owner: LookupMap<AccountId, UnorderedSet<TokenId>>,
+
+    //keeps track of the token struct for a given token ID
+    pub tokens_by_id: LookupMap<TokenId, Token>,
+
+    //keeps track of the token metadata for a given token ID
+    pub token_metadata_by_id: UnorderedMap<TokenId, TokenMetadata>,
+
+    //keeps track of the metadata for the contract
+    pub metadata: LazyOption<NFTContractMetadata>,
+
+    pub n_battle_rooms_cpu: u128,
+    pub n_battles: u128,
+    pub battle_room_cpu: HashMap<String,BattleCPU>,
+    pub battle_history: HashMap<String,BattlesHistory>
+
 }
 
 #[near_bindgen]

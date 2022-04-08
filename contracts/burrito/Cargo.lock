@@ -107,6 +107,7 @@ name = "burritos"
 version = "0.1.0"
 dependencies = [
  "near-sdk",
+ "near-sys",
  "serde_json",
 ]
 

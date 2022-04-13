@@ -14,6 +14,7 @@ pub use crate::burritos::*;
 pub use crate::evolve::*;
 pub use crate::reset_conditions::*;
 pub use crate::fights_cpu::*;
+pub use crate::fights_pvp::*;
 
 pub use crate::metadata::*;
 pub use crate::nft_core::*;
@@ -28,6 +29,7 @@ mod burritos;
 mod evolve;
 mod reset_conditions;
 mod fights_cpu;
+mod fights_pvp;
 
 mod approval; 
 mod enumeration; 
@@ -42,7 +44,7 @@ pub const NFT_METADATA_SPEC: &str = "nft-1.0.0";
 /// This is the name of the NFT standard we're using
 pub const NFT_STANDARD_NAME: &str = "nep171";
 
-pub const BURRITO_CONTRACT: &str = "dev-1648843231450-76383111338516";
+pub const BURRITO_CONTRACT: &str = "dev-1649707732162-66282708367055";
 pub const ITEMS_CONTRACT: &str = "dev-1647986467816-61735125036881";
 pub const STRWTOKEN_CONTRACT: &str = "dev-1648843322449-70578827831792";
 
@@ -109,6 +111,29 @@ pub struct BattleCPU {
     burrito_cpu_speed : String
 }
 
+#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Clone)]
+#[serde(crate = "near_sdk::serde")]
+pub struct BattlePVP {
+    status : String, // 1 = On Hold , 2 = In Battle , 3 = Finish
+    payer1_id : String,
+    payer2_id : String,
+    burrito_player1_id : String,
+    burrito_player2_id : String,
+    accesories_attack_b1 : String,
+    accesories_defense_b1 : String,
+    accesories_speed_b1 : String,
+    accesories_attack_b2 : String,
+    accesories_defense_b2 : String,
+    accesories_speed_b2 : String,
+    turn : String,
+    strong_attack_player1 : String,
+    shields_player1 : String,
+    health_player1 : String,
+    strong_attack_player2 : String,
+    shields_player2 : String,
+    health_player2 : String
+}
+
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct BattlesHistory {
@@ -148,8 +173,10 @@ pub struct OldContract {
     pub metadata: LazyOption<NFTContractMetadata>,
 
     pub n_battle_rooms_cpu: u128,
+    pub n_battle_rooms_pvp: u128,
     pub n_battles: u128,
     pub battle_room_cpu: HashMap<String,BattleCPU>,
+    pub battle_room_pvp: HashMap<String,BattlePVP>,
     pub battle_history: HashMap<String,BattlesHistory>
 
 }
@@ -173,8 +200,10 @@ pub struct Contract {
     pub metadata: LazyOption<NFTContractMetadata>,
 
     pub n_battle_rooms_cpu: u128,
+    pub n_battle_rooms_pvp: u128,
     pub n_battles: u128,
     pub battle_room_cpu: HashMap<String,BattleCPU>,
+    pub battle_room_pvp: HashMap<String,BattlePVP>,
     pub battle_history: HashMap<String,BattlesHistory>
 
 }
@@ -238,8 +267,10 @@ impl Contract {
                 Some(&metadata),
             ),
             n_battle_rooms_cpu: 0,
+            n_battle_rooms_pvp: 0,
             n_battles: 0,
             battle_room_cpu:HashMap::new(),
+            battle_room_pvp:HashMap::new(),
             battle_history:HashMap::new()
         };
 

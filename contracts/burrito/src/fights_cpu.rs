@@ -383,7 +383,7 @@ impl Contract {
                 }
                 
                 let info = BattleCPU {
-                    status : "1".to_string(),
+                    status : "2".to_string(),
                     payer_id : token_owner_id.clone().to_string(),
                     burrito_id : burrito_id.clone().to_string(),
                     accesories_attack_b1 : accessories_for_battle.final_attack_b1.clone().to_string(),

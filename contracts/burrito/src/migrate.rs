@@ -60,8 +60,10 @@ impl Contract {
             token_metadata_by_id: old_state.token_metadata_by_id,
             metadata:old_state.metadata,
             n_battle_rooms_cpu: old_state.n_battle_rooms_cpu,
+            n_battle_rooms_pvp: old_state.n_battle_rooms_pvp,
             n_battles: old_state.n_battles,
             battle_room_cpu: old_state.battle_room_cpu,
+            battle_room_pvp: old_state.battle_room_pvp,
             battle_history: old_state.battle_history
         }
     }

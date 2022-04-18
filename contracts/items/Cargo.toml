@@ -1,30 +1,20 @@
 [package]
-name = "non-fungible-token-wrapper"
-version = "0.0.2"
-authors = ["Near Inc <hello@near.org>"]
-edition = "2018"
+name = "items"
+version = "0.1.0"
+authors = ["Near Inc <hello@nearprotocol.com>"]
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-near-sdk = "3.1.0"
-near-sdk-sim = "3.2.0"
-near-contract-standards = "3.1.1"
-serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
-rand = "0.8.4"
-
-# remember to include a line for each contract
-non-fungible-token = { path = "./nft" }
+near-sdk = "=4.0.0-pre.4"
+serde_json = "1.0"
 
 [profile.release]
-codegen-units = 1
-# Tell `rustc` to optimize for small code size.
+codegen-units=1
 opt-level = "z"
 lto = true
 debug = false
 panic = "abort"
 overflow-checks = true
-
-[workspace]
-# remember to include a member for each contract
-members = [
-  "nft"
-]

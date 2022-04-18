@@ -55,15 +55,15 @@ Ejecute el siguiente comando dentro de cada carpeta (Burrito, Items y STRW-Token
 Asignamos el identificador de nuestro contrato desplegado a una constante (Sustituir el ID por el del contrato desplegado):
 
     Burrito
-    ID=dev-1648843231450-76383111338516
+    ID=dev-1649297832936-78994825371172
     echo $ID
 
     Accesorios
-    ID=dev-1647986467816-61735125036881
+    ID=dev-1649460241791-63781631860612
     echo $ID
 
     STRW-TOKEN
-    ID=dev-1648843322449-70578827831792
+    ID=dev-1649298440930-33140341611054
     echo $ID
 
 Los 3 contratos deben inicializarse antes de su uso, por lo que lo haremos con los siguientes comandos dependiendo del contrato:

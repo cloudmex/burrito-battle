@@ -272,7 +272,6 @@ impl Contract {
     }
 
     pub fn get_burrito(&self, burrito_id: TokenId) -> Burrito {
-
         if burrito_id.clone().parse::<u64>().unwrap() > self.token_metadata_by_id.len()-1 {
             env::panic_str("No existe el burrito con el id ingresado");
         }
@@ -302,7 +301,6 @@ impl Contract {
     }
 
     pub fn update_burrito(&mut self, burrito_id: TokenId, extra: String) -> Burrito {
-
         if burrito_id.clone().parse::<u64>().unwrap() > self.token_metadata_by_id.len()-1 {
             env::panic_str("No existe el burrito con el id ingresado");
         }

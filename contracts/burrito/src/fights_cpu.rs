@@ -1,5 +1,5 @@
 use near_sdk::{
-    env
+    env, serde_json::json
 };
 
 use crate::*;
@@ -13,12 +13,12 @@ const NO_DEPOSIT: Balance = 0;
 impl Contract {
     // Obtener cantidad de batallas activas Player vs CPU
     pub fn get_number_battles_actives_cpu(&self) -> u128 {
-        self.n_battle_rooms_cpu
+        self.battle_room_cpu.len().try_into().unwrap()
     }
 
     // Obtener numero de batallas finalizadas
     pub fn get_number_battles(&self) -> u128 {
-        self.n_battles
+        self.battle_history.len().try_into().unwrap()
     }
 
     // Obtener sala de batalla creada por account_id
@@ -383,7 +383,7 @@ impl Contract {
                 }
                 
                 let info = BattleCPU {
-                    status : "1".to_string(),
+                    status : "2".to_string(),
                     payer_id : token_owner_id.clone().to_string(),
                     burrito_id : burrito_id.clone().to_string(),
                     accesories_attack_b1 : accessories_for_battle.final_attack_b1.clone().to_string(),
@@ -407,8 +407,13 @@ impl Contract {
                 };
         
                 self.battle_room_cpu.insert(token_owner_id.clone().to_string(),info.clone());
-                self.n_battle_rooms_cpu += 1;
         
+                env::log(
+                    json!(info.clone())
+                    .to_string()
+                    .as_bytes(),
+                );
+
                 serde_json::to_string(&info).unwrap()
 
             }
@@ -499,12 +504,10 @@ impl Contract {
             status : "Surrender".to_string()
         };
 
-        self.battle_history.insert(battle_room.payer_id.to_string()+&"-".to_string()+ &self.n_battles.to_string(),info);
-        self.n_battles += 1;
+        self.battle_history.insert(battle_room.payer_id.to_string()+&"-".to_string()+ &self.battle_history.len().to_string(),info);
 
         // Eliminar sala
         self.battle_room_cpu.remove(&token_owner_id.to_string());
-        self.n_battle_rooms_cpu -= 1;
 
         "Finalizó batalla".to_string()
     }
@@ -734,11 +737,9 @@ impl Contract {
                     winner : old_battle_room.payer_id.to_string(),
                     status : "Battle".to_string()
                 };
-                self.battle_history.insert(old_battle_room.payer_id.to_string()+&"-".to_string()+ &self.n_battles.to_string(),info);
-                self.n_battles += 1;
+                self.battle_history.insert(old_battle_room.payer_id.to_string()+&"-".to_string()+ &self.battle_history.len().to_string(),info);
                 // Eliminar sala activa
                 self.battle_room_cpu.remove(&old_battle_room.payer_id);
-                self.n_battle_rooms_cpu -= 1;
                 log!("Batalla Finalizada, Ganó Jugador");
                 
                 // Incrementar victorias del burrito si son < 10
@@ -813,11 +814,9 @@ impl Contract {
                     winner : "CPU".to_string(),
                     status : "Battle".to_string()
                 };
-                self.battle_history.insert(old_battle_room.payer_id.to_string()+&"-".to_string()+ &self.n_battles.to_string(),info);
-                self.n_battles += 1;
+                self.battle_history.insert(old_battle_room.payer_id.to_string()+&"-".to_string()+ &self.battle_history.len().to_string(),info);
                 // Eliminar sala activa
                 self.battle_room_cpu.remove(&old_battle_room.payer_id);
-                self.n_battle_rooms_cpu -= 1;
                 log!("Batalla Finalizada, Ganó CPU");
 
                 // Restar una vida al burrito

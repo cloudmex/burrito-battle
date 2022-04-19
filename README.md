@@ -55,7 +55,11 @@ Ejecute el siguiente comando dentro de cada carpeta (Burrito, Items y STRW-Token
 Asignamos el identificador de nuestro contrato desplegado a una constante (Sustituir el ID por el del contrato desplegado):
 
     Burrito
+<<<<<<< HEAD
     ID=dev-1649297832936-78994825371172
+=======
+    ID=dev-1649707732162-66282708367055
+>>>>>>> 9629b816a1ecaf2cbefaa531d7dbf8fd243cd233
     echo $ID
 
     Accesorios
@@ -122,11 +126,11 @@ Obtener cantidad de batallas finalizadas:
 
     near view $ID get_number_battles
 
-Obtener cantidad de batallas activas:
+Obtener cantidad de batallas activas Player vs CPU:
 
     near view $ID get_number_battles_actives_cpu
 
-Obtener la sala activa del jugador
+Obtener la sala activa del jugador Player vs CPU
 
     near call $ID get_battle_active_cpu '{}' --accountId yairnava.testnet
 
@@ -134,7 +138,7 @@ Crear una partida Jugador vs CPU:
 
     near call $ID create_battle_player_cpu '{"burrito_id":"'0'", "accesorio1_id":"'0'", "accesorio2_id":"'1'", "accesorio3_id":"'2'"}' --accountId yairnava.testnet --gas=300000000000000
 
-Rendirse y finalizar combate activo
+Rendirse y finalizar combate activo Player vs CPU
 
     near call $ID surrender_cpu '{}' --accountId yairnava.testnet
 
@@ -147,6 +151,22 @@ Combatir Ronda Player vs CPU [type_move => (1 = Ataque Debil, 2 = Ataque Fuerte,
     near call $ID battle_player_cpu '{"type_move":"'3'"}' --accountId yairnava.testnet --gas=300000000000000
     
     near call $ID battle_player_cpu '{"type_move":"'4'"}' --accountId yairnava.testnet --gas=300000000000000
+
+Obtener cantidad de batallas activas PvP:
+
+    near view $ID get_number_battles_actives_pvp
+
+Obtener la sala activa del jugador PvP
+
+    near call $ID get_battle_active_pvp '{}' --accountId yairnava.testnet
+
+Borrar todas las salas activas PvP
+
+    near call $ID delete_battle_active_pvp '{}' --accountId yairnava.testnet
+
+Crear una partida Jugador vs CPU:
+
+    near call $ID create_battle_player_pvp '{"burrito_id":"'0'", "accesorio1_id":"'0'", "accesorio2_id":"'0'", "accesorio3_id":"'0'"}' --accountId yairnh.testnet --gas=300000000000000
 
 ### Items
 

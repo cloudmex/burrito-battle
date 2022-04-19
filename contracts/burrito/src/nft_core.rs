@@ -86,6 +86,7 @@ trait NonFungibleTokenResolver {
     fn new_burrito(&mut self,token_owner_id: AccountId, token_metadata: TokenMetadata) -> String;
     fn reset_conditions(&mut self,burrito_id: TokenId) -> String;
     fn save_battle_player_cpu(&mut self,burrito_id: TokenId) -> String;
+    fn save_battle_player_pvp(&mut self,burrito_id: TokenId) -> String;
 }
 
 /*

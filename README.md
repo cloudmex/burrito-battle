@@ -71,6 +71,8 @@ Los 3 contratos deben inicializarse antes de su uso, por lo que lo haremos con l
     Burrito
     near call $ID init_contract '{"owner_id":"'$ID'"}' --accountId $ID
 
+    near view $ID nft_metadata
+
     Accesorios
     near call $ID init_contract '{"owner_id": "'$ID'"}' --accountId $ID
 

@@ -301,6 +301,8 @@ impl Contract {
     }
 
     pub fn update_burrito(&mut self, burrito_id: TokenId, extra: String) -> Burrito {
+        self.assert_whitelist(env::predecessor_account_id());
+
         if burrito_id.clone().parse::<u64>().unwrap() > self.token_metadata_by_id.len()-1 {
             env::panic_str("No existe el burrito con el id ingresado");
         }
@@ -339,5 +341,89 @@ impl Contract {
         };
 
         burrito
+    }
+
+    pub fn decrease_burrito_hp(&mut self, burrito_id: TokenId) -> String {
+        self.assert_whitelist(env::predecessor_account_id());
+
+        let metadata = self.token_metadata_by_id.get(&burrito_id).unwrap();
+        let token = self.tokens_by_id.get(&burrito_id);        
+
+        let newextradata = str::replace(&metadata.extra.as_ref().unwrap().to_string(), "'", "\"");
+        let extradatajson: ExtraBurrito = serde_json::from_str(&newextradata).unwrap();
+        
+        // Crear estructura burrito
+        let burrito = Burrito {
+            owner_id : token.unwrap().owner_id.to_string(),
+            name : metadata.title.as_ref().unwrap().to_string(),
+            description : metadata.description.as_ref().unwrap().to_string(),
+            burrito_type : extradatajson.burrito_type,
+            hp : extradatajson.hp,
+            attack : extradatajson.attack,
+            defense : extradatajson.defense,
+            speed : extradatajson.speed,
+            win : extradatajson.win,
+            global_win : extradatajson.global_win,
+            level : extradatajson.level,
+            media : metadata.media.as_ref().unwrap().to_string()
+        };
+
+        let new_hp_burrito = burrito.hp.parse::<u8>().unwrap()-1;
+        extradatajson.hp = new_hp_burrito.to_string();
+
+        let mut extra_string_burrito = serde_json::to_string(&extradatajson).unwrap();
+        extra_string_burrito = str::replace(&extra_string_burrito, "\"", "'");
+        metadata.extra = Some(extra_string_burrito.clone());
+
+        self.token_metadata_by_id.insert(&burrito_id, &metadata);
+
+        "Contador de vidas decrementado".to_string
+
+    }
+
+    pub fn increment_burrito_wins(&mut self, burrito_id: TokenId) -> String {
+        self.assert_whitelist(env::predecessor_account_id());
+
+        let metadata = self.token_metadata_by_id.get(&burrito_id).unwrap();
+        let token = self.tokens_by_id.get(&burrito_id);        
+
+        let newextradata = str::replace(&metadata.extra.as_ref().unwrap().to_string(), "'", "\"");
+        let extradatajson: ExtraBurrito = serde_json::from_str(&newextradata).unwrap();
+        
+        // Crear estructura burrito
+        let burrito = Burrito {
+            owner_id : token.unwrap().owner_id.to_string(),
+            name : metadata.title.as_ref().unwrap().to_string(),
+            description : metadata.description.as_ref().unwrap().to_string(),
+            burrito_type : extradatajson.burrito_type,
+            hp : extradatajson.hp,
+            attack : extradatajson.attack,
+            defense : extradatajson.defense,
+            speed : extradatajson.speed,
+            win : extradatajson.win,
+            global_win : extradatajson.global_win,
+            level : extradatajson.level,
+            media : metadata.media.as_ref().unwrap().to_string()
+        };
+
+
+        // Incrementar victorias del burrito si son < 10
+        let mut new_win_burrito1 = extradatajson.win.parse::<u8>().unwrap();
+        let new_global_win_burrito1 = extradatajson.global_win.parse::<u8>().unwrap()+1;
+
+        if new_win_burrito1 < 10 {
+            new_win_burrito1 += 1;
+        }
+
+        extradatajson.win = new_win_burrito1.to_string();
+        extradatajson.global_win = new_global_win_burrito1.to_string();
+
+        let mut extra_string_burrito = serde_json::to_string(&extradatajson).unwrap();
+        extra_string_burrito = str::replace(&extra_string_burrito, "\"", "'");
+        metadata.extra = Some(extra_string_burrito.clone());
+
+        self.token_metadata_by_id.insert(&burrito_id, &metadata);
+
+        "Contador de victorias incrementado".to_string
     }
 }

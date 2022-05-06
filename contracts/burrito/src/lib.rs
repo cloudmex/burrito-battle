@@ -22,6 +22,7 @@ pub use crate::approval::*;
 pub use crate::royalty::*;
 pub use crate::events::*;
 pub use crate::migrate::*;
+pub use crate::whitelist::*;
 
 mod internal;
 
@@ -30,6 +31,7 @@ mod evolve;
 mod reset_conditions;
 mod fights_cpu;
 mod fights_pvp;
+mod whitelist;
 
 mod approval; 
 mod enumeration; 
@@ -157,6 +159,13 @@ pub struct AccessoriesForBattle {
     final_speed_b2 : String,
 }
 
+#[derive(BorshDeserialize, BorshSerialize,Clone)]
+#[serde(crate = "near_sdk::serde")]
+pub struct ExternalContract {
+    register_address: AccountId,
+    contract_name: String
+}
+
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
 pub struct OldContract {
@@ -178,6 +187,7 @@ pub struct OldContract {
     pub battle_room_cpu: HashMap<String,BattleCPU>,
     pub battle_room_pvp: HashMap<String,BattlePVP>,
     pub battle_history: HashMap<String,BattlesHistory>
+    pub whitelist_contracts: LookupMap<AccountId, ExternalContract>
 
 }
 
@@ -201,7 +211,8 @@ pub struct Contract {
 
     pub battle_room_cpu: HashMap<String,BattleCPU>,
     pub battle_room_pvp: HashMap<String,BattlePVP>,
-    pub battle_history: HashMap<String,BattlesHistory>
+    pub battle_history: HashMap<String,BattlesHistory>,
+    pub whitelist_contracts: LookupMap<AccountId, ExternalContract>
 
 }
 
@@ -216,6 +227,7 @@ pub enum StorageKey {
     TokensPerType,
     TokensPerTypeInner { token_type_hash: CryptoHash },
     TokenTypesLocked,
+    ContractAllowed
 }
 
 #[near_bindgen]
@@ -265,7 +277,8 @@ impl Contract {
             ),
             battle_room_cpu:HashMap::new(),
             battle_room_pvp:HashMap::new(),
-            battle_history:HashMap::new()
+            battle_history:HashMap::new(),
+            whitelist_contracts: LookupMap::new(StorageKey::ContractAllowed)
         };
 
         //return the Contract object

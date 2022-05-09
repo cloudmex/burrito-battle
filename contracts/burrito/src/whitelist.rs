@@ -24,22 +24,26 @@ impl Contract {
     
         self.whitelist_contracts.insert(&address_contract.clone(), &new_ext_contract);
 
-        "Contrato agregado al whitelist con éxito".to_string         
+        "Contrato agregado al whitelist con éxito".to_string()    
     }
 
     pub fn is_white_listed(&self) -> String  {
         let contract_exist = self.whitelist_contracts.get(&env::predecessor_account_id());
 
         if !contract_exist.is_none() {
-            return "No te encuentras registrado en el whitelist";
+            return "No te encuentras registrado en el whitelist".to_string();
         }
 
-        return "Te encuentras registrado en el whitelist";
+        return "Te encuentras registrado en el whitelist".to_string();;
 
     }
 
-    pub fn assert_whitelist(&self, account_id: String) {
-        assert!(self.whitelist_contracts.contains(&account_id), "No está en whitelist");
+    pub fn assert_whitelist(&self, account_id: AccountId) {
+        let contract_exist = self.whitelist_contracts.get(&env::predecessor_account_id());
+
+        if !contract_exist.is_none() {
+            env::panic_str("No te encuentras registrado en el whitelist");
+        }
     }
 
 }

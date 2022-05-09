@@ -66,6 +66,10 @@ Asignamos el identificador de nuestro contrato desplegado a una constante (Susti
     ID=dev-1648843322449-70578827831792
     echo $ID
 
+    PVE Battle
+    ID=dev-1651865631187-89397346107880
+    echo $ID
+
 Los 3 contratos deben inicializarse antes de su uso, por lo que lo haremos con los siguientes comandos dependiendo del contrato:
 
     Burrito
@@ -78,6 +82,9 @@ Los 3 contratos deben inicializarse antes de su uso, por lo que lo haremos con l
 
     STRW-TOKEN
     near call $ID init_contract '{"owner_id": "yairnava.testnet", "treasury_id": "yairnh.testnet", "strw_mint_cost": 600000, "strw_reset_cost": 30000, "strw_evolve_cost": 100000}' --accountId $ID
+
+    PVE Battle
+    near call $ID init_contract '{"owner_id":"'$ID'"}' --accountId $ID
 
 ### Burritos
 
@@ -125,7 +132,7 @@ Obtener cantidad de batallas activas Player vs CPU:
 
 Obtener la sala activa del jugador Player vs CPU
 
-    near call $ID get_battle_active_cpu '{}' --accountId yairnava.testnet
+    near call $ID get_battle_active '{}' --accountId yairnava.testnet
 
 Crear una partida Jugador vs CPU:
 

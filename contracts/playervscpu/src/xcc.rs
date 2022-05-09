@@ -17,13 +17,15 @@ pub trait ExternsContract {
     fn get_burrito(&self,account_id: String, burrito_id: TokenId) -> Burrito;
     fn decrease_burrito_hp(&self, burrito_id: TokenId) -> Burrito;
     fn increment_burrito_wins(&self, burrito_id: TokenId) -> Burrito;
-}
+    fn get_items_for_battle_cpu(&self, 
+        accesorio1_burrito1_id: TokenId, accesorio2_burrito1_id: TokenId, accesorio3_burrito1_id: TokenId
+    ) -> AccessoriesForBattle;}
 
 #[ext_contract(ext_self)]
 trait NonFungibleTokenResolver {
     fn get_winner(&mut self,burrito1_id: TokenId,burrito2_id: TokenId) -> String;
     fn burrito_level_up(&mut self,burrito_id: TokenId) -> String;
-    fn new_burrito(&mut self,token_owner_id: AccountId, token_metadata: TokenMetadata) -> String;
+    //fn new_burrito(&mut self,token_owner_id: AccountId, token_metadata: TokenMetadata) -> String;
     fn reset_conditions(&mut self,burrito_id: TokenId) -> String;
 
     fn save_burritos_battle_room(&mut self,burrito_id: TokenId,accesorio1_id: TokenId, accesorio2_id: TokenId, accesorio3_id: TokenId) -> String;

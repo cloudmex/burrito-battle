@@ -21,7 +21,7 @@ mod migrate;
 pub const BURRITO_CONTRACT: &str = "dev-1651263302596-56131886215172";
 pub const ITEMS_CONTRACT: &str = "dev-1647986467816-61735125036881";
 pub const STRWTOKEN_CONTRACT: &str = "dev-1648843322449-70578827831792";
-pub const PVE_CONTRACT: &str = "dev-1651605259094-92651837264879";
+pub const PVE_CONTRACT: &str = "dev-1651865631187-89397346107880";
 
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Clone)]
 #[serde(crate = "near_sdk::serde")]

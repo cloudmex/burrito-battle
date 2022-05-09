@@ -1,7 +1,7 @@
 use near_sdk::{
     env, serde_json::json
 };
-
+pub type TokenId = String;
 use crate::*;
 
 const GAS_FOR_RESOLVE_TRANSFER: Gas = Gas(10_000_000_000_000);
@@ -60,7 +60,7 @@ impl Contract {
     }
 
     // Guardar sala de combate Player vs CPU
-    pub fn create_battle_player_cpu(&mut self, burrito_id: TokenId, accesorio1_id: TokenId, accesorio2_id: TokenId, accesorio3_id: TokenId) -> Promise {
+    pub fn create_battle_player_cpu(&mut self, burrito_id: TokenId, accesorio1_id: TokenId, accesorio2_id: TokenId, accesorio3_id: TokenId) {
         let token_owner_id = env::signer_account_id();
 
         let br = self.battle_rooms.get(&token_owner_id.to_string());
@@ -83,11 +83,12 @@ impl Contract {
         }
 
         // Mandar a llamar al contrato de burritos para obtener la información del mismo
-        let p = ext_nft::get_burrito(
-            burrito_id,
+        ext_nft::get_burrito(
+            token_owner_id.clone().to_string(),
+            burrito_id.clone(),
             BURRITO_CONTRACT.parse::<AccountId>().unwrap(),
             NO_DEPOSIT,
-            MIN_GAS_FOR_NFT_TRANSFER_CALL
+            MIN_GAS_FOR_NFT_TRANSFER_CALL        
         )
         .then(ext_self::save_burritos_battle_room(
             burrito_id,
@@ -98,12 +99,10 @@ impl Contract {
             NO_DEPOSIT,
             GAS_FOR_NFT_TRANSFER_CALL
         ));
-
-        p
     }
 
     // Recuperar información de los burritos y guardarla en la sala de batalla
-    pub fn save_burritos_battle_room(&mut self, burrito_id: TokenId, accesorio1_id: TokenId, accesorio2_id: TokenId, accesorio3_id: TokenId) -> Promise {
+    pub fn save_burritos_battle_room(&mut self, burrito_id: TokenId, accesorio1_id: TokenId, accesorio2_id: TokenId, accesorio3_id: TokenId) {
         assert_eq!(
             env::promise_results_count(),
             1,
@@ -111,26 +110,34 @@ impl Contract {
         );
         match env::promise_result(0) {
             PromiseResult::NotReady => unreachable!(),
-            PromiseResult::Failed => "oops!".to_string(),
+            PromiseResult::Failed => env::log_str("Ops..."),
             PromiseResult::Successful(result) => {
+
                 let value = std::str::from_utf8(&result).unwrap();
                 let burrito_for_battle: Burrito = serde_json::from_str(&value).unwrap();
 
+
+                env::log(
+                    json!(burrito_for_battle)
+                    .to_string()
+                    .as_bytes(),
+                );
+
                 // Obtener información de los accesorios para ver si existen y recuperar las estadísticas a aumentar
-                let p = ext_nft::get_items_for_battle_cpu(
+                ext_nft::get_items_for_battle_cpu(
                     accesorio1_id.to_string(), // Id el item 1 del burrito
                     accesorio2_id.to_string(), // Id el item 2 del burrito
                     accesorio3_id.to_string(), // Id el item 3 del burrito
                     ITEMS_CONTRACT.parse::<AccountId>().unwrap(), // Contrato de items
                     NO_DEPOSIT, // yocto NEAR a ajuntar
-                    MIN_GAS_FOR_NFT_TRANSFER_CALL // gas a ajuntar
+                    GAS_FOR_RESOLVE_TRANSFER // gas a ajuntar
                 )
                 .then(ext_self::save_battle_player_cpu(
                     burrito_id,
                     burrito_for_battle,
-                    BURRITO_CONTRACT.parse::<AccountId>().unwrap(), // Contrato de burritos
+                    PVE_CONTRACT.parse::<AccountId>().unwrap(), // Contrato de burritos
                     NO_DEPOSIT, // yocto NEAR a ajuntar al callback
-                    GAS_FOR_NFT_TRANSFER_CALL // gas a ajuntar al callback
+                    GAS_FOR_RESOLVE_TRANSFER // gas a ajuntar al callback
                 ));
             }
         }
@@ -147,13 +154,21 @@ impl Contract {
             PromiseResult::NotReady => unreachable!(),
             PromiseResult::Failed => "oops!".to_string(),
             PromiseResult::Successful(result) => {
+                
                 let value = std::str::from_utf8(&result).unwrap();
                 let accessories_for_battle: AccessoriesForBattle = serde_json::from_str(&value).unwrap();
-
                 let token_owner_id = env::signer_account_id();
 
-                // Obtener metadata burrito 1
-                let burrito_for_battle = burrito_for_battle;
+                let extradatajson_burrito = ExtraBurrito {
+                    burrito_type: burrito_for_battle.burrito_type.clone().to_string(),
+                    hp : burrito_for_battle.hp.clone().to_string(),
+                    attack : burrito_for_battle.attack.clone().to_string(),
+                    defense : burrito_for_battle.defense.clone().to_string(),
+                    speed : burrito_for_battle.speed.clone().to_string(),
+                    win : burrito_for_battle.win.clone().to_string(),
+                    global_win : burrito_for_battle.global_win.clone().to_string(),
+                    level : burrito_for_battle.level.clone().to_string()
+                };
     
                 if burrito_for_battle.hp.clone().parse::<u8>().unwrap() == 0 {
                     env::panic_str("El Burrito a utilizar no tiene vidas");
@@ -407,7 +422,7 @@ impl Contract {
                     burrito_cpu_speed : burrito_cpu.speed.to_string()
                 };
         
-                self.battle_room_cpu.insert(token_owner_id.clone().to_string(),info.clone());
+                self.battle_rooms.insert(token_owner_id.clone().to_string(),info.clone());
         
                 env::log(
                     json!(info.clone())
@@ -424,6 +439,8 @@ impl Contract {
 
     // Rendirse y finalizar batalla Player vs CPU
     pub fn surrender_cpu(&mut self) -> String {
+        let token_owner_id = env::signer_account_id();
+
         let br = self.battle_rooms.get(&token_owner_id.to_string());
         
         if br.is_none() {
@@ -436,9 +453,9 @@ impl Contract {
             status : info.status.to_string(),
             player_id : info.player_id.to_string(),
             burrito_id : info.burrito_id.to_string(),
-            attack_b1 : info.attack.clone(),
-            defense_b1 : info.defense.clone(),
-            speed_b1 : info.speed.clone(),
+            attack_b1 : info.attack_b1.clone(),
+            defense_b1 : info.defense_b1.clone(),
+            speed_b1 : info.speed_b1.clone(),
             accesories_attack_b1 : info.accesories_attack_b1.to_string(),
             accesories_defense_b1 : info.accesories_defense_b1.to_string(),
             accesories_speed_b1 : info.accesories_speed_b1.to_string(),
@@ -470,7 +487,7 @@ impl Contract {
         self.battle_history.insert(battle_room.player_id.to_string()+&"-".to_string()+ &self.battle_history.len().to_string(),info);
 
         // Eliminar sala
-        self.battle_room_cpu.remove(&token_owner_id.to_string());
+        self.battle_rooms.remove(&token_owner_id.to_string());
 
         // Mandar a llamar al contrato de burritos para modificar la informacion del burrito perdedor
         let p = ext_nft::decrease_burrito_hp(
@@ -488,7 +505,7 @@ impl Contract {
     pub fn battle_player_cpu(&mut self, type_move: String) -> String {
         let token_owner_id = env::signer_account_id();
 
-        let br = self.battle_room_cpu.get(&token_owner_id.to_string());
+        let br = self.battle_rooms.get(&token_owner_id.to_string());
         
         if br.is_none() {
             env::panic_str("No tienes una batalla activa");
@@ -500,9 +517,9 @@ impl Contract {
             status : info.status.to_string(),
             player_id : info.player_id.to_string(),
             burrito_id : info.burrito_id.clone().to_string(),
-            attack_b1 : info.attack.clone(),
-            defense_b1 : info.defense.clone(),
-            speed_b1 : info.speed.clone(),
+            attack_b1 : info.attack_b1.clone(),
+            defense_b1 : info.defense_b1.clone(),
+            speed_b1 : info.speed_b1.clone(),
             accesories_attack_b1 : info.accesories_attack_b1.to_string(),
             accesories_defense_b1 : info.accesories_defense_b1.to_string(),
             accesories_speed_b1 : info.accesories_speed_b1.to_string(),
@@ -555,8 +572,8 @@ impl Contract {
                 if use_shield % 2 == 1 {
                     old_battle_room.shields_cpu = (old_battle_room.shields_cpu.parse::<u8>().unwrap()-1).to_string();
                     old_battle_room.turn = "CPU".to_string();
-                    self.battle_room_cpu.remove(&old_battle_room.player_id);
-                    self.battle_room_cpu.insert(old_battle_room.player_id.to_string(),old_battle_room.clone());
+                    self.battle_rooms.remove(&old_battle_room.player_id);
+                    self.battle_rooms.insert(old_battle_room.player_id.to_string(),old_battle_room.clone());
                     log!("CPU utilizó escudo");
                     return str::replace(&serde_json::to_string(&old_battle_room.clone()).unwrap(), "\"", "'");
                 }
@@ -579,8 +596,8 @@ impl Contract {
             if type_move == "4"{
                 old_battle_room.shields_player = (old_battle_room.shields_player.parse::<u8>().unwrap()-1).to_string();
                 old_battle_room.turn = "Player".to_string();
-                self.battle_room_cpu.remove(&old_battle_room.player_id);
-                self.battle_room_cpu.insert(old_battle_room.player_id.to_string(),old_battle_room.clone());
+                self.battle_rooms.remove(&old_battle_room.player_id);
+                self.battle_rooms.insert(old_battle_room.player_id.to_string(),old_battle_room.clone());
                 log!("Jugador utilizó escudo");
                 return str::replace(&serde_json::to_string(&old_battle_room.clone()).unwrap(), "\"", "'");
             }
@@ -703,7 +720,7 @@ impl Contract {
                 };
                 self.battle_history.insert(old_battle_room.player_id.to_string()+&"-".to_string()+ &self.battle_history.len().to_string(),info);
                 // Eliminar sala activa
-                self.battle_room_cpu.remove(&old_battle_room.player_id);
+                self.battle_rooms.remove(&old_battle_room.player_id);
                 log!("Batalla Finalizada, Ganó Jugador");
 
                 // Minar recompensa STRW Tokens
@@ -754,8 +771,8 @@ impl Contract {
             } else {
                 old_battle_room.health_cpu = new_health_burrito_defender.to_string();
                 old_battle_room.turn = "CPU".to_string();
-                self.battle_room_cpu.remove(&old_battle_room.player_id);
-                self.battle_room_cpu.insert(old_battle_room.player_id.to_string(),old_battle_room.clone());
+                self.battle_rooms.remove(&old_battle_room.player_id);
+                self.battle_rooms.insert(old_battle_room.player_id.to_string(),old_battle_room.clone());
             }
         } else {
             if new_health_burrito_defender <= 0.0 {
@@ -768,7 +785,7 @@ impl Contract {
                 };
                 self.battle_history.insert(old_battle_room.player_id.to_string()+&"-".to_string()+ &self.battle_history.len().to_string(),info);
                 // Eliminar sala activa
-                self.battle_room_cpu.remove(&old_battle_room.player_id);
+                self.battle_rooms.remove(&old_battle_room.player_id);
                 log!("Batalla Finalizada, Ganó CPU");
 
                 // Restar una vida al burrito
@@ -783,8 +800,8 @@ impl Contract {
             } else {
                 old_battle_room.health_player = new_health_burrito_defender.to_string();
                 old_battle_room.turn = "Player".to_string();
-                self.battle_room_cpu.remove(&old_battle_room.player_id);
-                self.battle_room_cpu.insert(old_battle_room.player_id.to_string(),old_battle_room.clone());
+                self.battle_rooms.remove(&old_battle_room.player_id);
+                self.battle_rooms.insert(old_battle_room.player_id.to_string(),old_battle_room.clone());
             }                
         }
 

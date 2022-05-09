@@ -346,25 +346,25 @@ impl Contract {
     pub fn decrease_burrito_hp(&mut self, burrito_id: TokenId) -> String {
         self.assert_whitelist(env::predecessor_account_id());
 
-        let metadata = self.token_metadata_by_id.get(&burrito_id).unwrap();
+        let mut metadata = self.token_metadata_by_id.get(&burrito_id).unwrap();
         let token = self.tokens_by_id.get(&burrito_id);        
 
         let newextradata = str::replace(&metadata.extra.as_ref().unwrap().to_string(), "'", "\"");
-        let extradatajson: ExtraBurrito = serde_json::from_str(&newextradata).unwrap();
+        let mut extradatajson: ExtraBurrito = serde_json::from_str(&newextradata).unwrap();
         
         // Crear estructura burrito
         let burrito = Burrito {
             owner_id : token.unwrap().owner_id.to_string(),
             name : metadata.title.as_ref().unwrap().to_string(),
             description : metadata.description.as_ref().unwrap().to_string(),
-            burrito_type : extradatajson.burrito_type,
-            hp : extradatajson.hp,
-            attack : extradatajson.attack,
-            defense : extradatajson.defense,
-            speed : extradatajson.speed,
-            win : extradatajson.win,
-            global_win : extradatajson.global_win,
-            level : extradatajson.level,
+            burrito_type : extradatajson.burrito_type.clone(),
+            hp : extradatajson.hp.clone(),
+            attack : extradatajson.attack.clone(),
+            defense : extradatajson.defense.clone(),
+            speed : extradatajson.speed.clone(),
+            win : extradatajson.win.clone(),
+            global_win : extradatajson.global_win.clone(),
+            level : extradatajson.level.clone(),
             media : metadata.media.as_ref().unwrap().to_string()
         };
 
@@ -377,32 +377,32 @@ impl Contract {
 
         self.token_metadata_by_id.insert(&burrito_id, &metadata);
 
-        "Contador de vidas decrementado".to_string
+        "Contador de vidas decrementado".to_string()
 
     }
 
     pub fn increment_burrito_wins(&mut self, burrito_id: TokenId) -> String {
         self.assert_whitelist(env::predecessor_account_id());
 
-        let metadata = self.token_metadata_by_id.get(&burrito_id).unwrap();
+        let mut metadata = self.token_metadata_by_id.get(&burrito_id).unwrap();
         let token = self.tokens_by_id.get(&burrito_id);        
 
         let newextradata = str::replace(&metadata.extra.as_ref().unwrap().to_string(), "'", "\"");
-        let extradatajson: ExtraBurrito = serde_json::from_str(&newextradata).unwrap();
+        let mut extradatajson: ExtraBurrito = serde_json::from_str(&newextradata).unwrap();
         
         // Crear estructura burrito
         let burrito = Burrito {
             owner_id : token.unwrap().owner_id.to_string(),
             name : metadata.title.as_ref().unwrap().to_string(),
             description : metadata.description.as_ref().unwrap().to_string(),
-            burrito_type : extradatajson.burrito_type,
-            hp : extradatajson.hp,
-            attack : extradatajson.attack,
-            defense : extradatajson.defense,
-            speed : extradatajson.speed,
-            win : extradatajson.win,
-            global_win : extradatajson.global_win,
-            level : extradatajson.level,
+            burrito_type : extradatajson.burrito_type.clone(),
+            hp : extradatajson.hp.clone(),
+            attack : extradatajson.attack.clone(),
+            defense : extradatajson.defense.clone(),
+            speed : extradatajson.speed.clone(),
+            win : extradatajson.win.clone(),
+            global_win : extradatajson.global_win.clone(),
+            level : extradatajson.level.clone(),
             media : metadata.media.as_ref().unwrap().to_string()
         };
 
@@ -424,6 +424,6 @@ impl Contract {
 
         self.token_metadata_by_id.insert(&burrito_id, &metadata);
 
-        "Contador de victorias incrementado".to_string
+        "Contador de victorias incrementado".to_string()
     }
 }

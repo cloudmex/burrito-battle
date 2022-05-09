@@ -5,7 +5,7 @@ use near_sdk::json_types::{Base64VecU8, U128};
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::{
     env, log, near_bindgen, AccountId, Balance, CryptoHash, PanicOnDefault, Promise, PromiseOrValue,
-    PromiseResult, Gas, require
+    PromiseResult, Gas, require, BorshStorageKey
 };
 
 use crate::internal::*;
@@ -13,8 +13,8 @@ use crate::internal::*;
 pub use crate::burritos::*;
 pub use crate::evolve::*;
 pub use crate::reset_conditions::*;
-pub use crate::fights_cpu::*;
-pub use crate::fights_pvp::*;
+//pub use crate::fights_cpu::*;
+//pub use crate::fights_pvp::*;
 
 pub use crate::metadata::*;
 pub use crate::nft_core::*;
@@ -29,8 +29,8 @@ mod internal;
 mod burritos;
 mod evolve;
 mod reset_conditions;
-mod fights_cpu;
-mod fights_pvp;
+//mod fights_cpu;
+//mod fights_pvp;
 mod whitelist;
 
 mod approval; 
@@ -75,7 +75,7 @@ pub struct Burrito {
     media : String
 }
 
-#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Debug)]
+#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Debug, Clone)]
 #[serde(crate = "near_sdk::serde")]
 pub struct ExtraBurrito {
     burrito_type: String,
@@ -159,7 +159,7 @@ pub struct AccessoriesForBattle {
     final_speed_b2 : String,
 }
 
-#[derive(BorshDeserialize, BorshSerialize,Clone)]
+#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct ExternalContract {
     register_address: AccountId,
@@ -186,9 +186,8 @@ pub struct OldContract {
 
     pub battle_room_cpu: HashMap<String,BattleCPU>,
     pub battle_room_pvp: HashMap<String,BattlePVP>,
-    pub battle_history: HashMap<String,BattlesHistory>
+    pub battle_history: HashMap<String,BattlesHistory>,
     pub whitelist_contracts: LookupMap<AccountId, ExternalContract>
-
 }
 
 #[near_bindgen]
@@ -217,7 +216,7 @@ pub struct Contract {
 }
 
 /// Helper structure for keys of the persistent collections.
-#[derive(BorshSerialize)]
+#[derive(BorshStorageKey, BorshSerialize)]
 pub enum StorageKey {
     TokensPerOwner,
     TokenPerOwnerInner { account_id_hash: CryptoHash },

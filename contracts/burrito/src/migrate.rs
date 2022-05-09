@@ -61,7 +61,8 @@ impl Contract {
             metadata:old_state.metadata,
             battle_room_cpu: old_state.battle_room_cpu,
             battle_room_pvp: old_state.battle_room_pvp,
-            battle_history: old_state.battle_history
+            battle_history: old_state.battle_history,
+            whitelist_contracts: old_state.whitelist_contracts
         }
     }
 

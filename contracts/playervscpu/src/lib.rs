@@ -72,9 +72,11 @@ pub struct BattleCPU {
     turn : String, // Player or CPU
     strong_attack_player : String, // 0-3
     shields_player : String, // 0-3
+    start_health_player : String,
     health_player : String,
     strong_attack_cpu : String, // 0-3
     shields_cpu : String, // 0-3
+    start_health_cpu : String,
     health_cpu : String,
     burrito_cpu_level : String,
     burrito_cpu_type : String,

@@ -55,7 +55,7 @@ Ejecute el siguiente comando dentro de cada carpeta (Burrito, Items y STRW-Token
 Asignamos el identificador de nuestro contrato desplegado a una constante (Sustituir el ID por el del contrato desplegado):
 
     Burrito
-    ID=dev-1650397384107-25806085378686
+    ID=dev-1652223519581-24530429724861
     echo $ID
 
     Accesorios
@@ -67,7 +67,7 @@ Asignamos el identificador de nuestro contrato desplegado a una constante (Susti
     echo $ID
 
     PVE Battle
-    ID=dev-1651865631187-89397346107880
+    ID=dev-1652192852652-20987363669756
     echo $ID
 
 Los 3 contratos deben inicializarse antes de su uso, por lo que lo haremos con los siguientes comandos dependiendo del contrato:
@@ -94,7 +94,7 @@ Obtener cantidad de burritos creados:
     
 Crear nuevo burrito:
 
-near call $ID nft_mint '{"token_owner_id": "'yairnh.testnet'", "token_metadata": { "title": "", "description": "", "media": "", "extra":""}}' --accountId yairnava.testnet --deposit 5 --gas=300000000000000
+near call $ID nft_mint '{"token_owner_id": "'yairnava.testnet'", "token_metadata": { "title": "", "description": "", "media": "", "extra":""}}' --accountId yairnava.testnet --deposit 5 --gas=300000000000000
     
 Modificar burrito:
 
@@ -121,54 +121,6 @@ Obtener datos de burritos de un segmento
 Obtener datos de burritos de un usuario por segmento
 
         near call $ID nft_tokens_for_owner '{"account_id": "yairnava.testnet", "from_index": "0", "limit": 50}' --accountId yairnava.testnet
-
-Obtener cantidad de batallas finalizadas:
-
-    near view $ID get_number_battles
-
-Obtener cantidad de batallas activas Player vs CPU:
-
-    near view $ID get_number_battles_actives_cpu
-
-Obtener la sala activa del jugador Player vs CPU
-
-    near call $ID get_battle_active '{}' --accountId yairnava.testnet
-
-Crear una partida Jugador vs CPU:
-
-    near call $ID create_battle_player_cpu '{"burrito_id":"'0'", "accesorio1_id":"'0'", "accesorio2_id":"'1'", "accesorio3_id":"'2'"}' --accountId yairnava.testnet --gas=300000000000000
-
-Rendirse y finalizar combate activo Player vs CPU
-
-    near call $ID surrender_cpu '{}' --accountId yairnava.testnet
-
-Combatir Ronda Player vs CPU [type_move => (1 = Ataque Debil, 2 = Ataque Fuerte, 3 = No Defenderse, 4 = Defenderse)]
-    
-    near call $ID battle_player_cpu '{"type_move":"'1'"}' --accountId yairnava.testnet --gas=300000000000000
-    
-    near call $ID battle_player_cpu '{"type_move":"'2'"}' --accountId yairnava.testnet --gas=300000000000000
-    
-    near call $ID battle_player_cpu '{"type_move":"'3'"}' --accountId yairnava.testnet --gas=300000000000000
-    
-    near call $ID battle_player_cpu '{"type_move":"'4'"}' --accountId yairnava.testnet --gas=300000000000000
-
-Obtener cantidad de batallas activas PvP:
-
-    near view $ID get_number_battles_actives_pvp
-
-Obtener la sala activa del jugador PvP
-
-    near call $ID get_battle_active_pvp '{}' --accountId yairnava.testnet
-
-Borrar todas las salas activas PvP
-
-    near call $ID delete_battles_actives '{}' --accountId yairnava.testnet
-
-Crear una partida Jugador vs CPU:
-
-    near call $ID create_battle_player_pvp '{"burrito_id":"'0'", "accesorio1_id":"'0'", "accesorio2_id":"'0'", "accesorio3_id":"'0'"}' --accountId yairnava.testnet --gas=300000000000000
-
-    near call $ID create_battle_player_pvp '{"burrito_id":"'2'", "accesorio1_id":"'0'", "accesorio2_id":"'0'", "accesorio3_id":"'0'"}' --accountId yairnh.testnet --gas=300000000000000
 
 
 ### Items
@@ -232,6 +184,47 @@ Mostrar STRW-Token en Wallet
 Minar tokens y agregarlos al wallet
 
     near call $ID reward_player '{"player_owner_id": "yairnava.testnet", "tokens_mint" : "1000000000000000000000000000000"}' --accountId $ID --deposit 0.000000000000000000000001
+
+### Player vs CPU
+
+Obtener cantidad de batallas finalizadas:
+
+    near view $ID get_number_battles
+
+Obtener cantidad de batallas activas Player vs CPU:
+
+    near view $ID get_number_battles_actives
+
+Obtener la sala activa del jugador Player vs CPU
+
+    near call $ID get_battle_active '{}' --accountId yairnava.testnet
+
+Crear una partida Jugador vs CPU:
+
+    near call $ID create_battle_player_cpu '{"burrito_id":"'0'", "accesorio1_id":"'0'", "accesorio2_id":"'1'", "accesorio3_id":"'2'"}' --accountId yairnava.testnet --gas=300000000000000
+
+Rendirse y finalizar combate activo Player vs CPU
+
+    near call $ID surrender_cpu '{}' --accountId yairnava.testnet --gas=300000000000000
+
+Combatir Ronda Player vs CPU [type_move => (1 = Ataque Debil, 2 = Ataque Fuerte, 3 = No Defenderse, 4 = Defenderse)]
+    
+    near call $ID battle_player_cpu '{"type_move":"'1'"}' --accountId yairnava.testnet --gas=300000000000000
+    
+    near call $ID battle_player_cpu '{"type_move":"'2'"}' --accountId yairnava.testnet --gas=300000000000000
+    
+    near call $ID battle_player_cpu '{"type_move":"'3'"}' --accountId yairnava.testnet --gas=300000000000000
+    
+    near call $ID battle_player_cpu '{"type_move":"'4'"}' --accountId yairnava.testnet --gas=300000000000000
+
+
+Agregar contrato a Whitelist
+
+    near call $ID add_whitelist '{"address_contract":"'dev-1652192852652-20987363669756'","contract_name":"'PVE'"}' --accountId $ID
+
+Consultar si un contrato esta en Whitelist
+
+    near call $ID is_white_listed  --accountId yairnava.testnet
 
 ## Construido con 🛠️
 

@@ -41,7 +41,7 @@ impl Contract {
     pub fn assert_whitelist(&self, account_id: AccountId) {
         let contract_exist = self.whitelist_contracts.get(&env::predecessor_account_id());
 
-        if !contract_exist.is_none() {
+        if contract_exist.is_none() {
             env::panic_str("No te encuentras registrado en el whitelist");
         }
     }

@@ -18,10 +18,10 @@ mod xcc;
 mod enumerations;
 mod migrate;
 
-pub const BURRITO_CONTRACT: &str = "dev-1652223519581-24530429724861";
+pub const BURRITO_CONTRACT: &str = "dev-1652376462131-97539161016715";
 pub const ITEMS_CONTRACT: &str = "dev-1647986467816-61735125036881";
 pub const STRWTOKEN_CONTRACT: &str = "dev-1648843322449-70578827831792";
-pub const PVE_CONTRACT: &str = "dev-1652192852652-20987363669756";
+pub const PVE_CONTRACT: &str = "dev-1652376335913-86387308955071";
 
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
@@ -66,6 +66,7 @@ pub struct BattleCPU {
     attack_b1 : String,
     defense_b1 : String,
     speed_b1 : String,
+    level_b1 : String,
     accesories_attack_b2 : String,
     accesories_defense_b2 : String,
     accesories_speed_b2 : String,

@@ -55,7 +55,7 @@ Ejecute el siguiente comando dentro de cada carpeta (Burrito, Items y STRW-Token
 Asignamos el identificador de nuestro contrato desplegado a una constante (Sustituir el ID por el del contrato desplegado):
 
     Burrito
-    ID=dev-1652223519581-24530429724861
+    ID=dev-1652376462131-97539161016715
     echo $ID
 
     Accesorios
@@ -67,7 +67,7 @@ Asignamos el identificador de nuestro contrato desplegado a una constante (Susti
     echo $ID
 
     PVE Battle
-    ID=dev-1652192852652-20987363669756
+    ID=dev-1652376335913-86387308955071
     echo $ID
 
 Los 3 contratos deben inicializarse antes de su uso, por lo que lo haremos con los siguientes comandos dependiendo del contrato:
@@ -94,7 +94,7 @@ Obtener cantidad de burritos creados:
     
 Crear nuevo burrito:
 
-near call $ID nft_mint '{"token_owner_id": "'yairnava.testnet'", "token_metadata": { "title": "", "description": "", "media": "", "extra":""}}' --accountId yairnava.testnet --deposit 5 --gas=300000000000000
+near call $ID nft_mint '{"token_owner_id": "'yairnh.testnet'", "token_metadata": { "title": "", "description": "", "media": "", "extra":""}}' --accountId yairnava.testnet --deposit 5 --gas=300000000000000
     
 Modificar burrito:
 
@@ -110,7 +110,7 @@ Restaurar burrito:
 
 Obtener datos de un burrito:
 
-    near view $ID get_burrito '{"burrito_id": "0"}'
+    near call $ID get_burrito '{"burrito_id": "1"}' --accountId yairnava.testnet
 
     near view $ID nft_token '{"token_id": "0"}'
 
@@ -187,6 +187,10 @@ Minar tokens y agregarlos al wallet
 
 ### Player vs CPU
 
+Obtener si una cuenta está en batalla:
+
+    near view $ID is_in_battle '{"account_id": "yairnava.testnet"}'
+
 Obtener cantidad de batallas finalizadas:
 
     near view $ID get_number_battles
@@ -220,7 +224,7 @@ Combatir Ronda Player vs CPU [type_move => (1 = Ataque Debil, 2 = Ataque Fuerte,
 
 Agregar contrato a Whitelist
 
-    near call $ID add_whitelist '{"address_contract":"'dev-1652192852652-20987363669756'","contract_name":"'PVE'"}' --accountId $ID
+    near call $ID add_whitelist '{"address_contract":"'dev-1652376335913-86387308955071'","contract_name":"'PVE'"}' --accountId $ID
 
 Consultar si un contrato esta en Whitelist
 

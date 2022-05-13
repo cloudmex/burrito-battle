@@ -276,6 +276,15 @@ impl Contract {
             env::panic_str("No existe el burrito con el id ingresado");
         }
     
+        // Validar que el burrito pertenezca al signer
+        let account_id = env::signer_account_id();
+        let token = self.tokens_by_id.get(&burrito_id.clone());        
+        let owner_id = token.unwrap().owner_id.to_string();
+
+        if account_id.clone() != owner_id.clone().parse::<AccountId>().unwrap() {
+            env::panic_str("El burrito no te pertenece");
+        }
+
         let metadata = self.token_metadata_by_id.get(&burrito_id).unwrap();
         let token = self.tokens_by_id.get(&burrito_id);        
 

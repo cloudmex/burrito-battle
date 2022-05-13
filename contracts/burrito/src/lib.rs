@@ -46,9 +46,10 @@ pub const NFT_METADATA_SPEC: &str = "nft-1.0.0";
 /// This is the name of the NFT standard we're using
 pub const NFT_STANDARD_NAME: &str = "nep171";
 
-pub const BURRITO_CONTRACT: &str = "dev-1652223519581-24530429724861";
+pub const BURRITO_CONTRACT: &str = "dev-1652376462131-97539161016715";
 pub const ITEMS_CONTRACT: &str = "dev-1647986467816-61735125036881";
 pub const STRWTOKEN_CONTRACT: &str = "dev-1648843322449-70578827831792";
+pub const PVE_CONTRACT: &str = "dev-1652376335913-86387308955071";
 
 pub const BURRITO1: &str = "QmULzZNvTGrRxEMvFVYPf1qaBc4tQtz6c3MVGgRNx36gAq";
 pub const BURRITO2: &str = "QmZEK32JEbJH3rQtXL9BqQJa2omXfpjuXGjbFXLiV2Ge9D";

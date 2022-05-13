@@ -13,8 +13,6 @@ use crate::internal::*;
 pub use crate::burritos::*;
 pub use crate::evolve::*;
 pub use crate::reset_conditions::*;
-//pub use crate::fights_cpu::*;
-//pub use crate::fights_pvp::*;
 
 pub use crate::metadata::*;
 pub use crate::nft_core::*;
@@ -29,8 +27,6 @@ mod internal;
 mod burritos;
 mod evolve;
 mod reset_conditions;
-//mod fights_cpu;
-//mod fights_pvp;
 mod whitelist;
 
 mod approval; 

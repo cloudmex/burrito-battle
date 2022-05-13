@@ -151,7 +151,8 @@ impl Contract {
            
 
                    self.token_metadata_by_id.insert(&burrito_id, &metadata_burrito);
-   
+                   log!("{}",burrito_id);
+
                    "Burrito Evolucionado".to_string()
                }
            }

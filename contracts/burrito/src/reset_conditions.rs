@@ -68,6 +68,8 @@ impl Contract {
                 metadata_burrito.extra = Some(extra_string_burrito.clone());
         
                 self.token_metadata_by_id.insert(&burrito_id, &metadata_burrito);
+                log!("{}",burrito_id);
+
 
                 "Burrito Restaurado".to_string()
             }

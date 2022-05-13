@@ -435,4 +435,111 @@ impl Contract {
 
         "Contador de victorias incrementado".to_string()
     }
+
+    pub fn burrito_ready_evolve(&mut self, burrito_id: TokenId) -> String {
+
+        let mut metadata = self.token_metadata_by_id.get(&burrito_id).unwrap();
+        let token = self.tokens_by_id.get(&burrito_id);        
+
+        let newextradata = str::replace(&metadata.extra.as_ref().unwrap().to_string(), "'", "\"");
+        let mut extradatajson: ExtraBurrito = serde_json::from_str(&newextradata).unwrap();
+        
+        // Crear estructura burrito
+        let burrito = Burrito {
+            owner_id : token.unwrap().owner_id.to_string(),
+            name : metadata.title.as_ref().unwrap().to_string(),
+            description : metadata.description.as_ref().unwrap().to_string(),
+            burrito_type : extradatajson.burrito_type.clone(),
+            hp : extradatajson.hp.clone(),
+            attack : extradatajson.attack.clone(),
+            defense : extradatajson.defense.clone(),
+            speed : extradatajson.speed.clone(),
+            win : extradatajson.win.clone(),
+            global_win : extradatajson.global_win.clone(),
+            level : extradatajson.level.clone(),
+            media : metadata.media.as_ref().unwrap().to_string()
+        };
+
+        extradatajson.win = "10".to_string();
+
+        let mut extra_string_burrito = serde_json::to_string(&extradatajson).unwrap();
+        extra_string_burrito = str::replace(&extra_string_burrito, "\"", "'");
+        metadata.extra = Some(extra_string_burrito.clone());
+
+        self.token_metadata_by_id.insert(&burrito_id, &metadata);
+
+        "Burrito listo para evolucionar".to_string()
+    }
+
+    pub fn burrito_ready_reset(&mut self, burrito_id: TokenId) -> String {
+
+        let mut metadata = self.token_metadata_by_id.get(&burrito_id).unwrap();
+        let token = self.tokens_by_id.get(&burrito_id);        
+
+        let newextradata = str::replace(&metadata.extra.as_ref().unwrap().to_string(), "'", "\"");
+        let mut extradatajson: ExtraBurrito = serde_json::from_str(&newextradata).unwrap();
+        
+        // Crear estructura burrito
+        let burrito = Burrito {
+            owner_id : token.unwrap().owner_id.to_string(),
+            name : metadata.title.as_ref().unwrap().to_string(),
+            description : metadata.description.as_ref().unwrap().to_string(),
+            burrito_type : extradatajson.burrito_type.clone(),
+            hp : extradatajson.hp.clone(),
+            attack : extradatajson.attack.clone(),
+            defense : extradatajson.defense.clone(),
+            speed : extradatajson.speed.clone(),
+            win : extradatajson.win.clone(),
+            global_win : extradatajson.global_win.clone(),
+            level : extradatajson.level.clone(),
+            media : metadata.media.as_ref().unwrap().to_string()
+        };
+
+        extradatajson.hp = "0".to_string();
+
+        let mut extra_string_burrito = serde_json::to_string(&extradatajson).unwrap();
+        extra_string_burrito = str::replace(&extra_string_burrito, "\"", "'");
+        metadata.extra = Some(extra_string_burrito.clone());
+
+        self.token_metadata_by_id.insert(&burrito_id, &metadata);
+
+        "Burrito listo para revivir".to_string()
+    }
+
+    pub fn burrito_increment_win(&mut self, burrito_id: TokenId) -> String {
+
+        let mut metadata = self.token_metadata_by_id.get(&burrito_id).unwrap();
+        let token = self.tokens_by_id.get(&burrito_id);        
+
+        let newextradata = str::replace(&metadata.extra.as_ref().unwrap().to_string(), "'", "\"");
+        let mut extradatajson: ExtraBurrito = serde_json::from_str(&newextradata).unwrap();
+        
+        // Crear estructura burrito
+        let burrito = Burrito {
+            owner_id : token.unwrap().owner_id.to_string(),
+            name : metadata.title.as_ref().unwrap().to_string(),
+            description : metadata.description.as_ref().unwrap().to_string(),
+            burrito_type : extradatajson.burrito_type.clone(),
+            hp : extradatajson.hp.clone(),
+            attack : extradatajson.attack.clone(),
+            defense : extradatajson.defense.clone(),
+            speed : extradatajson.speed.clone(),
+            win : extradatajson.win.clone(),
+            global_win : extradatajson.global_win.clone(),
+            level : extradatajson.level.clone(),
+            media : metadata.media.as_ref().unwrap().to_string()
+        };
+
+        let mut new_win_burrito1 = extradatajson.win.parse::<u8>().unwrap()+1;
+
+        extradatajson.win = new_win_burrito1.to_string();
+
+        let mut extra_string_burrito = serde_json::to_string(&extradatajson).unwrap();
+        extra_string_burrito = str::replace(&extra_string_burrito, "\"", "'");
+        metadata.extra = Some(extra_string_burrito.clone());
+
+        self.token_metadata_by_id.insert(&burrito_id, &metadata);
+
+        "Victorias incrementadas".to_string()
+    }
 }

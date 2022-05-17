@@ -1,4 +1,4 @@
-![Image text](https://github.com/cloudmex/burrito-battle/blob/new_standard/assets/Logotipo.png)
+![Image text](https://github.com/cloudmex/burrito-battle/blob/player_vs_player/assets/Logotipo.png)
 
 ## Descripción 📄
 

@@ -11,13 +11,21 @@ const NO_DEPOSIT: Balance = 0;
 
 #[near_bindgen]
 impl Contract {
-    // Verificar si tiene una sala activa
-    pub fn  is_in_battle (&self, account_id : AccountId) -> bool {
-        let token_owner_id = account_id.clone();
+    
 
-        let br = self.battle_rooms.get(&token_owner_id.to_string());
-        
-        if br.is_none() {
+    // Verificar si tiene una sala activa
+    pub fn  is_in_battle(&self, account_id : AccountId) -> bool {
+        let token_owner_id = env::signer_account_id();
+
+        let rooms_pvp = self.battle_rooms.clone();
+
+        let filter_rooms : HashMap<String,BattlePVP> = rooms_pvp
+        .into_iter()
+        .filter(|(_, v)| 
+            (v.payer1_id == token_owner_id.to_string() || v.payer2_id == token_owner_id.to_string()))
+        .collect();
+
+        if filter_rooms.len() == 0 {
             return false;
         } else {
             return true;
@@ -25,25 +33,40 @@ impl Contract {
     }
 
     // Obtener sala de batalla creada por account_id
-    pub fn get_battle_active(&self) -> BattleCPU {
+    pub fn get_battle_active_pvp(&self) -> BattlePVP {
         let token_owner_id = env::signer_account_id();
 
-        let br = self.battle_rooms.get(&token_owner_id.to_string());
+        let rooms_pvp = self.battle_rooms.clone();
+        let filter_rooms : HashMap<String,BattlePVP> = rooms_pvp
+        .into_iter()
+        .filter(|(_, v)| 
+            (v.payer1_id == token_owner_id.to_string() || v.payer2_id == token_owner_id.to_string()))
+        .collect();
+
+        if filter_rooms.len() == 0 {
+            env::panic_str("No existe sala creada a la que pertenezca esta cuenta");
+        }
         
-        if br.is_none() {
-            env::panic_str("No existe sala creada de esta cuenta");
+        let mut key = "";
+
+        for (k, v) in filter_rooms.iter() {
+            key = k;
         }
 
-        let info = br.unwrap();
+        let info = filter_rooms.get(key).unwrap();
 
-        let battle_room = BattleCPU {
+        env::log(
+            json!(info.clone())
+            .to_string()
+            .as_bytes(),
+        );
+
+        let battle_room = BattlePVP {
             status : info.status.to_string(),
-            player_id : info.player_id.to_string(),
-            burrito_id : info.burrito_id.to_string(),
-            attack_b1 : info.attack_b1.to_string(),
-            defense_b1 : info.defense_b1.to_string(),
-            speed_b1 : info.speed_b1.to_string(),
-            level_b1 : info.level_b1.to_string(),
+            payer1_id : info.payer1_id.to_string(),
+            payer2_id : info.payer2_id.to_string(),
+            burrito_player1_id : info.burrito_player1_id.to_string(),
+            burrito_player2_id : info.burrito_player2_id.to_string(),
             accesories_attack_b1 : info.accesories_attack_b1.to_string(),
             accesories_defense_b1 : info.accesories_defense_b1.to_string(),
             accesories_speed_b1 : info.accesories_speed_b1.to_string(),
@@ -51,29 +74,20 @@ impl Contract {
             accesories_defense_b2 : info.accesories_defense_b2.to_string(),
             accesories_speed_b2 : info.accesories_speed_b2.to_string(),
             turn : info.turn.to_string(),
-            strong_attack_player : info.strong_attack_player.to_string(),
-            shields_player : info.shields_player.to_string(),
-            start_health_player : info.start_health_player.to_string(),
-            health_player : info.health_player.to_string(),
-            strong_attack_cpu : info.strong_attack_cpu.to_string(),
-            shields_cpu : info.shields_cpu.to_string(),
-            start_health_cpu : info.start_health_cpu.to_string(),
-            health_cpu : info.health_cpu.to_string(),
-            burrito_cpu_level : info.burrito_cpu_level.to_string(),
-            burrito_cpu_type : info.burrito_cpu_type.to_string(),
-            burrito_cpu_attack : info.burrito_cpu_attack.to_string(),
-            burrito_cpu_defense : info.burrito_cpu_defense.to_string(),
-            burrito_cpu_speed : info.burrito_cpu_speed.to_string()
+            strong_attack_player1 : info.strong_attack_player1.to_string(),
+            shields_player1 : info.shields_player1.to_string(),
+            health_player1 : info.health_player1.to_string(),
+            strong_attack_player2 : info.strong_attack_player2.to_string(),
+            shields_player2 : info.shields_player2.to_string(),
+            health_player2 : info.health_player2.to_string(),
+            selected_move_player1 : info.selected_move_player1.to_string(),
+            selected_move_player2 : info.selected_move_player2.to_string(),
         };
-
-        env::log(
-            json!(battle_room.clone())
-            .to_string()
-            .as_bytes(),
-        );
 
         battle_room
     }
+
+    // METODOS PROBADOS //
 
     // Guardar sala de combate Player vs CPU
     pub fn create_battle_player_cpu(&mut self, burrito_id: TokenId, accesorio1_id: TokenId, accesorio2_id: TokenId, accesorio3_id: TokenId) {
@@ -866,4 +880,5 @@ impl Contract {
 
         old_battle_room
     }
+
 }

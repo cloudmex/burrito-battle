@@ -85,77 +85,6 @@ pub struct ExtraBurrito {
     level : String
 }
 
-#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Clone)]
-#[serde(crate = "near_sdk::serde")]
-pub struct BattleCPU {
-    status : String, // 1 = On Hold , 2 = In Battle , 3 = Finish
-    payer_id : String,
-    burrito_id : String,
-    accesories_attack_b1 : String,
-    accesories_defense_b1 : String,
-    accesories_speed_b1 : String,
-    accesories_attack_b2 : String,
-    accesories_defense_b2 : String,
-    accesories_speed_b2 : String,
-    turn : String, // Player or CPU
-    strong_attack_player : String, // 0-3
-    shields_player : String, // 0-3
-    health_player : String,
-    strong_attack_cpu : String, // 0-3
-    shields_cpu : String, // 0-3
-    health_cpu : String,
-    burrito_cpu_level : String,
-    burrito_cpu_type : String,
-    burrito_cpu_attack : String,
-    burrito_cpu_defense : String,
-    burrito_cpu_speed : String
-}
-
-#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Clone)]
-#[serde(crate = "near_sdk::serde")]
-pub struct BattlePVP {
-    status : String, // 1 = On Hold , 2 = In Battle , 3 = Finish
-    payer1_id : String,
-    payer2_id : String,
-    burrito_player1_id : String,
-    burrito_player2_id : String,
-    accesories_attack_b1 : String,
-    accesories_defense_b1 : String,
-    accesories_speed_b1 : String,
-    accesories_attack_b2 : String,
-    accesories_defense_b2 : String,
-    accesories_speed_b2 : String,
-    turn : String,
-    strong_attack_player1 : String,
-    shields_player1 : String,
-    health_player1 : String,
-    strong_attack_player2 : String,
-    shields_player2 : String,
-    health_player2 : String,
-    selected_move_player1 : String,
-    selected_move_player2 : String
-}
-
-#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
-#[serde(crate = "near_sdk::serde")]
-pub struct BattlesHistory {
-    payer1_id : String,
-    payer2_id : String,
-    winner : String,
-    status : String, // Battle, Surrender
-}
-
-#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
-#[serde(crate = "near_sdk::serde")]
-pub struct AccessoriesForBattle {
-    final_attack_b1 : String,
-    final_defense_b1 : String,
-    final_speed_b1 : String,
-    final_attack_b2 : String,
-    final_defense_b2 : String,
-    final_speed_b2 : String,
-}
-
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct ExternalContract {
@@ -181,9 +110,6 @@ pub struct OldContract {
     //keeps track of the metadata for the contract
     pub metadata: LazyOption<NFTContractMetadata>,
 
-    pub battle_room_cpu: HashMap<String,BattleCPU>,
-    pub battle_room_pvp: HashMap<String,BattlePVP>,
-    pub battle_history: HashMap<String,BattlesHistory>,
     pub whitelist_contracts: LookupMap<AccountId, ExternalContract>
 }
 
@@ -205,9 +131,6 @@ pub struct Contract {
     //keeps track of the metadata for the contract
     pub metadata: LazyOption<NFTContractMetadata>,
 
-    pub battle_room_cpu: HashMap<String,BattleCPU>,
-    pub battle_room_pvp: HashMap<String,BattlePVP>,
-    pub battle_history: HashMap<String,BattlesHistory>,
     pub whitelist_contracts: LookupMap<AccountId, ExternalContract>
 
 }
@@ -271,9 +194,7 @@ impl Contract {
                 StorageKey::NFTContractMetadata.try_to_vec().unwrap(),
                 Some(&metadata),
             ),
-            battle_room_cpu:HashMap::new(),
-            battle_room_pvp:HashMap::new(),
-            battle_history:HashMap::new(),
+
             whitelist_contracts: LookupMap::new(StorageKey::ContractAllowed)
         };
 

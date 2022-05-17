@@ -11,15 +11,6 @@ const NO_DEPOSIT: Balance = 0;
 
 #[near_bindgen]
 impl Contract {
-    // Obtener cantidad de batallas activas Player vs Player
-    pub fn get_number_battles_actives_pvp(&self) -> u128 {
-        self.battle_room_pvp.len().try_into().unwrap()
-    }
-
-    pub fn delete_battles_actives(&mut self) {
-        self.battle_room_pvp = HashMap::new();
-        self.battle_room_cpu = HashMap::new();
-    }
 
     // Obtener sala de batalla creada por account_id
     pub fn get_battle_active_pvp(&self) -> BattlePVP {
@@ -132,6 +123,7 @@ impl Contract {
 
         p
     }
+
 
     // Guardar sala de combate Player vs Player
     pub fn save_battle_player_pvp(&mut self, burrito_id: TokenId) -> String {

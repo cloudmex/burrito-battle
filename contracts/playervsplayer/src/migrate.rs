@@ -55,11 +55,8 @@ impl Contract {
         env::log_str("old state readed");
         Self {
             owner_id:old_state.owner_id,
-            tokens_per_owner: old_state.tokens_per_owner,
-            tokens_by_id:old_state.tokens_by_id,
-            token_metadata_by_id: old_state.token_metadata_by_id,
-            metadata:old_state.metadata,
-            whitelist_contracts: old_state.whitelist_contracts
+            battle_rooms: old_state.battle_rooms,
+            battle_history: old_state.battle_history
         }
     }
 

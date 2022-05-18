@@ -141,29 +141,41 @@ Obtener datos de un accesorio:
 
 ### STRW-Tokens
 
-Obtener propietario del contrato STRW-Token
+Obtener propietario del contrato
     
     near view $ID get_owner_id
 
-Cambiar propietario del contrato STRW-Token
+Asignar datos del Straw Token al FT
+
+    near call $ID set_meta '{}' --accountId yairnava.testnet
+
+Cambiar propietario del contrato
 
     near call $ID set_owner_id '{"owner_id": "yairnh.testnet"}' --accountId yairnava.testnet
 
-Obtener lista de mineros STRW-Token
+Obtener lista de mineros
     
     near view $ID get_minters
 
-Agregar minero STRW-Token
+Obtener costos
 
-    near call $ID add_minter '{"account_id": "yairnh.testnet"}' --accountId yairnava.testnet --deposit 0.000000000000000000000001
+    near view $ID get_costs
 
-Remover minero STRW-Token
+Cambiar tesorero
 
-    near call $ID remove_minter '{"account_id": "bbtoken.testnet"}' --accountId yairnava.testnet --deposit 0.000000000000000000000001
+    near call $ID set_treasury '{"new_treasury": "yairn.testnet"}' --accountId yairnava.testnet
+
+Agregar minero
+
+    near call $ID add_minter '{"account_id": "yairnh.testnet"}' --accountId yairnava.testnet
+
+Remover minero
+
+    near call $ID remove_minter '{"account_id": "yairnh.testnet"}' --accountId yairnava.testnet
 
 Minar STRW-Token
 
-    near call $ID mint '{"account_id": "yairnava.testnet", "amount" : "1000000000000000000000000000000"}' --accountId yairnava.testnet --deposit 0.000000000000000000000001
+    near call $ID mint '{"account_id": "yairnava.testnet", "amount" : "1000000000000000000000000000000"}' --accountId yairnava.testnet
 
 Obtener balance total de STRW-Token
     
@@ -173,17 +185,13 @@ Obtener balance de una cuenta de STRW-Token
 
     near view $ID ft_balance_of '{"account_id": "yairnava.testnet"}'
 
-Transferir STRW-Token a una cuenta
-
-    near call $ID ft_transfer '{"receiver_id": "yairnh.testnet", "amount" : "1000000000000000000000000000"}' --accountId yairnava.testnet --deposit 0.000000000000000000000001
-
 Mostrar STRW-Token en Wallet
 
-    near call $ID ft_transfer '{"receiver_id": "yairnava.testnet", "amount":"0", "memo":""}' --accountId yairnava.testnet --deposit 0.000000000000000000000001
+    near call $ID ft_transfer '{"receiver_id": "yairnava.testnet", "amount":"0", "memo":""}' --accountId yairnava.testnet
 
-Minar tokens y agregarlos al wallet
+Comprar STRW-Tokens 
 
-    near call $ID reward_player '{"player_owner_id": "yairnava.testnet", "tokens_mint" : "1000000000000000000000000000000"}' --accountId $ID --deposit 0.000000000000000000000001
+    near call $ID buy_tokens '{}' --accountId yairnava.testnet --deposit 1
 
 ### Player vs CPU
 

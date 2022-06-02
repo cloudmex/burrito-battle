@@ -12,7 +12,7 @@ const NO_DEPOSIT: Balance = 0;
 #[near_bindgen]
 impl Contract {
     // Verificar si tiene una sala activa
-    pub fn  is_in_battle (&self, account_id : AccountId) -> bool {
+    pub fn is_in_battle(&self, account_id : AccountId) -> bool {
         let token_owner_id = account_id.clone();
 
         let br = self.battle_rooms.get(&token_owner_id.to_string());
@@ -63,7 +63,8 @@ impl Contract {
             burrito_cpu_type : info.burrito_cpu_type.to_string(),
             burrito_cpu_attack : info.burrito_cpu_attack.to_string(),
             burrito_cpu_defense : info.burrito_cpu_defense.to_string(),
-            burrito_cpu_speed : info.burrito_cpu_speed.to_string()
+            burrito_cpu_speed : info.burrito_cpu_speed.to_string(),
+            rewards : "".to_string()
         };
 
         env::log(
@@ -76,7 +77,7 @@ impl Contract {
     }
 
     // Guardar sala de combate Player vs CPU
-    pub fn create_battle_player_cpu(&mut self, burrito_id: TokenId, accesorio1_id: TokenId, accesorio2_id: TokenId, accesorio3_id: TokenId) {
+    pub fn create_battle_player_cpu(&mut self, burrito_id: TokenId, accesorio1_id: TokenId, accesorio2_id: TokenId, accesorio3_id: TokenId) -> Promise {
         let token_owner_id = env::signer_account_id();
 
         let br = self.battle_rooms.get(&token_owner_id.to_string());
@@ -114,11 +115,11 @@ impl Contract {
             PVE_CONTRACT.parse::<AccountId>().unwrap(),
             NO_DEPOSIT,
             GAS_FOR_NFT_TRANSFER_CALL
-        ));
+        ))
     }
 
     // Recuperar información de los burritos y guardarla en la sala de batalla
-    pub fn save_burritos_battle_room(&mut self, burrito_id: TokenId, accesorio1_id: TokenId, accesorio2_id: TokenId, accesorio3_id: TokenId) {
+    pub fn save_burritos_battle_room(&mut self, burrito_id: TokenId, accesorio1_id: TokenId, accesorio2_id: TokenId, accesorio3_id: TokenId) -> PromiseOrValue<String> {
         assert_eq!(
             env::promise_results_count(),
             1,
@@ -126,7 +127,7 @@ impl Contract {
         );
         match env::promise_result(0) {
             PromiseResult::NotReady => unreachable!(),
-            PromiseResult::Failed => env::log_str("Ops..."),
+            PromiseResult::Failed => near_sdk::PromiseOrValue::Value("Error".to_string()),
             PromiseResult::Successful(result) => {
 
                 let value = std::str::from_utf8(&result).unwrap();
@@ -137,7 +138,7 @@ impl Contract {
                 }
 
                 // Obtener información de los accesorios para ver si existen y recuperar las estadísticas a aumentar
-                ext_nft::get_items_for_battle_cpu(
+                near_sdk::PromiseOrValue::Promise(ext_nft::get_items_for_battle_cpu(
                     accesorio1_id.to_string(), // Id el item 1 del burrito
                     accesorio2_id.to_string(), // Id el item 2 del burrito
                     accesorio3_id.to_string(), // Id el item 3 del burrito
@@ -151,13 +152,13 @@ impl Contract {
                     PVE_CONTRACT.parse::<AccountId>().unwrap(), // Contrato de burritos
                     NO_DEPOSIT, // yocto NEAR a ajuntar al callback
                     GAS_FOR_RESOLVE_TRANSFER // gas a ajuntar al callback
-                ));
+                )))
             }
         }
     }
 
     // Guardar sala de combate Player vs CPU
-    pub fn save_battle_player_cpu(&mut self, burrito_id: TokenId, burrito_for_battle: Burrito) -> String {
+    pub fn save_battle_player_cpu(&mut self, burrito_id: TokenId, burrito_for_battle: Burrito) -> BattleCPU {
         assert_eq!(
             env::promise_results_count(),
             1,
@@ -165,7 +166,40 @@ impl Contract {
         );
         match env::promise_result(0) {
             PromiseResult::NotReady => unreachable!(),
-            PromiseResult::Failed => "oops!".to_string(),
+            PromiseResult::Failed => {
+                let empty_info = BattleCPU {
+                    status : "".to_string(),
+                    player_id : "".to_string(),
+                    burrito_id : "".to_string(),
+                    attack_b1 : "".to_string(),
+                    defense_b1 : "".to_string(),
+                    speed_b1 : "".to_string(),
+                    level_b1 : "".to_string(),
+                    accesories_attack_b1 : "".to_string(),
+                    accesories_defense_b1 : "".to_string(),
+                    accesories_speed_b1 : "".to_string(),
+                    accesories_attack_b2 : "".to_string(),
+                    accesories_defense_b2 : "".to_string(),
+                    accesories_speed_b2 : "".to_string(),
+                    turn : "".to_string(),
+                    strong_attack_player : "".to_string(),
+                    shields_player : "".to_string(),
+                    start_health_player : "".to_string(),
+                    health_player : "".to_string(),
+                    strong_attack_cpu : "".to_string(),
+                    shields_cpu : "".to_string(),
+                    start_health_cpu : "".to_string(),
+                    health_cpu : "".to_string(),
+                    burrito_cpu_level : "".to_string(),
+                    burrito_cpu_type : "".to_string(),
+                    burrito_cpu_attack : "".to_string(),
+                    burrito_cpu_defense : "".to_string(),
+                    burrito_cpu_speed : "".to_string(),
+                    rewards : "".to_string()
+                };
+
+                empty_info
+            },
             PromiseResult::Successful(result) => {
                 
                 let value = std::str::from_utf8(&result).unwrap();
@@ -431,7 +465,8 @@ impl Contract {
                     burrito_cpu_type : burrito_cpu.burrito_type.to_string(),
                     burrito_cpu_attack : burrito_cpu.attack.to_string(),
                     burrito_cpu_defense : burrito_cpu.defense.to_string(),
-                    burrito_cpu_speed : burrito_cpu.speed.to_string()
+                    burrito_cpu_speed : burrito_cpu.speed.to_string(),
+                    rewards : "".to_string()
                 };
         
                 self.battle_rooms.insert(token_owner_id.clone().to_string(),info.clone());
@@ -442,8 +477,8 @@ impl Contract {
                     .as_bytes(),
                 );
 
-                serde_json::to_string(&info).unwrap()
-
+                // serde_json::to_string(&info).unwrap()
+                info
             }
         }
 
@@ -488,7 +523,8 @@ impl Contract {
             burrito_cpu_type : info.burrito_cpu_type.to_string(),
             burrito_cpu_attack : info.burrito_cpu_attack.to_string(),
             burrito_cpu_defense : info.burrito_cpu_defense.to_string(),
-            burrito_cpu_speed : info.burrito_cpu_speed.to_string()
+            burrito_cpu_speed : info.burrito_cpu_speed.to_string(),
+            rewards : "".to_string()
         };
 
         // Mandar a llamar al contrato de burritos para modificar la informacion del burrito perdedor
@@ -555,7 +591,8 @@ impl Contract {
             burrito_cpu_type : info.burrito_cpu_type.to_string(),
             burrito_cpu_attack : info.burrito_cpu_attack.to_string(),
             burrito_cpu_defense : info.burrito_cpu_defense.to_string(),
-            burrito_cpu_speed : info.burrito_cpu_speed.to_string()
+            burrito_cpu_speed : info.burrito_cpu_speed.to_string(),
+            rewards : "".to_string()
         };
 
 
@@ -761,39 +798,40 @@ impl Contract {
                 let mut tokens_mint : f32 = 0.0;
 
                 if burrito_attacker.level.clone().parse::<u8>().unwrap() < 10 {
-                    tokens_mint = 5.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                    tokens_mint = 500.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
                 }
                 if burrito_attacker.level.clone().parse::<u8>().unwrap() >= 10 && burrito_attacker.level.clone().parse::<u8>().unwrap() <= 14 {
-                    tokens_mint = 10.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                    tokens_mint = 1000.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
                 }
                 if burrito_attacker.level.clone().parse::<u8>().unwrap() >= 15 && burrito_attacker.level.clone().parse::<u8>().unwrap() <= 19 {
-                    tokens_mint = 15.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                    tokens_mint = 1500.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
                 }
                 if burrito_attacker.level.clone().parse::<u8>().unwrap() >= 20 && burrito_attacker.level.clone().parse::<u8>().unwrap() <= 24 {
-                    tokens_mint = 25.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                    tokens_mint = 2500.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
                 }
                 if burrito_attacker.level.clone().parse::<u8>().unwrap() >= 25 && burrito_attacker.level.clone().parse::<u8>().unwrap() <= 29 {
-                    tokens_mint = 40.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                    tokens_mint = 4000.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
                 }
                 if burrito_attacker.level.clone().parse::<u8>().unwrap() >= 30 && burrito_attacker.level.clone().parse::<u8>().unwrap() <= 34 {
-                    tokens_mint = 50.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                    tokens_mint = 5000.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
                 }
                 if burrito_attacker.level.clone().parse::<u8>().unwrap() >= 35 && burrito_attacker.level.clone().parse::<u8>().unwrap() <= 39 {
-                    tokens_mint = 55.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
+                    tokens_mint = 5500.0*(burrito_defender.level.clone().parse::<f32>().unwrap()/burrito_attacker.level.clone().parse::<f32>().unwrap());
                 }
                 if burrito_attacker.level.clone().parse::<u8>().unwrap() == 40 {
-                    tokens_mint = 60.0;
+                    tokens_mint = 6000.0;
                 }
 
                 // log!("Tokens a minar {}",tokens_mint*1000000000000000000000000.0);
                 let tokens_to_mint = tokens_mint*1000000000000000000000000.0;
+                old_battle_room.rewards = tokens_mint.clone().to_string();
                 ext_nft::reward_player(
                     old_battle_room.player_id.clone().to_string(),
                     tokens_to_mint.to_string(),
                     STRWTOKEN_CONTRACT.parse::<AccountId>().unwrap(),
-                    0000000000000000000000001,
+                    NO_DEPOSIT,
                     MIN_GAS_FOR_NFT_TRANSFER_CALL
-                ).then(ext_nft::increment_burrito_wins(
+                ).then(ext_nft::increment_burrito_wins( // Incrementar contador de victorias
                     old_battle_room.burrito_id.clone().to_string(),
                     BURRITO_CONTRACT.parse::<AccountId>().unwrap(),
                     NO_DEPOSIT,
@@ -806,7 +844,9 @@ impl Contract {
                     .to_string()
                     .as_bytes(),
                 );
+
                 return old_battle_room;
+
             } else {
                 old_battle_room.health_cpu = new_health_burrito_defender.to_string();
                 old_battle_room.turn = "CPU".to_string();
@@ -829,13 +869,20 @@ impl Contract {
                 self.battle_rooms.remove(&old_battle_room.player_id);
                 // log!("Batalla Finalizada, Ganó CPU");
 
-                // Restar una vida al burrito
-                ext_nft::decrease_burrito_hp(
+                let tokens_to_mint = 300.0*1000000000000000000000000.0;
+                old_battle_room.rewards = "300".to_string();
+                ext_nft::reward_player(
+                    old_battle_room.player_id.clone().to_string(),
+                    tokens_to_mint.to_string(),
+                    STRWTOKEN_CONTRACT.parse::<AccountId>().unwrap(),
+                    NO_DEPOSIT,
+                    MIN_GAS_FOR_NFT_TRANSFER_CALL
+                ).then(ext_nft::decrease_burrito_hp( // Restar una vida al burrito
                     old_battle_room.burrito_id.clone().to_string(),
                     BURRITO_CONTRACT.parse::<AccountId>().unwrap(),
                     NO_DEPOSIT,
-                    MIN_GAS_FOR_NFT_TRANSFER_CALL
-                );
+                    GAS_FOR_NFT_TRANSFER_CALL
+                ));                
 
                 // return str::replace(&serde_json::to_string(&old_battle_room.clone()).unwrap(), "\"", "'");
 
@@ -846,6 +893,7 @@ impl Contract {
                 );
 
                 return old_battle_room;
+
             } else {
                 old_battle_room.health_player = new_health_burrito_defender.to_string();
                 old_battle_room.turn = "Player".to_string();

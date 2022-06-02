@@ -18,9 +18,9 @@ mod xcc;
 mod enumerations;
 mod migrate;
 
-pub const BURRITO_CONTRACT: &str = "dev-1652376462131-97539161016715";
+pub const BURRITO_CONTRACT: &str = "dev-1652924595303-59024384289373";
 pub const ITEMS_CONTRACT: &str = "dev-1647986467816-61735125036881";
-pub const STRWTOKEN_CONTRACT: &str = "dev-1648843322449-70578827831792";
+pub const STRWTOKEN_CONTRACT: &str = "dev-1653415145729-47929415561597";
 pub const PVE_CONTRACT: &str = "dev-1652376335913-86387308955071";
 
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Clone)]
@@ -83,7 +83,8 @@ pub struct BattleCPU {
     burrito_cpu_type : String,
     burrito_cpu_attack : String,
     burrito_cpu_defense : String,
-    burrito_cpu_speed : String
+    burrito_cpu_speed : String,
+    rewards : String
 }
 
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]

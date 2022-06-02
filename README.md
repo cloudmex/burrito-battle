@@ -55,7 +55,7 @@ Ejecute el siguiente comando dentro de cada carpeta (Burrito, Items y STRW-Token
 Asignamos el identificador de nuestro contrato desplegado a una constante (Sustituir el ID por el del contrato desplegado):
 
     Burrito
-    ID=dev-1652376462131-97539161016715
+    ID=dev-1652924595303-59024384289373
     echo $ID
 
     Accesorios
@@ -63,7 +63,7 @@ Asignamos el identificador de nuestro contrato desplegado a una constante (Susti
     echo $ID
 
     STRW-TOKEN
-    ID=dev-1648843322449-70578827831792
+    ID=dev-1653415145729-47929415561597
     echo $ID
 
     PVE Battle
@@ -94,11 +94,11 @@ Obtener cantidad de burritos creados:
     
 Crear nuevo burrito:
 
-near call $ID nft_mint '{"token_owner_id": "'yairnh.testnet'", "token_metadata": { "title": "", "description": "", "media": "", "extra":""}}' --accountId yairnava.testnet --deposit 5 --gas=300000000000000
+near call $ID nft_mint '{"token_owner_id": "'yairnava.testnet'", "token_metadata": { "title": "", "description": "", "media": "", "extra":""}}' --accountId yairnava.testnet --deposit 5 --gas=300000000000000
     
 Modificar burrito:
 
-    near call $ID update_burrito '{"burrito_id": "0", "extra":"{'"'burrito_type'":"'Fuego'","'hp'":"'3'","'attack'":"'7'","'defense'":"'7'","'speed'":"'7'","'level'":"'1'","'win'":"'10'","'global_win'":"'10'"}'"}' --accountId yairnava.testnet 
+    near call $ID update_burrito '{"burrito_id": "15", "extra":"{'"'burrito_type'":"'Eléctrico'","'hp'":"'5'","'attack'":"'25'","'defense'":"'25'","'speed'":"'25'","'level'":"'1'","'win'":"'10'","'global_win'":"'10'"}'"}' --accountId yairnava.testnet 
 
 Evolucionar burrito:
 
@@ -122,6 +122,13 @@ Obtener datos de burritos de un usuario por segmento
 
         near call $ID nft_tokens_for_owner '{"account_id": "yairnava.testnet", "from_index": "0", "limit": 50}' --accountId yairnava.testnet
 
+Agregar contrato a Whitelist
+
+    near call $ID add_whitelist '{"address_contract":"'yairnava.testnet'","contract_name":"'PVE'"}' --accountId $ID
+
+Consultar si un contrato esta en Whitelist
+
+    near call $ID is_white_listed  --accountId yairnava.testnet
 
 ### Items
 
@@ -167,7 +174,7 @@ Cambiar tesorero
 
 Agregar minero
 
-    near call $ID add_minter '{"account_id": "yairnh.testnet"}' --accountId yairnava.testnet
+    near call $ID add_minter '{"account_id": "dev-1652924595303-59024384289373"}' --accountId yairnava.testnet
 
 Remover minero
 
@@ -175,7 +182,7 @@ Remover minero
 
 Minar STRW-Token
 
-    near call $ID mint '{"account_id": "yairnava.testnet", "amount" : "1000000000000000000000000000000"}' --accountId yairnava.testnet
+near call $ID mint '{"account_id": "cristian-zambrano.testnet", "amount" : "100000000000000000000000000000000"}' --accountId yairnava.testnet
 
 Obtener balance total de STRW-Token
     
@@ -187,7 +194,11 @@ Obtener balance de una cuenta de STRW-Token
 
 Mostrar STRW-Token en Wallet
 
-    near call $ID ft_transfer '{"receiver_id": "yairnava.testnet", "amount":"0", "memo":""}' --accountId yairnava.testnet
+    near call $ID ft_transfer '{"receiver_id": "cristian-zambrano.testnet", "amount":"0", "memo":""}' --accountId yairnava.testnet
+
+Verificar si una cuenta puede comprar tokens
+
+    near view $ID can_buy_tokens '{"account_id": "yairnava.testnet"}'
 
 Comprar STRW-Tokens 
 
@@ -213,7 +224,7 @@ Obtener la sala activa del jugador Player vs CPU
 
 Crear una partida Jugador vs CPU:
 
-    near call $ID create_battle_player_cpu '{"burrito_id":"'0'", "accesorio1_id":"'0'", "accesorio2_id":"'1'", "accesorio3_id":"'2'"}' --accountId yairnava.testnet --gas=300000000000000
+    near call $ID create_battle_player_cpu '{"burrito_id":"'15'", "accesorio1_id":"'0'", "accesorio2_id":"'0'", "accesorio3_id":"'0'"}' --accountId yairnava.testnet --gas=300000000000000
 
 Rendirse y finalizar combate activo Player vs CPU
 
@@ -228,15 +239,6 @@ Combatir Ronda Player vs CPU [type_move => (1 = Ataque Debil, 2 = Ataque Fuerte,
     near call $ID battle_player_cpu '{"type_move":"'3'"}' --accountId yairnava.testnet --gas=300000000000000
     
     near call $ID battle_player_cpu '{"type_move":"'4'"}' --accountId yairnava.testnet --gas=300000000000000
-
-
-Agregar contrato a Whitelist
-
-    near call $ID add_whitelist '{"address_contract":"'dev-1652376335913-86387308955071'","contract_name":"'PVE'"}' --accountId $ID
-
-Consultar si un contrato esta en Whitelist
-
-    near call $ID is_white_listed  --accountId yairnava.testnet
 
 ## Construido con 🛠️
 

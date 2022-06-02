@@ -1,5 +1,4 @@
 use near_sdk::collections::LookupMap;
-
 use near_contract_standards::fungible_token::{
     core::FungibleTokenCore,
     metadata::{FungibleTokenMetadata, FungibleTokenMetadataProvider, FT_METADATA_SPEC},
@@ -11,7 +10,7 @@ use near_sdk::collections::LazyOption;
 use near_sdk::json_types::{ValidAccountId, U128};
 use near_sdk::{
     assert_one_yocto, env, ext_contract, log, near_bindgen, AccountId, Balance, Gas,
-    Promise, PanicOnDefault, PromiseOrValue
+    Promise, PanicOnDefault, PromiseOrValue, serde_json::json
 };
 use std::str;
 
@@ -62,7 +61,9 @@ pub struct MetaToken {
     pub treasury_id: AccountId,
     pub strw_mint_cost: u128,
     pub strw_reset_cost: u128,
-    pub strw_evolve_cost: u128
+    pub strw_evolve_cost: u128,
+    pub buyers: LookupMap<AccountId, String>,
+
 }
 
 #[near_bindgen]
@@ -84,7 +85,8 @@ impl MetaToken {
             treasury_id : treasury_id,
             strw_mint_cost: strw_mint_cost,
             strw_reset_cost: strw_reset_cost,
-            strw_evolve_cost: strw_evolve_cost        
+            strw_evolve_cost: strw_evolve_cost,
+            buyers  : LookupMap::new(b"v".to_vec())      
         }
     }
 
@@ -135,6 +137,11 @@ impl MetaToken {
     pub fn buy_tokens(&mut self) -> String {
         let account_id = env::signer_account_id();
 
+        // Obtener epoca actual
+        let block_timestamp = env::block_timestamp();
+        // Obtener epoca de la ultima compra del usuario
+        let old_timestamp_buyer = self.buyers.get(&account_id);
+
         // Obtener Nears
         let deposit = env::attached_deposit();
 
@@ -142,6 +149,19 @@ impl MetaToken {
             env::panic(
                 format!("NEARS Insuficientes, esta operación cuesta 1 NEAR").as_bytes(),
             );
+        }
+
+        if old_timestamp_buyer.is_none() {
+            self.buyers.insert(&account_id.clone(),&block_timestamp.clone().to_string());
+        } else {
+            // Verificar que la epoca actual sea diferente a la ultima donde realizó una compra
+            if block_timestamp <= (old_timestamp_buyer.clone().unwrap().parse::<u64>().unwrap() + 43200000000000) {
+                env::panic(
+                    format!("Ya realizaste una compra en ésta época, debes esperar a la siguiente").as_bytes(),
+                );
+            } else {
+                self.buyers.insert(&account_id.clone(),&block_timestamp.clone().to_string());
+            }
         }
 
         Promise::new(self.treasury_id.clone()).transfer(deposit as u128);
@@ -171,9 +191,29 @@ impl MetaToken {
         self.mint_into(&account_id.clone(), tokens_to_mint as u128);
         tokens_to_mint.to_string()
     }
+
+    pub fn can_buy_tokens(&self, account_id : AccountId) -> String {
+        let account_id = account_id.clone();
+
+        // Obtener epoca actual
+        let block_timestamp = env::block_timestamp();
+        // Obtener epoca de la ultima compra del usuario
+        let old_timestamp_buyer = self.buyers.get(&account_id);
+
+        if old_timestamp_buyer.is_none() {
+            return "0".to_string();
+        } else {
+            // Verificar que la epoca actual sea diferente a la ultima donde realizó una compra
+            if block_timestamp <= (old_timestamp_buyer.clone().unwrap().parse::<u64>().unwrap() + 43200000000000) {
+                let finish_epoch = (old_timestamp_buyer.clone().unwrap().parse::<u64>().unwrap() + 43200000000000);
+                return finish_epoch.to_string();
+            } else {
+                return "0".to_string();
+            }
+        }
+    }
     
     // Otorgar recompensas a jugador
-    #[payable]
     pub fn reward_player(&mut self, player_owner_id: ValidAccountId, tokens_mint: U128String) {
         self.assert_minter(env::predecessor_account_id());
 

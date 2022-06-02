@@ -39,7 +39,7 @@ pub const NFT_STANDARD_NAME: &str = "nep171";
 
 pub const BURRITO_CONTRACT: &str = "dev-1649297832936-78994825371172";
 pub const ITEMS_CONTRACT: &str = "dev-1649460241791-63781631860612";
-pub const STRWTOKEN_CONTRACT: &str = "dev-1649298440930-33140341611054";
+pub const STRWTOKEN_CONTRACT: &str = "dev-1653415145729-47929415561597";
 
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
 #[serde(crate = "near_sdk::serde")]

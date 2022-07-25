@@ -99,23 +99,27 @@ impl Contract {
             env::panic_str("Los 3 Items a equipar deben ser diferentes");
         }
 
-        // Mandar a llamar al contrato de burritos para obtener la información del mismo
-        ext_nft::get_burrito(
+        let call = ext_nft::get_burrito(
             token_owner_id.clone().to_string(),
             burrito_id.clone(),
             BURRITO_CONTRACT.parse::<AccountId>().unwrap(),
             NO_DEPOSIT,
-            MIN_GAS_FOR_NFT_TRANSFER_CALL        
-        )
-        .then(ext_self::save_burritos_battle_room(
+            Gas(100_000_000_000_000)
+
+        );
+
+        let callback = ext_self::save_burritos_battle_room(
             burrito_id,
             accesorio1_id.to_string(),
             accesorio2_id.to_string(),
             accesorio3_id.to_string(), 
             PVE_CONTRACT.parse::<AccountId>().unwrap(),
             NO_DEPOSIT,
-            GAS_FOR_NFT_TRANSFER_CALL
-        ))
+            Gas(100_000_000_000_000)
+        );
+
+        call.then(callback)
+
     }
 
     // Recuperar información de los burritos y guardarla en la sala de batalla
@@ -138,21 +142,25 @@ impl Contract {
                 }
 
                 // Obtener información de los accesorios para ver si existen y recuperar las estadísticas a aumentar
-                near_sdk::PromiseOrValue::Promise(ext_nft::get_items_for_battle_cpu(
+                let call = ext_nft::get_items_for_battle_cpu(
                     accesorio1_id.to_string(), // Id el item 1 del burrito
                     accesorio2_id.to_string(), // Id el item 2 del burrito
                     accesorio3_id.to_string(), // Id el item 3 del burrito
                     ITEMS_CONTRACT.parse::<AccountId>().unwrap(), // Contrato de items
                     NO_DEPOSIT, // yocto NEAR a ajuntar
-                    GAS_FOR_RESOLVE_TRANSFER // gas a ajuntar
-                )
-                .then(ext_self::save_battle_player_cpu(
+                    Gas(60_000_000_000_000)
+                );
+
+                let callback = ext_self::save_battle_player_cpu(
                     burrito_id,
                     burrito_for_battle,
                     PVE_CONTRACT.parse::<AccountId>().unwrap(), // Contrato de burritos
                     NO_DEPOSIT, // yocto NEAR a ajuntar al callback
-                    GAS_FOR_RESOLVE_TRANSFER // gas a ajuntar al callback
-                )))
+                    Gas(20_000_000_000_000)
+                );
+
+                near_sdk::PromiseOrValue::Promise(call.then(callback))
+
             }
         }
     }
@@ -224,23 +232,17 @@ impl Contract {
                 let rand_level = *env::random_seed().get(4).unwrap();
                 let mut level_cpu: u8 = 0;
 
-                if rand_level > 0 &&  rand_level <= 70 {
+                if rand_level > 0 &&  rand_level <= 65 {
                     level_cpu = extradatajson_burrito.level.clone().parse::<u8>().unwrap();
                 }
-                if rand_level >= 71 &&  rand_level <= 130 {
+                if rand_level >= 66 &&  rand_level <= 130 {
                     level_cpu = extradatajson_burrito.level.clone().parse::<u8>().unwrap() + 1;
                 }
-                if rand_level >= 131 &&  rand_level <= 180 {
+                if rand_level >= 131 &&  rand_level <= 195 {
                     level_cpu = extradatajson_burrito.level.clone().parse::<u8>().unwrap() + 2;
                 }
-                if rand_level >= 181 &&  rand_level <= 220 {
-                    level_cpu = extradatajson_burrito.level.clone().parse::<u8>().unwrap() + 3;
-                }
-                if rand_level >= 221 &&  rand_level <= 250 {
-                    level_cpu = extradatajson_burrito.level.clone().parse::<u8>().unwrap() + 4;
-                }
-                if rand_level >= 251 &&  rand_level < 255 {
-                    level_cpu = extradatajson_burrito.level.clone().parse::<u8>().unwrap() + 5;
+                if rand_level >= 196 &&  rand_level <= 255 {
+                    level_cpu = extradatajson_burrito.level.clone().parse::<u8>().unwrap() + 2;
                 }
 
                 if level_cpu > 40 {
@@ -281,42 +283,42 @@ impl Contract {
                     if rand_attack % 2 == 1 {
                         attack = 5+(burrito_cpu_level.clone());
                     } else {
-                        attack = 5+(burrito_cpu_level.clone()*2);
+                        attack = 5+(burrito_cpu_level.clone()+3);
                     }    
                 }
                 if rand_attack >= 71 &&  rand_attack <= 130 {
                     if rand_attack % 2 == 1 {
                         attack = 6+(burrito_cpu_level.clone());
                     } else {
-                        attack = 6+(burrito_cpu_level.clone()*2);
+                        attack = 6+(burrito_cpu_level.clone()+3);
                     }                 
                 }
                 if rand_attack >= 131 &&  rand_attack <= 180 {
                     if rand_attack % 2 == 1 {
                         attack = 7+(burrito_cpu_level.clone());
                     } else {
-                        attack = 7+(burrito_cpu_level.clone()*2);
+                        attack = 7+(burrito_cpu_level.clone()+3);
                     } 
                 }
                 if rand_attack >= 181 &&  rand_attack <= 220 {
                     if rand_attack % 2 == 1 {
                         attack = 8+(burrito_cpu_level.clone());
                     } else {
-                        attack = 8+(burrito_cpu_level.clone()*2);
+                        attack = 8+(burrito_cpu_level.clone()+3);
                     } 
                 }
                 if rand_attack >= 221 &&  rand_attack <= 250 {
                     if rand_attack % 2 == 1 {
                         attack = 9+(burrito_cpu_level.clone());
                     } else {
-                        attack = 9+(burrito_cpu_level.clone()*2);
+                        attack = 9+(burrito_cpu_level.clone()+3);
                     } 
                 }
                 if rand_attack >= 251 &&  rand_attack < 255 {
                     if rand_attack % 2 == 1 {
                         attack = 10+(burrito_cpu_level.clone());
                     } else {
-                        attack = 10+(burrito_cpu_level.clone()*2);
+                        attack = 10+(burrito_cpu_level.clone()+3);
                     } 
                 }
         
@@ -325,41 +327,41 @@ impl Contract {
                     if rand_defense % 2 == 1 {
                         defense = 5+(burrito_cpu_level.clone());
                     } else {
-                        defense = 5+(burrito_cpu_level.clone()*2);
+                        defense = 5+(burrito_cpu_level.clone()+3);
                     }
                 }
                 if rand_defense >= 71 &&  rand_defense <= 130 {
                     if rand_defense % 2 == 1 {
                         defense = 6+(burrito_cpu_level.clone());
                     } else {
-                        defense = 6+(burrito_cpu_level.clone()*2);
+                        defense = 6+(burrito_cpu_level.clone()+3);
                     }                }
                 if rand_defense >= 131 &&  rand_defense <= 180 {
                     if rand_defense % 2 == 1 {
                         defense = 7+(burrito_cpu_level.clone());
                     } else {
-                        defense = 7+(burrito_cpu_level.clone()*2);
+                        defense = 7+(burrito_cpu_level.clone()+3);
                     }                
                 }
                 if rand_defense >= 181 &&  rand_defense <= 220 {
                     if rand_defense % 2 == 1 {
                         defense = 8+(burrito_cpu_level.clone());
                     } else {
-                        defense = 8+(burrito_cpu_level.clone()*2);
+                        defense = 8+(burrito_cpu_level.clone()+3);
                     }                
                 }
                 if rand_defense >= 221 &&  rand_defense <= 250 {
                     if rand_defense % 2 == 1 {
                         defense = 9+(burrito_cpu_level.clone());
                     } else {
-                        defense = 9+(burrito_cpu_level.clone()*2);
+                        defense = 9+(burrito_cpu_level.clone()+3);
                     }                
                 }
                 if rand_defense >= 251 &&  rand_defense < 255 {
                     if rand_defense % 2 == 1 {
                         defense = 10+(burrito_cpu_level.clone());
                     } else {
-                        defense = 10+(burrito_cpu_level.clone()*2);
+                        defense = 10+(burrito_cpu_level.clone()+3);
                     }                
                 }
         
@@ -368,42 +370,42 @@ impl Contract {
                     if rand_speed % 2 == 1 {
                         speed = 5+(burrito_cpu_level.clone());
                     } else {
-                        speed = 5+(burrito_cpu_level.clone()*2);
+                        speed = 5+(burrito_cpu_level.clone()+3);
                     } 
                 }
                 if rand_speed >= 71 &&  rand_speed <= 130 {
                     if rand_speed % 2 == 1 {
                         speed = 6+(burrito_cpu_level.clone());
                     } else {
-                        speed = 6+(burrito_cpu_level.clone()*2);
+                        speed = 6+(burrito_cpu_level.clone()+3);
                     } 
                 }
                 if rand_speed >= 131 &&  rand_speed <= 180 {
                     if rand_speed % 2 == 1 {
                         speed = 7+(burrito_cpu_level.clone());
                     } else {
-                        speed = 7+(burrito_cpu_level.clone()*2);
+                        speed = 7+(burrito_cpu_level.clone()+3);
                     } 
                 }
                 if rand_speed >= 181 &&  rand_speed <= 220 {
                     if rand_speed % 2 == 1 {
                         speed = 8+(burrito_cpu_level.clone());
                     } else {
-                        speed = 8+(burrito_cpu_level.clone()*2);
+                        speed = 8+(burrito_cpu_level.clone()+3);
                     } 
                 }
                 if rand_speed >= 221 &&  rand_speed <= 250 {
                     if rand_speed % 2 == 1 {
                         speed = 9+(burrito_cpu_level.clone());
                     } else {
-                        speed = 9+(burrito_cpu_level.clone()*2);
+                        speed = 9+(burrito_cpu_level.clone()+3);
                     } 
                 }
                 if rand_speed >= 251 &&  rand_speed < 255 {
                     if rand_speed % 2 == 1 {
                         speed = 10+(burrito_cpu_level.clone());
                     } else {
-                        speed = 10+(burrito_cpu_level.clone()*2);
+                        speed = 10+(burrito_cpu_level.clone()+3);
                     } 
                 }
         
@@ -760,19 +762,26 @@ impl Contract {
 
         // log!("Cantidad de daño a realizar: {}",attack);
 
+        if attack < 1.0 {
+            attack += 2.0;
+        }
+
         // Verificar el tipo de ataque
         if old_battle_room.turn == "Player"{
+            attack += 3.0;
             if type_move == "2"{
-                attack += attack*0.5;
+                attack = attack*2.0;
                 // log!("Cantidad de daño fuerte a realizar: {}",attack);
             }
         } else {
+            attack += 3.0;
             if cpu_type_move == "2"{
-                attack += attack*0.5;
+                attack = attack*2.0;
+                //attack += 10;
                 // log!("Cantidad de daño fuerte a realizar: {}",attack);
             }
         }
-        
+        attack = (attack * 100.0).round() / 100.0;
         let new_health_burrito_defender = old_health_burrito_defender - attack;
         // log!("Vida nueva burrito defensor: {}",new_health_burrito_defender);
         

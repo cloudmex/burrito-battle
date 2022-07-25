@@ -1,5 +1,5 @@
 use near_sdk::{
-    env
+    env, serde_json::json
 };
 
 use crate::*;
@@ -57,7 +57,7 @@ impl Contract {
            ))
        }
    
-       pub fn burrito_level_up(&mut self, burrito_id: TokenId) -> String{
+       pub fn burrito_level_up(&mut self, burrito_id: TokenId) -> Burrito{
            assert_eq!(
                env::promise_results_count(),
                1,
@@ -67,7 +67,24 @@ impl Contract {
            // handle the result from the cross contract call this method is a callback for
            match env::promise_result(0) {
                PromiseResult::NotReady => unreachable!(),
-               PromiseResult::Failed => "oops!".to_string(),
+               PromiseResult::Failed => {
+                let empty_info = Burrito {
+                    owner_id : "".to_string(),
+                    name : "".to_string(),
+                    description : "".to_string(),
+                    burrito_type : "".to_string(),
+                    hp : "".to_string(),
+                    attack : "".to_string(),
+                    defense : "".to_string(),
+                    speed : "".to_string(),
+                    win : "".to_string(),
+                    global_win : "".to_string(),
+                    level : "".to_string(),
+                    media : "".to_string()
+                };
+
+                empty_info
+               },
                PromiseResult::Successful(_result) => {
                    let mut metadata_burrito = self.token_metadata_by_id.get(&burrito_id.clone()).unwrap();
 
@@ -151,9 +168,18 @@ impl Contract {
            
 
                    self.token_metadata_by_id.insert(&burrito_id, &metadata_burrito);
-                   log!("{}",burrito_id);
 
-                   "Burrito Evolucionado".to_string()
+                   //"Burrito Evolucionado".to_string()
+
+                   //burrito_id
+
+                   env::log(
+                    json!(burrito)
+                    .to_string()
+                    .as_bytes(),
+                    );
+
+                   burrito
                }
            }
    

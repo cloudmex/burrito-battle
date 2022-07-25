@@ -37,10 +37,6 @@ pub const NFT_METADATA_SPEC: &str = "nft-1.0.0";
 /// This is the name of the NFT standard we're using
 pub const NFT_STANDARD_NAME: &str = "nep171";
 
-pub const BURRITO_CONTRACT: &str = "dev-1649297832936-78994825371172";
-pub const ITEMS_CONTRACT: &str = "dev-1649460241791-63781631860612";
-pub const STRWTOKEN_CONTRACT: &str = "dev-1653415145729-47929415561597";
-
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Accessory {

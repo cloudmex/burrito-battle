@@ -134,7 +134,7 @@ impl MetaToken {
 
     // Comprar tokens
     #[payable]
-    pub fn buy_tokens(&mut self) -> String {
+    pub fn buy_tokens(&mut self) -> f32 {
         let account_id = env::signer_account_id();
 
         // Obtener epoca actual
@@ -185,11 +185,13 @@ impl MetaToken {
         }
 
         let tokens_to_mint = tokens_mint*1000000000000000000000000.0;
-        log!("{}",tokens_to_mint);
+        log!("{}",tokens_mint);
 
         // Minar tokens
         self.mint_into(&account_id.clone(), tokens_to_mint as u128);
-        tokens_to_mint.to_string()
+        //tokens_to_mint.to_string()
+
+        tokens_mint
     }
 
     pub fn can_buy_tokens(&self, account_id : AccountId) -> String {
@@ -252,10 +254,10 @@ impl MetaToken {
                     format!("NEARS Insuficientes, enviaste {} y necesitas 5000000000000000000000000", &deposit).as_bytes(),
                 );
             }
-
+            // 50,000 STRW
             if balance < self.strw_mint_cost*1000000000000000000000000 {
                 env::panic(
-                    format!("STRW Tokens Insuficientes, tienes {} y necesitas 600000000000000000000000000000", &balance).as_bytes(),
+                    format!("STRW Tokens Insuficientes, tienes {} y necesitas 50000000000000000000000000000", &balance).as_bytes(),
                 );
             }
             strw_cost = self.strw_mint_cost*1000000000000000000000000;
@@ -266,7 +268,7 @@ impl MetaToken {
                     format!("NEARS Insuficientes, enviaste {} y necesitas 1000000000000000000000000", &deposit).as_bytes(),
                 );
             }
-
+            // 30,000 STRW
             if balance < self.strw_reset_cost*1000000000000000000000000 {
                 env::panic(
                     format!("STRW Tokens Insuficientes, tienes {} y necesitas 30000000000000000000000000000", &balance).as_bytes(),
@@ -280,18 +282,72 @@ impl MetaToken {
                     format!("NEARS Insuficientes, enviaste {} y necesitas 2000000000000000000000000", &deposit).as_bytes(),
                 );
             }
-
+            // 70,000 STRW
             if balance < self.strw_evolve_cost*1000000000000000000000000 {
                 env::panic(
-                    format!("STRW Tokens Insuficientes, tienes {} y necesitas 100000000000000000000000000000", &balance).as_bytes(),
+                    format!("STRW Tokens Insuficientes, tienes {} y necesitas 70000000000000000000000000000", &balance).as_bytes(),
                 );
             }
             strw_cost = self.strw_evolve_cost*1000000000000000000000000;
 
         }
-
-        self.internal_burn(&account_id, strw_cost);
+        let receiver_id = self.treasury_id.clone();
+        let memo : Option<String> = Some(String::from("".to_string())) ;     
+        self.internal_transfer(&account_id, &receiver_id, (strw_cost/100)*5, memo);
+        self.internal_burn(&account_id, (strw_cost/100)*95);
         true
+    }
+
+    #[payable]
+    pub fn get_balance_and_transfer_minigames(&mut self, account_id: AccountId, action: String, treasury_id: ValidAccountId) -> bool {
+        self.assert_minter(env::predecessor_account_id());
+
+        // Obtener STRW Tokens del jugador
+        let balance : u128 = self.accounts.get(&account_id).unwrap_or(0).into();
+        
+        // Costo de STRW
+        let mut strw_cost = 0;
+        let memo : Option<String> = Some(String::from("".to_string())) ;     
+        let receiver_id: ValidAccountId = treasury_id;
+
+        // Tipo de operación
+        // 10,000
+        if action == "Incursion" {
+            if balance < 10000000000000000000000000000 {
+                log!("STRW Tokens Insuficientes, tienes {} y necesitas 10000000000000000000000000000");
+                return false;
+            }
+            strw_cost = 10000000000000000000000000000;
+        }
+        
+        self.internal_transfer(&account_id, receiver_id.as_ref(), (strw_cost/100)*5, memo);
+        self.internal_burn(&account_id, (strw_cost/100)*95);
+        return true;
+    }
+
+    #[payable]
+    pub fn get_balance_and_transfer_hospital(&mut self, account_id: AccountId, action: String, treasury_id: ValidAccountId, cost: u128) -> bool {
+        self.assert_minter(env::predecessor_account_id());
+
+        // Obtener STRW Tokens del jugador
+        let balance : u128 = self.accounts.get(&account_id).unwrap_or(0).into();
+        
+        // Costo de STRW
+        let mut strw_cost = 0;
+        let memo : Option<String> = Some(String::from("".to_string())) ;     
+        let receiver_id: ValidAccountId = treasury_id;
+
+        // Tipo de operación
+        if action == "Capsule" {
+            if balance < cost*1000000000000000000000000 {
+                log!("STRW Tokens Insuficientes");
+                return false;
+            }
+            strw_cost = cost*1000000000000000000000000;
+        }
+        self.internal_transfer(&account_id, receiver_id.as_ref(), (strw_cost/100)*5, memo);
+        self.internal_burn(&account_id, (strw_cost/100)*95);
+        return true;
     }
 
     // Obtener costos de STRW Tokens
@@ -300,6 +356,14 @@ impl MetaToken {
         log!("STRW Mint Cost: {}",self.strw_mint_cost);
         log!("STRW Reset Cost: {}",self.strw_reset_cost);
         log!("STRW Evolve Cost: {}",self.strw_evolve_cost);
+    }
+
+    // Cambiar costos de STRW Tokens
+    pub fn set_costs(&mut self, strw_mint_cost: u128, strw_reset_cost: u128, strw_evolve_cost: u128) {
+        self.assert_owner_calling();
+        self.strw_mint_cost = strw_mint_cost;
+        self.strw_reset_cost = strw_reset_cost;
+        self.strw_evolve_cost = strw_evolve_cost;
     }
         
     // Agregar nuevo minero

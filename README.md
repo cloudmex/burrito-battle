@@ -1,4 +1,4 @@
-![Image text](https://github.com/cloudmex/burrito-battle/blob/player_vs_player/assets/Logotipo.png)
+![Image text](https://github.com/cloudmex/burrito-battle/blob/master/assets/Logotipo.png)
 
 ## Descripción 📄
 
@@ -70,12 +70,10 @@ Asignamos el identificador de nuestro contrato desplegado a una constante (Susti
     ID=dev-1652376335913-86387308955071
     echo $ID
 
-Los 3 contratos deben inicializarse antes de su uso, por lo que lo haremos con los siguientes comandos dependiendo del contrato:
+Los 4 contratos deben inicializarse antes de su uso, por lo que lo haremos con los siguientes comandos dependiendo del contrato:
 
     Burrito
     near call $ID init_contract '{"owner_id":"'$ID'"}' --accountId $ID
-
-    near view $ID nft_metadata
 
     Accesorios
     near call $ID init_contract '{"owner_id": "'$ID'"}' --accountId $ID
@@ -98,7 +96,7 @@ near call $ID nft_mint '{"token_owner_id": "'yairnava.testnet'", "token_metadata
     
 Modificar burrito:
 
-    near call $ID update_burrito '{"burrito_id": "15", "extra":"{'"'burrito_type'":"'Eléctrico'","'hp'":"'5'","'attack'":"'25'","'defense'":"'25'","'speed'":"'25'","'level'":"'1'","'win'":"'10'","'global_win'":"'10'"}'"}' --accountId yairnava.testnet 
+    near call $ID update_burrito '{"burrito_id": "151", "extra":"{'"'burrito_type'":"'Volador'","'hp'":"'0'","'attack'":"'10'","'defense'":"'10'","'speed'":"'10'","'level'":"'1'","'win'":"'10'","'global_win'":"'10'"}'"}' --accountId yairnava.testnet 
 
 Evolucionar burrito:
 
@@ -106,17 +104,17 @@ Evolucionar burrito:
 
 Restaurar burrito:
 
-    near call $ID reset_burrito '{"burrito_id": "0"}' --accountId yairnava.testnet --deposit 1 --gas=300000000000000
+    near call $ID reset_burrito '{"burrito_id": "4"}' --accountId yairnava.testnet --deposit 1 --gas=300000000000000
 
 Obtener datos de un burrito:
 
-    near call $ID get_burrito '{"burrito_id": "1"}' --accountId yairnava.testnet
+    near call $ID get_burrito '{"burrito_id": "151"}' --accountId yairnava.testnet
 
-    near view $ID nft_token '{"token_id": "0"}'
+    near view $ID nft_token '{"token_id": "149"}'
 
 Obtener datos de burritos de un segmento
 
-    near call $ID nft_tokens '{"from_index": "0", "limit": 50}' --accountId yairnava.testnet
+    near call $ID nft_tokens '{"from_index": "0", "limit": 50}' --accountId yairnava.testnet --gas=300000000000000
 
 Obtener datos de burritos de un usuario por segmento
 
@@ -124,7 +122,7 @@ Obtener datos de burritos de un usuario por segmento
 
 Agregar contrato a Whitelist
 
-    near call $ID add_whitelist '{"address_contract":"'yairnava.testnet'","contract_name":"'PVE'"}' --accountId $ID
+    near call $ID add_whitelist '{"address_contract":"'dev-1658170507800-83790945510897'","contract_name":"'INCURSIONS'"}' --accountId $ID
 
 Consultar si un contrato esta en Whitelist
 
@@ -168,13 +166,17 @@ Obtener costos
 
     near view $ID get_costs
 
+Actualizar costos
+
+    near call $ID set_costs '{"strw_mint_cost": 50000, "strw_reset_cost": 30000, "strw_evolve_cost": 70000}' --accountId yairnava.testnet
+
 Cambiar tesorero
 
-    near call $ID set_treasury '{"new_treasury": "yairn.testnet"}' --accountId yairnava.testnet
+    near call $ID set_treasury '{"new_treasury": "darkyair.testnet"}' --accountId yairnava.testnet
 
 Agregar minero
 
-    near call $ID add_minter '{"account_id": "dev-1652924595303-59024384289373"}' --accountId yairnava.testnet
+    near call $ID add_minter '{"account_id": "dev-1657319025362-20400432440915"}' --accountId yairnava.testnet
 
 Remover minero
 
@@ -182,7 +184,7 @@ Remover minero
 
 Minar STRW-Token
 
-near call $ID mint '{"account_id": "cristian-zambrano.testnet", "amount" : "100000000000000000000000000000000"}' --accountId yairnava.testnet
+near call $ID mint '{"account_id": "mmoreira.testnet", "amount" : "100000000000000000000000000000"}' --accountId yairnava.testnet
 
 Obtener balance total de STRW-Token
     
@@ -194,7 +196,7 @@ Obtener balance de una cuenta de STRW-Token
 
 Mostrar STRW-Token en Wallet
 
-    near call $ID ft_transfer '{"receiver_id": "cristian-zambrano.testnet", "amount":"0", "memo":""}' --accountId yairnava.testnet
+    near call $ID ft_transfer '{"receiver_id": "cridtinavlous.testnet", "amount":"0", "memo":""}' --accountId yairnava.testnet
 
 Verificar si una cuenta puede comprar tokens
 

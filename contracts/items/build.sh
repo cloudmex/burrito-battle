@@ -12,9 +12,23 @@ fi
 cp target/wasm32-unknown-unknown/release/items.wasm ./res/
 
 echo "¿Quieres desplegar el contrato de items?"
-select yn in "Si" "No"; do
+select yn in "Si" "No"; 
+do
     case $yn in
-        Si ) near dev-deploy --wasmFile res/items.wasm; break;;
+        Si ) 
+                echo "Tipo de despliegue"
+                select option in Dev Account
+                do
+                        case $option in
+                                Dev)
+                                        near dev-deploy --wasmFile res/items.wasm; break;;
+                                Account)
+                                        echo Ingrese la cuenta:
+                                        read account
+                                        near deploy $account --wasmFile res/items.wasm; break;;
+                        esac
+                done
+                break;;
         No ) exit;;
     esac
 done

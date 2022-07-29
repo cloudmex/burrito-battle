@@ -15,7 +15,7 @@ impl Contract {
     pub fn nft_mint(&mut self,token_owner_id: AccountId, token_metadata: TokenMetadata) -> String{
 
         let mut new_item = token_metadata;
-        let item_id: TokenId = (self.token_metadata_by_id.len()).to_string();
+        let item_id: TokenId = (self.token_metadata_by_id.len()+1).to_string();
 
         let newextradata = str::replace(&new_item.extra.as_ref().unwrap().to_string(), "'", "\"");
         let extradatajson: ExtraAccessory = serde_json::from_str(&newextradata).unwrap();
@@ -102,6 +102,10 @@ impl Contract {
         );
 
         serde_json::to_string(&accessory).unwrap()
+    }
+
+    pub fn get_number_accessories(&self) -> u64 {
+        self.token_metadata_by_id.len()
     }
 }
 

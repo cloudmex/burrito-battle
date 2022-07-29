@@ -15,6 +15,23 @@ impl Contract {
     pub fn get_items_for_battle_cpu(&self, 
         accesorio1_burrito1_id: TokenId, accesorio2_burrito1_id: TokenId, accesorio3_burrito1_id: TokenId) -> AccessoriesForBattle  {
 
+        let mut accessories_for_battle = AccessoriesForBattle {
+            final_attack_b1 : "0".to_string(),
+            final_defense_b1 : "0".to_string(),
+            final_speed_b1 : "0".to_string(),
+            final_attack_b2 : "0".to_string(),
+            final_defense_b2 : "0".to_string(),
+            final_speed_b2 : "0".to_string()
+        };
+            
+        let mut accesories_attack_burrito1 : f32 = 0.0;
+        let mut accesories_defense_burrito1 : f32 = 0.0;
+        let mut accesories_speed_burrito1 : f32 = 0.0;
+
+        if self.token_metadata_by_id.len() == 0 {
+            return accessories_for_battle;
+        }
+
         // Validar que exista el id
         if accesorio1_burrito1_id.clone().parse::<u64>().unwrap() > self.token_metadata_by_id.len()-1 {
             env::panic(b"No existe el id del accesorio 1");
@@ -25,20 +42,6 @@ impl Contract {
         if accesorio3_burrito1_id.clone().parse::<u64>().unwrap() > self.token_metadata_by_id.len()-1 {
             env::panic(b"No existe el id del accesorio 3");
         }
-
-        let mut accessories_for_battle = AccessoriesForBattle {
-            final_attack_b1 : "0".to_string(),
-            final_defense_b1 : "0".to_string(),
-            final_speed_b1 : "0".to_string(),
-            final_attack_b2 : "0".to_string(),
-            final_defense_b2 : "0".to_string(),
-            final_speed_b2 : "0".to_string()
-        };
-
-        //let token_owner_id = env::signer_account_id();
-        let mut accesories_attack_burrito1 : f32 = 0.0;
-        let mut accesories_defense_burrito1 : f32 = 0.0;
-        let mut accesories_speed_burrito1 : f32 = 0.0;
         
         if accesorio1_burrito1_id.clone().parse::<u128>().unwrap() > 0 {
             let token = self.tokens_by_id.get(&accesorio1_burrito1_id.clone());   
@@ -89,7 +92,7 @@ impl Contract {
         accessories_for_battle.final_defense_b1 = accesories_defense_burrito1.to_string();
         accessories_for_battle.final_speed_b1 = accesories_speed_burrito1.to_string();
 
-        accessories_for_battle
+        return accessories_for_battle;
 
     }
 

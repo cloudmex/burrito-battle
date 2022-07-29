@@ -18,10 +18,10 @@ mod xcc;
 mod enumerations;
 mod migrate;
 
-pub const BURRITO_CONTRACT: &str = "dev-1652924595303-59024384289373";
-pub const ITEMS_CONTRACT: &str = "dev-1647986467816-61735125036881";
-pub const STRWTOKEN_CONTRACT: &str = "dev-1653415145729-47929415561597";
-pub const PVE_CONTRACT: &str = "dev-1652376335913-86387308955071";
+pub const BURRITO_CONTRACT: &str = "bb-burritos.testnet";
+pub const ITEMS_CONTRACT: &str = "bb-items.testnet";
+pub const STRWTOKEN_CONTRACT: &str = "bb-strw.testnet";
+pub const PVE_CONTRACT: &str = "bb-pve.testnet";
 
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Clone)]
 #[serde(crate = "near_sdk::serde")]

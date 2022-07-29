@@ -46,7 +46,7 @@ Configure su near-cli para autorizar su cuenta de prueba creada recientemente:
     
 ## Despliegue 📦
 
-Ejecute el siguiente comando dentro de cada carpeta (Burrito, Items y STRW-Tokens) el cual generará nuestro archivo WASM en el directorio correspondiente (contracts/burrito/ , contracts/items/ y contracts/strw-token/ ). Además de que la consola preguntará si deseamos desplegar el contrato correspondiente.
+Ejecute el siguiente comando dentro de cada carpeta (Burrito, Items y STRW-Tokens) el cual generará nuestro archivo WASM en el directorio correspondiente (contracts/burrito/ , contracts/items/ , contracts/playervscpu/ y contracts/strw-token/ ). Además de que la consola preguntará si deseamos desplegar el contrato correspondiente.
     
     ./build.sh
 
@@ -55,19 +55,19 @@ Ejecute el siguiente comando dentro de cada carpeta (Burrito, Items y STRW-Token
 Asignamos el identificador de nuestro contrato desplegado a una constante (Sustituir el ID por el del contrato desplegado):
 
     Burrito
-    ID=dev-1652924595303-59024384289373
+    ID=bb-burritos.testnet
     echo $ID
 
     Accesorios
-    ID=dev-1647986467816-61735125036881
+    ID=bb-items.testnet
     echo $ID
 
     STRW-TOKEN
-    ID=dev-1653415145729-47929415561597
+    ID=bb-strw.testnet
     echo $ID
 
     PVE Battle
-    ID=dev-1652376335913-86387308955071
+    ID=bb-pve.testnet
     echo $ID
 
 Los 4 contratos deben inicializarse antes de su uso, por lo que lo haremos con los siguientes comandos dependiendo del contrato:
@@ -79,7 +79,7 @@ Los 4 contratos deben inicializarse antes de su uso, por lo que lo haremos con l
     near call $ID init_contract '{"owner_id": "'$ID'"}' --accountId $ID
 
     STRW-TOKEN
-    near call $ID init_contract '{"owner_id": "yairnava.testnet", "treasury_id": "yairnh.testnet", "strw_mint_cost": 600000, "strw_reset_cost": 30000, "strw_evolve_cost": 100000}' --accountId $ID
+    near call $ID init_contract '{"owner_id": "'$ID'", "treasury_id": "bb-treasury.testnet", "strw_mint_cost": 50000, "strw_reset_cost": 30000, "strw_evolve_cost": 70000}' --accountId $ID
 
     PVE Battle
     near call $ID init_contract '{"owner_id":"'$ID'"}' --accountId $ID
@@ -122,7 +122,11 @@ Obtener datos de burritos de un usuario por segmento
 
 Agregar contrato a Whitelist
 
-    near call $ID add_whitelist '{"address_contract":"'dev-1658170507800-83790945510897'","contract_name":"'INCURSIONS'"}' --accountId $ID
+    near call $ID add_whitelist '{"address_contract":"'bb-pve.testnet'","contract_name":"'PVE'"}' --accountId $ID
+
+    near call $ID add_whitelist '{"address_contract":"'bb-incursions.testnet'","contract_name":"'INCURSION'"}' --accountId $ID
+
+    near call $ID add_whitelist '{"address_contract":"'bb-hospital.testnet'","contract_name":"'HOSPITAL'"}' --accountId $ID
 
 Consultar si un contrato esta en Whitelist
 
@@ -152,11 +156,11 @@ Obtener propietario del contrato
 
 Asignar datos del Straw Token al FT
 
-    near call $ID set_meta '{}' --accountId yairnava.testnet
+    near call $ID set_meta '{}' --accountId bb-strw.testnet
 
 Cambiar propietario del contrato
 
-    near call $ID set_owner_id '{"owner_id": "yairnh.testnet"}' --accountId yairnava.testnet
+    near call $ID set_owner_id '{"owner_id": "yairnava.testnet"}' --accountId bb-strw.testnet
 
 Obtener lista de mineros
     
@@ -168,23 +172,29 @@ Obtener costos
 
 Actualizar costos
 
-    near call $ID set_costs '{"strw_mint_cost": 50000, "strw_reset_cost": 30000, "strw_evolve_cost": 70000}' --accountId yairnava.testnet
+    near call $ID set_costs '{"strw_mint_cost": 50000, "strw_reset_cost": 30000, "strw_evolve_cost": 70000}' --accountId bb-strw.testnet
 
 Cambiar tesorero
 
-    near call $ID set_treasury '{"new_treasury": "darkyair.testnet"}' --accountId yairnava.testnet
+    near call $ID set_treasury '{"new_treasury": "yairnava.testnet"}' --accountId bb-strw.testnet
 
 Agregar minero
 
-    near call $ID add_minter '{"account_id": "dev-1657319025362-20400432440915"}' --accountId yairnava.testnet
+    near call $ID add_minter '{"account_id": "bb-burritos.testnet"}' --accountId bb-strw.testnet
+
+    near call $ID add_minter '{"account_id": "bb-pve.testnet"}' --accountId bb-strw.testnet
+    
+    near call $ID add_minter '{"account_id": "bb-incursions.testnet"}' --accountId bb-strw.testnet
+
+    near call $ID add_minter '{"account_id": "bb-hospital.testnet"}' --accountId bb-strw.testnet
 
 Remover minero
 
-    near call $ID remove_minter '{"account_id": "yairnh.testnet"}' --accountId yairnava.testnet
+    near call $ID remove_minter '{"account_id": "yairnava.testnet"}' --accountId bb-strw.testnet
 
 Minar STRW-Token
 
-near call $ID mint '{"account_id": "mmoreira.testnet", "amount" : "100000000000000000000000000000"}' --accountId yairnava.testnet
+near call $ID mint '{"account_id": "yairnava.testnet", "amount" : "100000000000000000000000000000"}' --accountId bb-strw.testnet
 
 Obtener balance total de STRW-Token
     
@@ -196,7 +206,7 @@ Obtener balance de una cuenta de STRW-Token
 
 Mostrar STRW-Token en Wallet
 
-    near call $ID ft_transfer '{"receiver_id": "cridtinavlous.testnet", "amount":"0", "memo":""}' --accountId yairnava.testnet
+    near call $ID ft_transfer '{"receiver_id": "alan_test.testnet", "amount":"0", "memo":""}' --accountId bb-strw.testnet
 
 Verificar si una cuenta puede comprar tokens
 
@@ -226,7 +236,7 @@ Obtener la sala activa del jugador Player vs CPU
 
 Crear una partida Jugador vs CPU:
 
-    near call $ID create_battle_player_cpu '{"burrito_id":"'15'", "accesorio1_id":"'0'", "accesorio2_id":"'0'", "accesorio3_id":"'0'"}' --accountId yairnava.testnet --gas=300000000000000
+    near call $ID create_battle_player_cpu '{"burrito_id":"'0'", "accesorio1_id":"'0'", "accesorio2_id":"'0'", "accesorio3_id":"'0'"}' --accountId yairnava.testnet --gas=300000000000000
 
 Rendirse y finalizar combate activo Player vs CPU
 

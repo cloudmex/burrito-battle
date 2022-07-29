@@ -923,4 +923,5 @@ impl Contract {
 
         old_battle_room
     }
+
 }

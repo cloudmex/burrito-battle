@@ -9,9 +9,9 @@ then
 mkdir res
 fi
 
-cp target/wasm32-unknown-unknown/release/strw_token.wasm ./res/
+cp target/wasm32-unknown-unknown/release/pve.wasm ./res/
 
-echo "¿Quieres desplegar el contrato de strw tokens?"
+echo "¿Quieres desplegar el contrato de batallas pve?"
 select yn in "Si" "No"; 
 do
     case $yn in
@@ -21,11 +21,11 @@ do
                 do
                         case $option in
                                 Dev)
-                                        near dev-deploy --wasmFile res/strw_token.wasm; break;;
+                                        near dev-deploy --wasmFile res/pve.wasm; break;;
                                 Account)
                                         echo Ingrese la cuenta:
                                         read account
-                                        near deploy $account --wasmFile res/strw_token.wasm; break;;
+                                        near deploy $account --wasmFile res/pve.wasm; break;;
                         esac
                 done
                 break;;

@@ -25,7 +25,8 @@ pub struct PrevContractStateStruct {
     pub treasury_id: AccountId,
     pub strw_mint_cost: u128,
     pub strw_reset_cost: u128,
-    pub strw_evolve_cost: u128
+    pub strw_evolve_cost: u128,
+    pub buyers: LookupMap<AccountId, String>
 }
 
 use crate::MetaToken;
@@ -77,7 +78,8 @@ impl MetaToken {
             treasury_id : old.treasury_id,
             strw_mint_cost: old.strw_mint_cost,
             strw_reset_cost: old.strw_reset_cost,
-            strw_evolve_cost: old.strw_evolve_cost  
+            strw_evolve_cost: old.strw_evolve_cost,  
+            buyers: old.buyers   
         };
     }
 }

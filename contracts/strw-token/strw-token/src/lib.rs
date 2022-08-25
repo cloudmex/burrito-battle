@@ -1,5 +1,4 @@
 use near_sdk::collections::LookupMap;
-
 use near_contract_standards::fungible_token::{
     core::FungibleTokenCore,
     metadata::{FungibleTokenMetadata, FungibleTokenMetadataProvider, FT_METADATA_SPEC},
@@ -11,7 +10,7 @@ use near_sdk::collections::LazyOption;
 use near_sdk::json_types::{ValidAccountId, U128};
 use near_sdk::{
     assert_one_yocto, env, ext_contract, log, near_bindgen, AccountId, Balance, Gas,
-    Promise, PanicOnDefault, PromiseOrValue
+    Promise, PanicOnDefault, PromiseOrValue, serde_json::json
 };
 use std::str;
 
@@ -23,6 +22,7 @@ const TGAS: Gas = 1_000_000_000_000;
 const GAS_FOR_RESOLVE_TRANSFER: Gas = 5 * TGAS;
 const GAS_FOR_FT_TRANSFER_CALL: Gas = 25 * TGAS;
 const NO_DEPOSIT: Balance = 0;
+pub const ICON: &str = "data:image/jpeg;base64,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";
 
 // nanoseconds in a second
 const NANOSECONDS: u64 = 1_000_000_000;
@@ -61,7 +61,9 @@ pub struct MetaToken {
     pub treasury_id: AccountId,
     pub strw_mint_cost: u128,
     pub strw_reset_cost: u128,
-    pub strw_evolve_cost: u128
+    pub strw_evolve_cost: u128,
+    pub buyers: LookupMap<AccountId, String>,
+
 }
 
 #[near_bindgen]
@@ -83,15 +85,36 @@ impl MetaToken {
             treasury_id : treasury_id,
             strw_mint_cost: strw_mint_cost,
             strw_reset_cost: strw_reset_cost,
-            strw_evolve_cost: strw_evolve_cost        
+            strw_evolve_cost: strw_evolve_cost,
+            buyers  : LookupMap::new(b"v".to_vec())      
         }
     }
 
-    /// Returns account ID of the owner.
+    // Obtener dueño del contrato
     pub fn get_owner_id(&self) -> AccountId {
         return self.owner_id.clone();
     }
+
+    // Cambiar metadata del FT
+    #[payable]
+    pub fn set_meta(&mut self) -> String {
+        self.assert_owner_calling();
+        let mut m = self.internal_get_ft_metadata();
+        m.name = "Straw Token".to_string();
+        m.symbol = "STRW".to_string();
+        m.icon = Some(ICON.to_string());
+        self.metadata.set(&m);
+        "Metadata cambiada".to_string()
+    }
+
+    // Cambiar tesorero
+    pub fn set_treasury(&mut self, new_treasury: AccountId) -> String {
+        self.assert_owner_calling();
+        self.treasury_id = new_treasury;
+        "Tesorero actualizado".to_string()
+    }
     
+    // Cambiar dueño del contrato
     pub fn set_owner_id(&mut self, owner_id: AccountId) {
         self.assert_owner_calling();
         assert!(env::is_valid_account_id(owner_id.as_bytes()));
@@ -103,18 +126,99 @@ impl MetaToken {
         self.locked_until_nano = unix_timestamp as u64 * NANOSECONDS;
     }
 
-    // whitelisted minters can mint more into some account
-    #[payable]
+    // Minar tokens
     pub fn mint(&mut self, account_id: &AccountId, amount: U128String) {
-        assert_one_yocto();
         self.assert_minter(env::predecessor_account_id());
         self.mint_into(account_id, amount.0);
     }
-    
-    // whitelisted minters can mint more into some account
+
+    // Comprar tokens
     #[payable]
+    pub fn buy_tokens(&mut self) -> f32 {
+        let account_id = env::signer_account_id();
+
+        // Obtener epoca actual
+        let block_timestamp = env::block_timestamp();
+        // Obtener epoca de la ultima compra del usuario
+        let old_timestamp_buyer = self.buyers.get(&account_id);
+
+        // Obtener Nears
+        let deposit = env::attached_deposit();
+
+        if deposit < 1000000000000000000000000 {
+            env::panic(
+                format!("NEARS Insuficientes, esta operación cuesta 1 NEAR").as_bytes(),
+            );
+        }
+
+        if old_timestamp_buyer.is_none() {
+            self.buyers.insert(&account_id.clone(),&block_timestamp.clone().to_string());
+        } else {
+            // Verificar que la epoca actual sea diferente a la ultima donde realizó una compra
+            if block_timestamp <= (old_timestamp_buyer.clone().unwrap().parse::<u64>().unwrap() + 43200000000000) {
+                env::panic(
+                    format!("Ya realizaste una compra en ésta época, debes esperar a la siguiente").as_bytes(),
+                );
+            } else {
+                self.buyers.insert(&account_id.clone(),&block_timestamp.clone().to_string());
+            }
+        }
+
+        Promise::new(self.treasury_id.clone()).transfer(deposit as u128);
+
+        // Cantidad de STRW Tokens a minar
+        let mut strw_to_mint = 0;
+
+        // Generar cantidad de STRW Tokens a minar entre 1,000 y 10,000
+        let random_number = *env::random_seed().get(0).unwrap();
+
+        let mut tokens_mint : f32 = 0.0;
+
+        if random_number <= 25 {
+            tokens_mint = 1000.0
+        }
+        if random_number > 25 && random_number < 254 {
+            tokens_mint = random_number as f32*39.0
+        }
+        if random_number >= 254 {
+            tokens_mint = 10000.0
+        }
+
+        let tokens_to_mint = tokens_mint*1000000000000000000000000.0;
+        log!("{}",tokens_mint);
+
+        // Minar tokens
+        self.mint_into(&account_id.clone(), tokens_to_mint as u128);
+        //tokens_to_mint.to_string()
+
+        tokens_mint
+    }
+
+    pub fn can_buy_tokens(&self, account_id : AccountId) -> String {
+        let account_id = account_id.clone();
+
+        // Obtener epoca actual
+        let block_timestamp = env::block_timestamp();
+        // Obtener epoca de la ultima compra del usuario
+        let old_timestamp_buyer = self.buyers.get(&account_id);
+
+        if old_timestamp_buyer.is_none() {
+            return "0".to_string();
+        } else {
+            // Verificar que la epoca actual sea diferente a la ultima donde realizó una compra
+            if block_timestamp <= (old_timestamp_buyer.clone().unwrap().parse::<u64>().unwrap() + 43200000000000) {
+                let finish_epoch = (old_timestamp_buyer.clone().unwrap().parse::<u64>().unwrap() + 43200000000000);
+                return finish_epoch.to_string();
+            } else {
+                return "0".to_string();
+            }
+        }
+    }
+    
+    // Otorgar recompensas a jugador
     pub fn reward_player(&mut self, player_owner_id: ValidAccountId, tokens_mint: U128String) {
-        assert_one_yocto();
+        self.assert_minter(env::predecessor_account_id());
+
         let account_id: AccountId = player_owner_id.clone().into();
 
         self.mint_into(&account_id.clone(), tokens_mint.clone().0);
@@ -130,6 +234,8 @@ impl MetaToken {
 
     #[payable]
     pub fn get_balance_and_transfer(&mut self, account_id: AccountId, action: String) -> bool {
+        self.assert_minter(env::predecessor_account_id());
+
         // Obtener STRW Tokens del jugador
         let balance : u128 = self.accounts.get(&account_id).unwrap_or(0).into();
         // Obtener Nears
@@ -148,10 +254,10 @@ impl MetaToken {
                     format!("NEARS Insuficientes, enviaste {} y necesitas 5000000000000000000000000", &deposit).as_bytes(),
                 );
             }
-
+            // 50,000 STRW
             if balance < self.strw_mint_cost*1000000000000000000000000 {
                 env::panic(
-                    format!("STRW Tokens Insuficientes, tienes {} y necesitas 600000000000000000000000000000", &balance).as_bytes(),
+                    format!("STRW Tokens Insuficientes, tienes {} y necesitas 50000000000000000000000000000", &balance).as_bytes(),
                 );
             }
             strw_cost = self.strw_mint_cost*1000000000000000000000000;
@@ -162,7 +268,7 @@ impl MetaToken {
                     format!("NEARS Insuficientes, enviaste {} y necesitas 1000000000000000000000000", &deposit).as_bytes(),
                 );
             }
-
+            // 30,000 STRW
             if balance < self.strw_reset_cost*1000000000000000000000000 {
                 env::panic(
                     format!("STRW Tokens Insuficientes, tienes {} y necesitas 30000000000000000000000000000", &balance).as_bytes(),
@@ -176,18 +282,72 @@ impl MetaToken {
                     format!("NEARS Insuficientes, enviaste {} y necesitas 2000000000000000000000000", &deposit).as_bytes(),
                 );
             }
-
+            // 70,000 STRW
             if balance < self.strw_evolve_cost*1000000000000000000000000 {
                 env::panic(
-                    format!("STRW Tokens Insuficientes, tienes {} y necesitas 100000000000000000000000000000", &balance).as_bytes(),
+                    format!("STRW Tokens Insuficientes, tienes {} y necesitas 70000000000000000000000000000", &balance).as_bytes(),
                 );
             }
             strw_cost = self.strw_evolve_cost*1000000000000000000000000;
 
         }
-
-        self.internal_burn(&account_id, strw_cost);
+        let receiver_id = self.treasury_id.clone();
+        let memo : Option<String> = Some(String::from("".to_string())) ;     
+        self.internal_transfer(&account_id, &receiver_id, (strw_cost/100)*5, memo);
+        self.internal_burn(&account_id, (strw_cost/100)*95);
         true
+    }
+
+    #[payable]
+    pub fn get_balance_and_transfer_minigames(&mut self, account_id: AccountId, action: String, treasury_id: ValidAccountId) -> bool {
+        self.assert_minter(env::predecessor_account_id());
+
+        // Obtener STRW Tokens del jugador
+        let balance : u128 = self.accounts.get(&account_id).unwrap_or(0).into();
+        
+        // Costo de STRW
+        let mut strw_cost = 0;
+        let memo : Option<String> = Some(String::from("".to_string())) ;     
+        let receiver_id: ValidAccountId = treasury_id;
+
+        // Tipo de operación
+        // 10,000
+        if action == "Incursion" {
+            if balance < 10000000000000000000000000000 {
+                log!("STRW Tokens Insuficientes, tienes {} y necesitas 10000000000000000000000000000");
+                return false;
+            }
+            strw_cost = 10000000000000000000000000000;
+        }
+        
+        self.internal_transfer(&account_id, receiver_id.as_ref(), (strw_cost/100)*5, memo);
+        self.internal_burn(&account_id, (strw_cost/100)*95);
+        return true;
+    }
+
+    #[payable]
+    pub fn get_balance_and_transfer_hospital(&mut self, account_id: AccountId, action: String, treasury_id: ValidAccountId, cost: u128) -> bool {
+        self.assert_minter(env::predecessor_account_id());
+
+        // Obtener STRW Tokens del jugador
+        let balance : u128 = self.accounts.get(&account_id).unwrap_or(0).into();
+        
+        // Costo de STRW
+        let mut strw_cost = 0;
+        let memo : Option<String> = Some(String::from("".to_string())) ;     
+        let receiver_id: ValidAccountId = treasury_id;
+
+        // Tipo de operación
+        if action == "Capsule" {
+            if balance < cost*1000000000000000000000000 {
+                log!("STRW Tokens Insuficientes");
+                return false;
+            }
+            strw_cost = cost*1000000000000000000000000;
+        }
+        self.internal_transfer(&account_id, receiver_id.as_ref(), (strw_cost/100)*5, memo);
+        self.internal_burn(&account_id, (strw_cost/100)*95);
+        return true;
     }
 
     // Obtener costos de STRW Tokens
@@ -197,22 +357,28 @@ impl MetaToken {
         log!("STRW Reset Cost: {}",self.strw_reset_cost);
         log!("STRW Evolve Cost: {}",self.strw_evolve_cost);
     }
+
+    // Cambiar costos de STRW Tokens
+    pub fn set_costs(&mut self, strw_mint_cost: u128, strw_reset_cost: u128, strw_evolve_cost: u128) {
+        self.assert_owner_calling();
+        self.strw_mint_cost = strw_mint_cost;
+        self.strw_reset_cost = strw_reset_cost;
+        self.strw_evolve_cost = strw_evolve_cost;
+    }
         
-    //owner can add/remove minters
-    #[payable]
-    pub fn add_minter(&mut self, account_id: AccountId) {
-        assert_one_yocto();
+    // Agregar nuevo minero
+    pub fn add_minter(&mut self, account_id: AccountId) -> String {
         self.assert_owner_calling();
         if let Some(_) = self.minters.iter().position(|x| *x == account_id) {
             //found
             panic!("already in the list");
         }
         self.minters.push(account_id);
+        "Minero agregado".to_string()
     }
 
-    #[payable]
-    pub fn remove_minter(&mut self, account_id: &AccountId) {
-        assert_one_yocto();
+    // Remover minero
+    pub fn remove_minter(&mut self, account_id: &AccountId) -> String {
         self.assert_owner_calling();
         if let Some(inx) = self.minters.iter().position(|x| x == account_id) {
             //found
@@ -220,20 +386,12 @@ impl MetaToken {
         } else {
             panic!("not a minter")
         }
+        "Minero removido".to_string()
     }
 
+    // Consultar lista de mineros
     pub fn get_minters(self) -> Vec<AccountId> {
         self.minters
-    }
-
-    /// sets metadata icon
-    #[payable]
-    pub fn set_metadata_icon(&mut self, svg_string: String) {
-        assert_one_yocto();
-        self.assert_owner_calling();
-        let mut m = self.internal_get_ft_metadata();
-        m.icon = Some(svg_string);
-        self.metadata.set(&m);
     }
 
     /// sets metadata_reference
@@ -397,9 +555,7 @@ impl MetaToken {
 // it's better to impede sybil attacks by other means
 #[near_bindgen]
 impl FungibleTokenCore for MetaToken {
-    #[payable]
     fn ft_transfer(&mut self, receiver_id: ValidAccountId, amount: U128, memo: Option<String>) {
-        assert_one_yocto();
         let sender_id = env::predecessor_account_id();
         let amount: Balance = amount.into();
         self.internal_transfer(&sender_id, receiver_id.as_ref(), amount, memo);

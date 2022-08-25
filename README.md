@@ -70,6 +70,10 @@ Asignamos el identificador de nuestro contrato desplegado a una constante (Susti
     ID=bb-pve.testnet
     echo $ID
 
+    Posiones
+    ID=bb-potions.testnet
+    echo $ID
+
 Los 4 contratos deben inicializarse antes de su uso, por lo que lo haremos con los siguientes comandos dependiendo del contrato:
 
     Burrito
@@ -84,6 +88,9 @@ Los 4 contratos deben inicializarse antes de su uso, por lo que lo haremos con l
     PVE Battle
     near call $ID init_contract '{"owner_id":"'$ID'"}' --accountId $ID
 
+    Potions
+    near call $ID init_contract '{"owner_id":"'$ID'"}' --accountId $ID
+
 ### Burritos
 
 Obtener cantidad de burritos creados:
@@ -96,7 +103,7 @@ near call $ID nft_mint '{"token_owner_id": "'yairnava.testnet'", "token_metadata
     
 Modificar burrito:
 
-    near call $ID update_burrito '{"burrito_id": "151", "extra":"{'"'burrito_type'":"'Volador'","'hp'":"'0'","'attack'":"'10'","'defense'":"'10'","'speed'":"'10'","'level'":"'1'","'win'":"'10'","'global_win'":"'10'"}'"}' --accountId yairnava.testnet 
+    near call $ID update_burrito '{"burrito_id": "24", "extra":"{'"'burrito_type'":"'Agua'","'hp'":"'0'","'attack'":"'15'","'defense'":"'15'","'speed'":"'15'","'level'":"'1'","'win'":"'10'","'global_win'":"'10'"}'"}' --accountId $ID
 
 Evolucionar burrito:
 
@@ -110,7 +117,7 @@ Obtener datos de un burrito:
 
     near call $ID get_burrito '{"burrito_id": "151"}' --accountId yairnava.testnet
 
-    near view $ID nft_token '{"token_id": "149"}'
+    near view $ID nft_token '{"token_id": "24"}'
 
 Obtener datos de burritos de un segmento
 
@@ -121,6 +128,8 @@ Obtener datos de burritos de un usuario por segmento
         near call $ID nft_tokens_for_owner '{"account_id": "yairnava.testnet", "from_index": "0", "limit": 50}' --accountId yairnava.testnet
 
 Agregar contrato a Whitelist
+
+    near call $ID add_whitelist '{"address_contract":"'bb-burritos.testnet'","contract_name":"'Burritos'"}' --accountId $ID
 
     near call $ID add_whitelist '{"address_contract":"'bb-pve.testnet'","contract_name":"'PVE'"}' --accountId $ID
 
@@ -194,7 +203,11 @@ Remover minero
 
 Minar STRW-Token
 
-near call $ID mint '{"account_id": "yairnava.testnet", "amount" : "100000000000000000000000000000"}' --accountId bb-strw.testnet
+    near call $ID mint '{"account_id": "yairnava.testnet", "amount" : "100000000000000000000000000000"}' --accountId bb-strw.testnet
+
+Mostrar STRW-Token en Wallet
+
+    near call $ID ft_transfer '{"receiver_id": "yairnava.testnet", "amount":"0", "memo":""}' --accountId bb-strw.testnet
 
 Obtener balance total de STRW-Token
     
@@ -204,9 +217,6 @@ Obtener balance de una cuenta de STRW-Token
 
     near view $ID ft_balance_of '{"account_id": "yairnava.testnet"}'
 
-Mostrar STRW-Token en Wallet
-
-    near call $ID ft_transfer '{"receiver_id": "alan_test.testnet", "amount":"0", "memo":""}' --accountId bb-strw.testnet
 
 Verificar si una cuenta puede comprar tokens
 
@@ -251,6 +261,38 @@ Combatir Ronda Player vs CPU [type_move => (1 = Ataque Debil, 2 = Ataque Fuerte,
     near call $ID battle_player_cpu '{"type_move":"'3'"}' --accountId yairnava.testnet --gas=300000000000000
     
     near call $ID battle_player_cpu '{"type_move":"'4'"}' --accountId yairnava.testnet --gas=300000000000000
+
+### Potions
+
+ID=dev-1659550087087-59589642465973
+
+Obtener cantidad de posiones creadas:
+
+    near view $ID get_number_potions
+    
+Crear nueva posion:
+
+near call $ID nft_mint '{"token_owner_id": "'darkyair.testnet'", "token_metadata": { }, "type_potion": "Health"}' --accountId yairnava.testnet --deposit 1 --gas=300000000000000
+
+near call $ID nft_mint '{"token_owner_id": "'darkyair.testnet'", "token_metadata": { }, "type_potion": "Attack"}' --accountId yairnava.testnet --deposit 1 --gas=300000000000000
+
+near call $ID nft_mint '{"token_owner_id": "'darkyair.testnet'", "token_metadata": { }, "type_potion": "Shield"}' --accountId yairnava.testnet --deposit 1 --gas=300000000000000
+
+near call $ID get_potion '{"potion_id": "6"}' --accountId darkyair.testnet --deposit 1 --gas=300000000000000
+    
+Obtener datos de una posion:
+
+    near call $ID get_potion '{"burrito_id": "0"}' --accountId yairnava.testnet
+
+    near view $ID nft_token '{"token_id": "0"}'
+
+Obtener datos de posiones de un segmento
+
+    near call $ID nft_tokens '{"from_index": "0", "limit": 50}' --accountId yairnava.testnet --gas=300000000000000
+
+Obtener datos de posiones de un usuario por segmento
+
+        near call $ID nft_tokens_for_owner '{"account_id": "yairnava.testnet", "from_index": "0", "limit": 50}' --accountId yairnava.testnet
 
 ## Construido con 🛠️
 

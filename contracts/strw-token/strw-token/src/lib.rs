@@ -555,6 +555,7 @@ impl MetaToken {
 // it's better to impede sybil attacks by other means
 #[near_bindgen]
 impl FungibleTokenCore for MetaToken {
+    #[payable]
     fn ft_transfer(&mut self, receiver_id: ValidAccountId, amount: U128, memo: Option<String>) {
         let sender_id = env::predecessor_account_id();
         let amount: Balance = amount.into();

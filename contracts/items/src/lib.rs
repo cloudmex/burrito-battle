@@ -206,6 +206,23 @@ impl Contract {
         this
     }
 
+    pub fn change_owner(&mut self, owner_id: AccountId) {
+        self.assert_owner();
+        self.owner_id = owner_id;
+    }
+
+    fn assert_owner(&self) {
+        require!(self.signer_is_owner(), "Method is private to owner")
+    }
+
+    fn signer_is_owner(&self) -> bool {
+        self.is_owner(&env::signer_account_id())
+    }
+
+    fn is_owner(&self, minter: &AccountId) -> bool {
+        minter.as_str() == self.owner_id.as_str()
+    }
+
     /*pub fn update_metadata_icon(&mut self, icon: String) {
         let mut metadata = self.metadata.get().unwrap();
         metadata.icon = Some(icon);

@@ -148,6 +148,11 @@ impl Contract {
         this
     }
 
+    pub fn change_owner(&mut self, owner_id: AccountId) {
+        self.assert_owner();
+        self.owner_id = owner_id;
+    }
+
     fn assert_owner(&self) {
         require!(self.signer_is_owner(), "Method is private to owner")
     }

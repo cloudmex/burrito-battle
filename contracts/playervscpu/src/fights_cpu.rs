@@ -102,7 +102,7 @@ impl Contract {
         let call = ext_nft::get_burrito(
             token_owner_id.clone().to_string(),
             burrito_id.clone(),
-            BURRITO_CONTRACT.parse::<AccountId>().unwrap(),
+            self.burrito_contract.parse::<AccountId>().unwrap(),
             NO_DEPOSIT,
             Gas(100_000_000_000_000)
 
@@ -113,7 +113,7 @@ impl Contract {
             accesorio1_id.to_string(),
             accesorio2_id.to_string(),
             accesorio3_id.to_string(), 
-            PVE_CONTRACT.parse::<AccountId>().unwrap(),
+            self.pve_contract.parse::<AccountId>().unwrap(),
             NO_DEPOSIT,
             Gas(100_000_000_000_000)
         );
@@ -146,7 +146,7 @@ impl Contract {
                     accesorio1_id.to_string(), // Id el item 1 del burrito
                     accesorio2_id.to_string(), // Id el item 2 del burrito
                     accesorio3_id.to_string(), // Id el item 3 del burrito
-                    ITEMS_CONTRACT.parse::<AccountId>().unwrap(), // Contrato de items
+                    self.items_contract.parse::<AccountId>().unwrap(), // Contrato de items
                     NO_DEPOSIT, // yocto NEAR a ajuntar
                     Gas(60_000_000_000_000)
                 );
@@ -154,7 +154,7 @@ impl Contract {
                 let callback = ext_self::save_battle_player_cpu(
                     burrito_id,
                     burrito_for_battle,
-                    PVE_CONTRACT.parse::<AccountId>().unwrap(), // Contrato de burritos
+                    self.pve_contract.parse::<AccountId>().unwrap(), // Contrato de burritos
                     NO_DEPOSIT, // yocto NEAR a ajuntar al callback
                     Gas(20_000_000_000_000)
                 );
@@ -532,7 +532,7 @@ impl Contract {
         // Mandar a llamar al contrato de burritos para modificar la informacion del burrito perdedor
         let p = ext_nft::decrease_burrito_hp(
             battle_room.burrito_id.clone().to_string(),
-            BURRITO_CONTRACT.parse::<AccountId>().unwrap(),
+            self.burrito_contract.parse::<AccountId>().unwrap(),
             NO_DEPOSIT,
             MIN_GAS_FOR_NFT_TRANSFER_CALL
         );
@@ -837,12 +837,12 @@ impl Contract {
                 ext_nft::reward_player(
                     old_battle_room.player_id.clone().to_string(),
                     tokens_to_mint.to_string(),
-                    STRWTOKEN_CONTRACT.parse::<AccountId>().unwrap(),
+                    self.strw_contract.parse::<AccountId>().unwrap(),
                     NO_DEPOSIT,
                     MIN_GAS_FOR_NFT_TRANSFER_CALL
                 ).then(ext_nft::increment_burrito_wins( // Incrementar contador de victorias
                     old_battle_room.burrito_id.clone().to_string(),
-                    BURRITO_CONTRACT.parse::<AccountId>().unwrap(),
+                    self.burrito_contract.parse::<AccountId>().unwrap(),
                     NO_DEPOSIT,
                     GAS_FOR_NFT_TRANSFER_CALL
                 ));
@@ -883,12 +883,12 @@ impl Contract {
                 ext_nft::reward_player(
                     old_battle_room.player_id.clone().to_string(),
                     tokens_to_mint.to_string(),
-                    STRWTOKEN_CONTRACT.parse::<AccountId>().unwrap(),
+                    self.strw_contract.parse::<AccountId>().unwrap(),
                     NO_DEPOSIT,
                     MIN_GAS_FOR_NFT_TRANSFER_CALL
                 ).then(ext_nft::decrease_burrito_hp( // Restar una vida al burrito
                     old_battle_room.burrito_id.clone().to_string(),
-                    BURRITO_CONTRACT.parse::<AccountId>().unwrap(),
+                    self.burrito_contract.parse::<AccountId>().unwrap(),
                     NO_DEPOSIT,
                     GAS_FOR_NFT_TRANSFER_CALL
                 ));                

@@ -12,6 +12,8 @@ impl Contract {
     #[cfg(target_arch = "wasm32")]
     pub fn upgrade(self) {
         use near_sys as sys;
+        log!("predecessor_account_id: {}",env::predecessor_account_id());
+        log!("owner_id: {}",self.owner_id);
         assert!(env::predecessor_account_id() == self.owner_id);
         //input is code:<Vec<u8> on REGISTER 0
         //log!("bytes.length {}", code.unwrap().len());
@@ -59,7 +61,10 @@ impl Contract {
             tokens_by_id:old_state.tokens_by_id,
             token_metadata_by_id: old_state.token_metadata_by_id,
             metadata:old_state.metadata,
-            whitelist_contracts: old_state.whitelist_contracts
+            whitelist_contracts: old_state.whitelist_contracts,
+            burrito_contract: old_state.burrito_contract,
+            items_contract: old_state.items_contract,
+            strw_contract: old_state.strw_contract
         }
     }
 

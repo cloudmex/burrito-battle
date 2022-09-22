@@ -77,7 +77,7 @@ Asignamos el identificador de nuestro contrato desplegado a una constante (Susti
 Los 4 contratos deben inicializarse antes de su uso, por lo que lo haremos con los siguientes comandos dependiendo del contrato:
 
     Burrito
-    near call $ID init_contract '{"owner_id":"'$ID'"}' --accountId $ID
+    near call $ID init_contract '{"owner_id":"'$ID'","burrito_contract":"'$ID'","items_contract":"'bb-items.testnet'","strw_contract":"'bb-strw.testnet'"}' --accountId dev-1663710126378-66907359558484
 
     Accesorios
     near call $ID init_contract '{"owner_id": "'$ID'"}' --accountId $ID
@@ -86,12 +86,24 @@ Los 4 contratos deben inicializarse antes de su uso, por lo que lo haremos con l
     near call $ID init_contract '{"owner_id": "'$ID'", "treasury_id": "bb-treasury.testnet", "strw_mint_cost": 50000, "strw_reset_cost": 30000, "strw_evolve_cost": 70000}' --accountId $ID
 
     PVE Battle
-    near call $ID init_contract '{"owner_id":"'$ID'"}' --accountId $ID
+    near call $ID init_contract '{"owner_id":"'$ID'", "burrito_contract":"'dev-1663710126378-66907359558484'","items_contract":"'bb-items.testnet'","strw_contract":"'bb-strw.testnet'", "pve_contract":"'dev-1663738468242-76777974943846'"}' --accountId $ID
 
     Potions
     near call $ID init_contract '{"owner_id":"'$ID'"}' --accountId $ID
 
 ### Burritos
+
+Cambiar de owner
+
+    near call $ID change_owner '{"owner_id": "bb-burrito-battle.sputnikv2.testnet"}' --accountId $ID
+
+Cambiar contratos
+
+    near call $ID change_contracts '{"burrito_contract":"'dev-1663710126378-66907359558484'","items_contract":"'bb-items.testnet'","strw_contract":"'bb-strw.testnet'"}' --accountId $ID
+
+Mostrar contratos
+
+    near view $ID show_contracts
 
 Obtener cantidad de burritos creados:
 
@@ -103,7 +115,7 @@ near call $ID nft_mint '{"token_owner_id": "'yairnava.testnet'", "token_metadata
     
 Modificar burrito:
 
-    near call $ID update_burrito '{"burrito_id": "24", "extra":"{'"'burrito_type'":"'Agua'","'hp'":"'0'","'attack'":"'15'","'defense'":"'15'","'speed'":"'15'","'level'":"'1'","'win'":"'10'","'global_win'":"'10'"}'"}' --accountId $ID
+    near call $ID update_burrito '{"burrito_id": "5", "extra":"{'"'burrito_type'":"'Planta'","'hp'":"'0'","'attack'":"'15'","'defense'":"'15'","'speed'":"'15'","'level'":"'1'","'win'":"'10'","'global_win'":"'10'"}'"}' --accountId $ID
 
 Evolucionar burrito:
 
@@ -117,7 +129,7 @@ Obtener datos de un burrito:
 
     near call $ID get_burrito '{"burrito_id": "151"}' --accountId yairnava.testnet
 
-    near view $ID nft_token '{"token_id": "24"}'
+    near view $ID nft_token '{"token_id": "5"}'
 
 Obtener datos de burritos de un segmento
 
@@ -228,6 +240,18 @@ Comprar STRW-Tokens
 
 ### Player vs CPU
 
+Cambiar de owner
+
+    near call $ID change_owner '{"owner_id": "bb-burrito-battle.sputnikv2.testnet"}' --accountId $ID
+
+Cambiar contratos
+
+    near call $ID change_contracts '{"burrito_contract":"'dev-1663710126378-66907359558484'","items_contract":"'bb-items.testnet'","strw_contract":"'bb-strw.testnet'" ,"pve_contract":"'dev-1663738468242-76777974943846'"}' --accountId $ID
+
+Mostrar contratos
+
+    near view $ID show_contracts
+
 Obtener si una cuenta está en batalla:
 
     near view $ID is_in_battle '{"account_id": "yairnava.testnet"}'
@@ -262,37 +286,20 @@ Combatir Ronda Player vs CPU [type_move => (1 = Ataque Debil, 2 = Ataque Fuerte,
     
     near call $ID battle_player_cpu '{"type_move":"'4'"}' --accountId yairnava.testnet --gas=300000000000000
 
-### Potions
+### Crear Propuestas en DAO
 
-ID=dev-1659550087087-59589642465973
+Ejecutar Método:
 
-Obtener cantidad de posiones creadas:
+    sputnikdao proposal call dev-1663710126378-66907359558484 change_contracts '{"burrito_contract":"'dev-1663710126378-66907359558484'","items_contract":"'bb-items.testnet'","strw_contract":"'bb-strw.testnet'"}' --daoAcc bb-burrito-battle --accountId yairnava.testnet
 
-    near view $ID get_number_potions
+    sputnikdao proposal call dev-1663738468242-76777974943846 change_contracts '{"burrito_contract":"'dev-1663710126378-66907359558484'","items_contract":"'bb-items.testnet'","strw_contract":"'bb-strw.testnet'", "pve_contract":"'dev-1663738468242-76777974943846'"}' --daoAcc bb-burrito-battle --accountId yairnava.testnet
+
+Actualización de contrato:
+
+    sputnikdao proposal upgrade res/burritos.wasm dev-1663710126378-66907359558484 --daoAcc bb-burrito-battle --accountId yairnava.testnet
+
+    sputnikdao proposal upgrade res/pve.wasm dev-1663738468242-76777974943846 --daoAcc bb-burrito-battle --accountId yairnava.testnet
     
-Crear nueva posion:
-
-near call $ID nft_mint '{"token_owner_id": "'darkyair.testnet'", "token_metadata": { }, "type_potion": "Health"}' --accountId yairnava.testnet --deposit 1 --gas=300000000000000
-
-near call $ID nft_mint '{"token_owner_id": "'darkyair.testnet'", "token_metadata": { }, "type_potion": "Attack"}' --accountId yairnava.testnet --deposit 1 --gas=300000000000000
-
-near call $ID nft_mint '{"token_owner_id": "'darkyair.testnet'", "token_metadata": { }, "type_potion": "Shield"}' --accountId yairnava.testnet --deposit 1 --gas=300000000000000
-
-near call $ID get_potion '{"potion_id": "6"}' --accountId darkyair.testnet --deposit 1 --gas=300000000000000
-    
-Obtener datos de una posion:
-
-    near call $ID get_potion '{"burrito_id": "0"}' --accountId yairnava.testnet
-
-    near view $ID nft_token '{"token_id": "0"}'
-
-Obtener datos de posiones de un segmento
-
-    near call $ID nft_tokens '{"from_index": "0", "limit": 50}' --accountId yairnava.testnet --gas=300000000000000
-
-Obtener datos de posiones de un usuario por segmento
-
-        near call $ID nft_tokens_for_owner '{"account_id": "yairnava.testnet", "from_index": "0", "limit": 50}' --accountId yairnava.testnet
 
 ## Construido con 🛠️
 

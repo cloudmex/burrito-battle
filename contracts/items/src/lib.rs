@@ -216,7 +216,7 @@ impl Contract {
     }
 
     fn signer_is_owner(&self) -> bool {
-        self.is_owner(&env::signer_account_id())
+        self.is_owner(&env::predecessor_account_id())
     }
 
     fn is_owner(&self, minter: &AccountId) -> bool {

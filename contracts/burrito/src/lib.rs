@@ -42,10 +42,6 @@ pub const NFT_METADATA_SPEC: &str = "nft-1.0.0";
 /// This is the name of the NFT standard we're using
 pub const NFT_STANDARD_NAME: &str = "nep171";
 
-pub const BURRITO_CONTRACT: &str = "bb-burritos.testnet";
-pub const ITEMS_CONTRACT: &str = "bb-items.testnet";
-pub const STRWTOKEN_CONTRACT: &str = "bb-strw.testnet";
-
 pub const BURRITO1: &str = "QmULzZNvTGrRxEMvFVYPf1qaBc4tQtz6c3MVGgRNx36gAq";
 pub const BURRITO2: &str = "QmZEK32JEbJH3rQtXL9BqQJa2omXfpjuXGjbFXLiV2Ge9D";
 pub const BURRITO3: &str = "QmQcTRnmdFhWa1j47JZAxr5CT1Cdr5AfqdhnrGpSdr28t6";
@@ -109,7 +105,11 @@ pub struct OldContract {
     //keeps track of the metadata for the contract
     pub metadata: LazyOption<NFTContractMetadata>,
 
-    pub whitelist_contracts: LookupMap<AccountId, ExternalContract>
+    pub whitelist_contracts: LookupMap<AccountId, ExternalContract>,
+
+    pub burrito_contract: String,
+    pub items_contract: String,
+    pub strw_contract: String
 }
 
 #[near_bindgen]
@@ -130,7 +130,11 @@ pub struct Contract {
     //keeps track of the metadata for the contract
     pub metadata: LazyOption<NFTContractMetadata>,
 
-    pub whitelist_contracts: LookupMap<AccountId, ExternalContract>
+    pub whitelist_contracts: LookupMap<AccountId, ExternalContract>,
+
+    pub burrito_contract: String,
+    pub items_contract: String,
+    pub strw_contract: String
 
 }
 
@@ -156,7 +160,7 @@ impl Contract {
         user doesn't have to manually type metadata.
     */
     #[init]
-    pub fn init_contract(owner_id: AccountId) -> Self {
+    pub fn init_contract(owner_id: AccountId, burrito_contract: String, items_contract: String, strw_contract: String) -> Self {
         //calls the other function "new: with some default metadata and the owner_id passed in 
         Self::new(
             owner_id,
@@ -169,6 +173,9 @@ impl Contract {
                 reference: None,
                 reference_hash: None,
             },
+            burrito_contract,
+            items_contract,
+            strw_contract
         )
     }
 
@@ -178,7 +185,7 @@ impl Contract {
         the owner_id. 
     */
     #[init]
-    pub fn new(owner_id: AccountId, metadata: NFTContractMetadata) -> Self {
+    pub fn new(owner_id: AccountId, metadata: NFTContractMetadata, burrito_contract: String, items_contract: String, strw_contract: String) -> Self {
         //create a variable of type Self with all the fields initialized. 
         let this = Self {
             //Storage keys are simply the prefixes used for the collections. This helps avoid data collision
@@ -194,7 +201,10 @@ impl Contract {
                 Some(&metadata),
             ),
 
-            whitelist_contracts: LookupMap::new(StorageKey::ContractAllowed)
+            whitelist_contracts: LookupMap::new(StorageKey::ContractAllowed),
+            burrito_contract : burrito_contract,
+            items_contract : items_contract,
+            strw_contract : strw_contract
         };
 
         //return the Contract object
@@ -208,6 +218,13 @@ impl Contract {
         self.metadata.set(&metadata);
     }
 
+    pub fn change_contracts(&mut self, burrito_contract: String, items_contract: String, strw_contract: String) {
+        self.assert_owner();
+        self.burrito_contract = burrito_contract;
+        self.items_contract = items_contract;
+        self.strw_contract = strw_contract;
+    }
+
     pub fn change_owner(&mut self, owner_id: AccountId) {
         self.assert_owner();
         self.owner_id = owner_id;
@@ -218,11 +235,17 @@ impl Contract {
     }
 
     fn signer_is_owner(&self) -> bool {
-        self.is_owner(&env::signer_account_id())
+        self.is_owner(&env::predecessor_account_id())
     }
 
     fn is_owner(&self, minter: &AccountId) -> bool {
         minter.as_str() == self.owner_id.as_str()
+    }
+
+    pub fn show_contracts(&self) {
+        log!("burrito_contract: {}",self.burrito_contract);
+        log!("items_contract: {}",self.items_contract);
+        log!("strw_contract: {}",self.strw_contract);
     }
 
 }

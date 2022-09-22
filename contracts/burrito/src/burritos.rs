@@ -27,13 +27,13 @@ impl Contract {
         ext_nft::get_balance_and_transfer(
             account_id.clone().to_string(),
             "Mint".to_string(),
-            STRWTOKEN_CONTRACT.parse::<AccountId>().unwrap(),
+            self.items_contract.parse::<AccountId>().unwrap(),
             deposit_to_treasury,
             MIN_GAS_FOR_NFT_TRANSFER_CALL
         ).then(ext_self::new_burrito(
             token_owner_id,
             token_metadata,
-            BURRITO_CONTRACT.parse::<AccountId>().unwrap(),
+            self.burrito_contract.parse::<AccountId>().unwrap(),
             deposit_to_mint,
             GAS_FOR_NFT_TRANSFER_CALL
         ))

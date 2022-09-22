@@ -13,7 +13,7 @@ const MIN_GAS_FOR_NFT_TRANSFER_CALL: Gas = Gas(100_000_000_000_000);
 impl Contract {
     
     pub fn nft_mint(&mut self,token_owner_id: AccountId, token_metadata: TokenMetadata) -> String{
-
+        self.assert_owner();
         let mut new_item = token_metadata;
         let item_id: TokenId = (self.token_metadata_by_id.len()+1).to_string();
 

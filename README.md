@@ -55,41 +55,28 @@ Ejecute el siguiente comando dentro de cada carpeta (Burrito, Items y STRW-Token
 Asignamos el identificador de nuestro contrato desplegado a una constante (Sustituir el ID por el del contrato desplegado):
 
     Burrito
-    ID=bb-burritos.testnet
-    echo $ID
-
-    Accesorios
-    ID=bb-items.testnet
+    ID=burritos-bb.testnet
     echo $ID
 
     STRW-TOKEN
-    ID=bb-strw.testnet
+    ID=strw-bb.testnet
     echo $ID
 
     PVE Battle
-    ID=bb-pve.testnet
+    ID=pve-bb.testnet
     echo $ID
 
-    Posiones
-    ID=bb-potions.testnet
-    echo $ID
-
-Los 4 contratos deben inicializarse antes de su uso, por lo que lo haremos con los siguientes comandos dependiendo del contrato:
+Los 3 contratos deben inicializarse antes de su uso, por lo que lo haremos con los siguientes comandos dependiendo del contrato:
 
     Burrito
-    near call $ID init_contract '{"owner_id":"'$ID'","burrito_contract":"'$ID'","items_contract":"'bb-items.testnet'","strw_contract":"'bb-strw.testnet'"}' --accountId dev-1663710126378-66907359558484
-
-    Accesorios
-    near call $ID init_contract '{"owner_id": "'$ID'"}' --accountId $ID
+    near call burritos-bb.testnet init_contract '{"owner_id":"burritos-bb.testnet","burrito_contract":"burritos-bb.testnet",
+    "strw_contract":"strw-bb.testnet"}' --accountId burritos-bb.testnet
 
     STRW-TOKEN
-    near call $ID init_contract '{"owner_id": "'$ID'", "treasury_id": "bb-treasury.testnet", "strw_mint_cost": 50000, "strw_reset_cost": 30000, "strw_evolve_cost": 70000}' --accountId $ID
+    near call strw-bb.testnet init_contract '{"owner_id": "strw-bb.testnet", "treasury_id": "strw-bb.testnet", "strw_mint_cost": 50000, "strw_reset_cost": 30000, "strw_evolve_cost": 70000}' --accountId strw-bb.testnet
 
     PVE Battle
-    near call $ID init_contract '{"owner_id":"'$ID'", "burrito_contract":"'dev-1663710126378-66907359558484'","items_contract":"'bb-items.testnet'","strw_contract":"'bb-strw.testnet'", "pve_contract":"'dev-1663738468242-76777974943846'"}' --accountId $ID
-
-    Potions
-    near call $ID init_contract '{"owner_id":"'$ID'"}' --accountId $ID
+    near call pve-bb.testnet init_contract '{"owner_id":"pve-bb.testnet", "burrito_contract":"burritos-bb.testnet","strw_contract":"strw-bb.testnet", "pve_contract":"pve-bb.testnet"}' --accountId pve-bb.testnet
 
 ### Burritos
 
@@ -123,13 +110,13 @@ Evolucionar burrito:
 
 Restaurar burrito:
 
-    near call $ID reset_burrito '{"burrito_id": "4"}' --accountId yairnava.testnet --deposit 1 --gas=300000000000000
+    near call $ID reset_burrito '{"burrito_id": "0"}' --accountId yairnava.testnet --deposit 1 --gas=300000000000000
 
 Obtener datos de un burrito:
 
-    near call $ID get_burrito '{"burrito_id": "151"}' --accountId yairnava.testnet
+    near call $ID get_burrito '{"burrito_id": "0"}' --accountId yairnava.testnet
 
-    near view $ID nft_token '{"token_id": "5"}'
+    near view $ID nft_token '{"token_id": "0"}'
 
 Obtener datos de burritos de un segmento
 
@@ -153,21 +140,54 @@ Consultar si un contrato esta en Whitelist
 
     near call $ID is_white_listed  --accountId yairnava.testnet
 
-### Items
 
-Obtener cantidad de accesorios creados:
+### Player vs CPU
 
-    near view $ID get_number_accessories
+Cambiar de owner
 
-Crear nuevo accesorio:
+    near call $ID change_owner '{"owner_id": "bb-burrito-battle.sputnikv2.testnet"}' --accountId $ID
 
-    near call $ID mint_token '{"token_owner_id": "'yairnava.testnet'", "colecction": "Items BB", "token_metadata": { "title": "Thunder Sword", "description": "Thunder Sword 2", "media": "","extra":"{'"'attack'":"'3'","'defense'":"'0'","'speed'":"'0'"}'"}}' --accountId yairnava.testnet --deposit 0.1 --gas=300000000000000
+Cambiar contratos
 
-Obtener datos de un accesorio:
+    near call $ID change_contracts '{"burrito_contract":"'dev-1663710126378-66907359558484'","strw_contract":"'bb-strw.testnet'" ,"pve_contract":"'dev-1663738468242-76777974943846'"}' --accountId $ID
 
-    near view $ID get_accessory '{"accessory_id": "0"}'
+Mostrar contratos
+
+    near view $ID show_contracts
+
+Obtener si una cuenta está en batalla:
+
+    near view $ID is_in_battle '{"account_id": "yairnava.testnet"}'
+
+Obtener cantidad de batallas finalizadas:
+
+    near view $ID get_number_battles
+
+Obtener cantidad de batallas activas Player vs CPU:
+
+    near view $ID get_number_battles_actives
+
+Obtener la sala activa del jugador Player vs CPU
+
+    near call $ID get_battle_active '{}' --accountId yairnava.testnet
+
+Crear una partida Jugador vs CPU:
+
+    near call $ID create_battle_player_cpu '{"burrito_id":"'0'"}' --accountId yairnava.testnet --gas=300000000000000
+
+Rendirse y finalizar combate activo Player vs CPU
+
+    near call $ID surrender_cpu '{}' --accountId yairnava.testnet --gas=300000000000000
+
+Combatir Ronda Player vs CPU [type_move => (1 = Ataque Debil, 2 = Ataque Fuerte, 3 = No Defenderse, 4 = Defenderse)]
     
-    near view $ID nft_token '{"token_id":"0"}' --accountId yairnava.testnet
+    near call $ID battle_player_cpu '{"type_move":"'1'"}' --accountId yairnava.testnet --gas=300000000000000
+    
+    near call $ID battle_player_cpu '{"type_move":"'2'"}' --accountId yairnava.testnet --gas=300000000000000
+    
+    near call $ID battle_player_cpu '{"type_move":"'3'"}' --accountId yairnava.testnet --gas=300000000000000
+    
+    near call $ID battle_player_cpu '{"type_move":"'4'"}' --accountId yairnava.testnet --gas=300000000000000
 
 ### STRW-Tokens
 
@@ -215,11 +235,11 @@ Remover minero
 
 Minar STRW-Token
 
-    near call $ID mint '{"account_id": "yairnava.testnet", "amount" : "100000000000000000000000000000"}' --accountId bb-strw.testnet
+    near call $ID mint '{"account_id": "yairnava.testnet", "amount" : "777000000000000000000000000000"}' --accountId strw-bb.testnet
 
 Mostrar STRW-Token en Wallet
 
-    near call $ID ft_transfer '{"receiver_id": "yairnava.testnet", "amount":"0", "memo":""}' --accountId bb-strw.testnet
+    near call $ID ft_transfer '{"receiver_id": "yairnava.testnet", "amount":"0", "memo":""}' --accountId strw-bb.testnet
 
 Obtener balance total de STRW-Token
     
@@ -238,71 +258,60 @@ Comprar STRW-Tokens
 
     near call $ID buy_tokens '{}' --accountId yairnava.testnet --deposit 1
 
-### Player vs CPU
-
-Cambiar de owner
-
-    near call $ID change_owner '{"owner_id": "bb-burrito-battle.sputnikv2.testnet"}' --accountId $ID
+### Crear Propuestas en DAO
 
 Cambiar contratos
 
-    near call $ID change_contracts '{"burrito_contract":"'dev-1663710126378-66907359558484'","items_contract":"'bb-items.testnet'","strw_contract":"'bb-strw.testnet'" ,"pve_contract":"'dev-1663738468242-76777974943846'"}' --accountId $ID
+    sputnikdao proposal call burritos-bb.testnet change_contracts '{"burrito_contract":"burritos-bb.testnet","strw_contract":"strw-bb.testnet"}' --daoAcc bb-burrito-battle --accountId yairnava.testnet
 
-Mostrar contratos
+    sputnikdao proposal call pve-bb.testnet change_contracts '{"burrito_contract":"burritos-bb.testnet","strw_contract":"strw-bb.testnet", "pve_contract":"pve-bb.testnet"}' --daoAcc bb-burrito-battle --accountId yairnava.testnet
 
-    near view $ID show_contracts
+Minar un burrito
 
-Obtener si una cuenta está en batalla:
+    sputnikdao proposal call burritos-bb.testnet nft_mint_dao '{"token_owner_id": "yairnava.testnet", "token_metadata": { "title": "", "description": "", "media": "", "extra":""}}' --daoAcc bb-burrito-battle --accountId yairnava.testnet --deposit 100000000000000000000000
 
-    near view $ID is_in_battle '{"account_id": "yairnava.testnet"}'
+Actualización de contrato
 
-Obtener cantidad de batallas finalizadas:
+    sputnikdao proposal upgrade res/burritos.wasm burritos-bb.testnet --daoAcc bb-burrito-battle --accountId yairnava.testnet
 
-    near view $ID get_number_battles
-
-Obtener cantidad de batallas activas Player vs CPU:
-
-    near view $ID get_number_battles_actives
-
-Obtener la sala activa del jugador Player vs CPU
-
-    near call $ID get_battle_active '{}' --accountId yairnava.testnet
-
-Crear una partida Jugador vs CPU:
-
-    near call $ID create_battle_player_cpu '{"burrito_id":"'0'", "accesorio1_id":"'0'", "accesorio2_id":"'0'", "accesorio3_id":"'0'"}' --accountId yairnava.testnet --gas=300000000000000
-
-Rendirse y finalizar combate activo Player vs CPU
-
-    near call $ID surrender_cpu '{}' --accountId yairnava.testnet --gas=300000000000000
-
-Combatir Ronda Player vs CPU [type_move => (1 = Ataque Debil, 2 = Ataque Fuerte, 3 = No Defenderse, 4 = Defenderse)]
+    sputnikdao proposal upgrade res/pve.wasm pve-bb.testnet --daoAcc bb-burrito-battle --accountId yairnava.testnet
     
-    near call $ID battle_player_cpu '{"type_move":"'1'"}' --accountId yairnava.testnet --gas=300000000000000
+## Configuración y orden para desplegar
+
+Compilar y desplegar todos los contratos de Burrito Battle (Burrito, STRW, PVE).
+
+    Burritos: burritos-bb.testnet
+    PVE: pve-bb.testnet
+    STRW: strw-bb.testnet
+
+Inicializar los contratos de Burrito Battle (Burrito, STRW, PVE).
+    near call burritos-bb.testnet init_contract '{"owner_id":"burritos-bb.testnet","burrito_contract":"burritos-bb.testnet", "strw_contract":"strw-bb.testnet"}' --accountId burritos-bb.testnet
     
-    near call $ID battle_player_cpu '{"type_move":"'2'"}' --accountId yairnava.testnet --gas=300000000000000
+    near call strw-bb.testnet init_contract '{"owner_id": "strw-bb.testnet", "treasury_id": "strw-bb.testnet", "strw_mint_cost": 50000, "strw_reset_cost": 30000, "strw_evolve_cost": 70000}' --accountId strw-bb.testnet
+
+    near call pve-bb.testnet init_contract '{"owner_id":"pve-bb.testnet", "burrito_contract":"burritos-bb.testnet","strw_contract":"strw-bb.testnet", "pve_contract":"pve-bb.testnet"}' --accountId pve-bb.testnet
+
+Asignar metadata al contrato de STRW Tokens
+    near call strw-bb.testnet set_meta --accountId strw-bb.testnet
+
+Agregar al whitelist del contrato de BURRITOS los contratos de BURRITOS, PVE e INCURSIONES
     
-    near call $ID battle_player_cpu '{"type_move":"'3'"}' --accountId yairnava.testnet --gas=300000000000000
+    near call burritos-bb.testnet add_whitelist '{"address_contract":"burritos-bb.testnet","contract_name":"BURRITOS"}' --accountId burritos-bb.testnet
     
-    near call $ID battle_player_cpu '{"type_move":"'4'"}' --accountId yairnava.testnet --gas=300000000000000
-
-### Crear Propuestas en DAO
-
-Ejecutar Método:
-
-    sputnikdao proposal call dev-1663710126378-66907359558484 change_contracts '{"burrito_contract":"'dev-1663710126378-66907359558484'","items_contract":"'bb-items.testnet'","strw_contract":"'bb-strw.testnet'"}' --daoAcc bb-burrito-battle --accountId yairnava.testnet
-
-    sputnikdao proposal call dev-1663738468242-76777974943846 change_contracts '{"burrito_contract":"'dev-1663710126378-66907359558484'","items_contract":"'bb-items.testnet'","strw_contract":"'bb-strw.testnet'", "pve_contract":"'dev-1663738468242-76777974943846'"}' --daoAcc bb-burrito-battle --accountId yairnava.testnet
-
-Actualización de contrato:
-
-    sputnikdao proposal upgrade res/burritos.wasm dev-1663710126378-66907359558484 --daoAcc bb-burrito-battle --accountId yairnava.testnet
-
-    sputnikdao proposal upgrade res/pve.wasm dev-1663738468242-76777974943846 --daoAcc bb-burrito-battle --accountId yairnava.testnet
+    near call burritos-bb.testnet add_whitelist '{"address_contract":"pve-bb.testnet","contract_name":"PVE"}' --accountId burritos-bb.testnet
     
+    near call burritos-bb.testnet add_whitelist '{"address_contract":"incursiones-bb.testnet","contract_name":"INCURSIONES"}' --accountId burritos-bb.testnet
+
+Agregar al whitelist del contrato de STRW los contratos de BURRITOS, PVE e INCURSIONES
+    
+    near call  strw-bb.testnet add_minter '{"account_id": "burritos-bb.testnet"}' --accountId strw-bb.testnet
+    
+    near call  strw-bb.testnet add_minter '{"account_id": "pve-bb.testnet"}' --accountId strw-bb.testnet
+    
+    near call  strw-bb.testnet add_minter '{"account_id": "incursiones-bb.testnet"}' --accountId strw-bb.testnet
+
 
 ## Construido con 🛠️
-
 * [RUST](https://www.rust-lang.org/) - Lenguaje de programación usado para contrato inteligente.
 * [Rust Toolchain](https://docs.near.org/docs/develop/contracts/rust/intro#installing-the-rust-toolchain)
 * [NEAR CLI](https://docs.near.org/docs/tools/near-cli) - Herramienta de interfaz de línea de comandos para interactuar con cuentas y contratos inteligentes en NEAR.

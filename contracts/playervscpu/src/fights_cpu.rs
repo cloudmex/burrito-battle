@@ -44,12 +44,6 @@ impl Contract {
             defense_b1 : info.defense_b1.to_string(),
             speed_b1 : info.speed_b1.to_string(),
             level_b1 : info.level_b1.to_string(),
-            accesories_attack_b1 : info.accesories_attack_b1.to_string(),
-            accesories_defense_b1 : info.accesories_defense_b1.to_string(),
-            accesories_speed_b1 : info.accesories_speed_b1.to_string(),
-            accesories_attack_b2 : info.accesories_attack_b2.to_string(),
-            accesories_defense_b2 : info.accesories_defense_b2.to_string(),
-            accesories_speed_b2 : info.accesories_speed_b2.to_string(),
             turn : info.turn.to_string(),
             strong_attack_player : info.strong_attack_player.to_string(),
             shields_player : info.shields_player.to_string(),
@@ -77,26 +71,13 @@ impl Contract {
     }
 
     // Guardar sala de combate Player vs CPU
-    pub fn create_battle_player_cpu(&mut self, burrito_id: TokenId, accesorio1_id: TokenId, accesorio2_id: TokenId, accesorio3_id: TokenId) -> Promise {
+    pub fn create_battle_player_cpu(&mut self, burrito_id: TokenId) -> Promise {
         let token_owner_id = env::signer_account_id();
 
         let br = self.battle_rooms.get(&token_owner_id.to_string());
         
         if br.is_some() {
             env::panic_str("Ya tienes una partida iniciada, debes terminarla o rendirte");
-        }
-
-        // Validar que los 3 accesorios sean diferentes
-        if (accesorio1_id.clone().parse::<u128>().unwrap() == accesorio2_id.clone().parse::<u128>().unwrap() && 
-            accesorio1_id.clone().parse::<u128>().unwrap() != 0 && accesorio2_id.clone().parse::<u128>().unwrap() != 0) 
-            || 
-            (accesorio1_id.clone().parse::<u128>().unwrap() == accesorio3_id.clone().parse::<u128>().unwrap() &&
-            accesorio1_id.clone().parse::<u128>().unwrap() != 0 && accesorio3_id.clone().parse::<u128>().unwrap() != 0) 
-            || 
-            (accesorio2_id.clone().parse::<u128>().unwrap() == accesorio3_id.clone().parse::<u128>().unwrap() &&
-            accesorio2_id.clone().parse::<u128>().unwrap() != 0 && accesorio3_id.clone().parse::<u128>().unwrap() != 0) 
-        {
-            env::panic_str("Los 3 Items a equipar deben ser diferentes");
         }
 
         let call = ext_nft::get_burrito(
@@ -108,13 +89,10 @@ impl Contract {
 
         );
 
-        let callback = ext_self::save_burritos_battle_room(
-            burrito_id,
-            accesorio1_id.to_string(),
-            accesorio2_id.to_string(),
-            accesorio3_id.to_string(), 
-            self.pve_contract.parse::<AccountId>().unwrap(),
-            NO_DEPOSIT,
+        let callback = ext_self::save_battle_player_cpu(
+            burrito_id.clone(),
+            self.pve_contract.parse::<AccountId>().unwrap(), // Contrato de burritos
+            NO_DEPOSIT, // yocto NEAR a ajuntar al callback
             Gas(100_000_000_000_000)
         );
 
@@ -122,51 +100,8 @@ impl Contract {
 
     }
 
-    // Recuperar información de los burritos y guardarla en la sala de batalla
-    pub fn save_burritos_battle_room(&mut self, burrito_id: TokenId, accesorio1_id: TokenId, accesorio2_id: TokenId, accesorio3_id: TokenId) -> PromiseOrValue<String> {
-        assert_eq!(
-            env::promise_results_count(),
-            1,
-            "Éste es un método callback"
-        );
-        match env::promise_result(0) {
-            PromiseResult::NotReady => unreachable!(),
-            PromiseResult::Failed => near_sdk::PromiseOrValue::Value("Error".to_string()),
-            PromiseResult::Successful(result) => {
-
-                let value = std::str::from_utf8(&result).unwrap();
-                let burrito_for_battle: Burrito = serde_json::from_str(&value).unwrap();
-
-                if burrito_for_battle.hp.clone().parse::<u8>().unwrap() == 0 {
-                    env::panic_str("El Burrito a utilizar no tiene vidas");
-                }
-
-                // Obtener información de los accesorios para ver si existen y recuperar las estadísticas a aumentar
-                let call = ext_nft::get_items_for_battle_cpu(
-                    accesorio1_id.to_string(), // Id el item 1 del burrito
-                    accesorio2_id.to_string(), // Id el item 2 del burrito
-                    accesorio3_id.to_string(), // Id el item 3 del burrito
-                    self.items_contract.parse::<AccountId>().unwrap(), // Contrato de items
-                    NO_DEPOSIT, // yocto NEAR a ajuntar
-                    Gas(60_000_000_000_000)
-                );
-
-                let callback = ext_self::save_battle_player_cpu(
-                    burrito_id,
-                    burrito_for_battle,
-                    self.pve_contract.parse::<AccountId>().unwrap(), // Contrato de burritos
-                    NO_DEPOSIT, // yocto NEAR a ajuntar al callback
-                    Gas(20_000_000_000_000)
-                );
-
-                near_sdk::PromiseOrValue::Promise(call.then(callback))
-
-            }
-        }
-    }
-
-    // Guardar sala de combate Player vs CPU
-    pub fn save_battle_player_cpu(&mut self, burrito_id: TokenId, burrito_for_battle: Burrito) -> BattleCPU {
+    // Recuperar información de los burritos y guardar sala de combate Player vs CPU
+    pub fn save_battle_player_cpu(&mut self, burrito_id: TokenId) -> BattleCPU {
         assert_eq!(
             env::promise_results_count(),
             1,
@@ -183,12 +118,6 @@ impl Contract {
                     defense_b1 : "".to_string(),
                     speed_b1 : "".to_string(),
                     level_b1 : "".to_string(),
-                    accesories_attack_b1 : "".to_string(),
-                    accesories_defense_b1 : "".to_string(),
-                    accesories_speed_b1 : "".to_string(),
-                    accesories_attack_b2 : "".to_string(),
-                    accesories_defense_b2 : "".to_string(),
-                    accesories_speed_b2 : "".to_string(),
                     turn : "".to_string(),
                     strong_attack_player : "".to_string(),
                     shields_player : "".to_string(),
@@ -211,7 +140,12 @@ impl Contract {
             PromiseResult::Successful(result) => {
                 
                 let value = std::str::from_utf8(&result).unwrap();
-                let accessories_for_battle: AccessoriesForBattle = serde_json::from_str(&value).unwrap();
+                let burrito_for_battle: Burrito = serde_json::from_str(&value).unwrap();
+
+                if burrito_for_battle.hp.clone().parse::<u8>().unwrap() == 0 {
+                    env::panic_str("El Burrito a utilizar no tiene vidas");
+                }
+
                 let token_owner_id = env::signer_account_id();
 
                 let extradatajson_burrito = ExtraBurrito {
@@ -434,7 +368,7 @@ impl Contract {
         
                 // Determinar burrito mas veloz
                 let mut burrito_first_atack = "";
-                if burrito_cpu.speed.parse::<u8>().unwrap() > (burrito.speed.parse::<u8>().unwrap() + accessories_for_battle.final_speed_b1.clone().parse::<u8>().unwrap()) {
+                if burrito_cpu.speed.parse::<u8>().unwrap() > (burrito.speed.parse::<u8>().unwrap()) {
                     burrito_first_atack = "CPU";
                 } else {
                     burrito_first_atack = "Player";
@@ -448,12 +382,6 @@ impl Contract {
                     defense_b1 : burrito.defense.clone(),
                     speed_b1 : burrito.speed.clone(),
                     level_b1 : burrito.level.clone(),
-                    accesories_attack_b1 : accessories_for_battle.final_attack_b1.clone().to_string(),
-                    accesories_defense_b1 : accessories_for_battle.final_defense_b1.clone().to_string(),
-                    accesories_speed_b1 : accessories_for_battle.final_speed_b1.clone().to_string(),
-                    accesories_attack_b2 : accessories_for_battle.final_attack_b2.clone().to_string(),
-                    accesories_defense_b2 : accessories_for_battle.final_defense_b2.clone().to_string(),
-                    accesories_speed_b2 : accessories_for_battle.final_speed_b2.clone().to_string(),
                     turn : burrito_first_atack.to_string(),
                     strong_attack_player : "3".to_string(),
                     shields_player : "3".to_string(),
@@ -506,12 +434,6 @@ impl Contract {
             defense_b1 : info.defense_b1.clone(),
             speed_b1 : info.speed_b1.clone(),
             level_b1 : info.level_b1.clone(),
-            accesories_attack_b1 : info.accesories_attack_b1.to_string(),
-            accesories_defense_b1 : info.accesories_defense_b1.to_string(),
-            accesories_speed_b1 : info.accesories_speed_b1.to_string(),
-            accesories_attack_b2 : info.accesories_attack_b2.to_string(),
-            accesories_defense_b2 : info.accesories_defense_b2.to_string(),
-            accesories_speed_b2 : info.accesories_speed_b2.to_string(),
             turn : info.turn.to_string(),
             strong_attack_player : info.strong_attack_player.to_string(),
             shields_player : info.shields_player.to_string(),
@@ -574,12 +496,6 @@ impl Contract {
             defense_b1 : info.defense_b1.clone(),
             speed_b1 : info.speed_b1.clone(),
             level_b1 : info.level_b1.clone(),
-            accesories_attack_b1 : info.accesories_attack_b1.to_string(),
-            accesories_defense_b1 : info.accesories_defense_b1.to_string(),
-            accesories_speed_b1 : info.accesories_speed_b1.to_string(),
-            accesories_attack_b2 : info.accesories_attack_b2.to_string(),
-            accesories_defense_b2 : info.accesories_defense_b2.to_string(),
-            accesories_speed_b2 : info.accesories_speed_b2.to_string(),
             turn : info.turn.to_string(),
             strong_attack_player : info.strong_attack_player.to_string(),
             shields_player : info.shields_player.to_string(),
@@ -755,9 +671,9 @@ impl Contract {
 
         let mut attack = 0.0;
         if old_battle_room.turn == "Player"{
-            attack = (burrito_attacker.attack.parse::<f32>().unwrap()*attack_mult)+type_mult+old_battle_room.accesories_attack_b1.parse::<f32>().unwrap();
+            attack = (burrito_attacker.attack.parse::<f32>().unwrap()*attack_mult)+type_mult;
         } else {
-            attack = (burrito_attacker.attack.parse::<f32>().unwrap()*attack_mult)+type_mult+old_battle_room.accesories_attack_b2.parse::<f32>().unwrap();
+            attack = (burrito_attacker.attack.parse::<f32>().unwrap()*attack_mult)+type_mult;
         }
 
         // log!("Cantidad de daño a realizar: {}",attack);

@@ -108,7 +108,6 @@ pub struct OldContract {
     pub whitelist_contracts: LookupMap<AccountId, ExternalContract>,
 
     pub burrito_contract: String,
-    pub items_contract: String,
     pub strw_contract: String
 }
 
@@ -133,7 +132,6 @@ pub struct Contract {
     pub whitelist_contracts: LookupMap<AccountId, ExternalContract>,
 
     pub burrito_contract: String,
-    pub items_contract: String,
     pub strw_contract: String
 
 }
@@ -160,7 +158,7 @@ impl Contract {
         user doesn't have to manually type metadata.
     */
     #[init]
-    pub fn init_contract(owner_id: AccountId, burrito_contract: String, items_contract: String, strw_contract: String) -> Self {
+    pub fn init_contract(owner_id: AccountId, burrito_contract: String, strw_contract: String) -> Self {
         //calls the other function "new: with some default metadata and the owner_id passed in 
         Self::new(
             owner_id,
@@ -174,7 +172,6 @@ impl Contract {
                 reference_hash: None,
             },
             burrito_contract,
-            items_contract,
             strw_contract
         )
     }
@@ -185,7 +182,7 @@ impl Contract {
         the owner_id. 
     */
     #[init]
-    pub fn new(owner_id: AccountId, metadata: NFTContractMetadata, burrito_contract: String, items_contract: String, strw_contract: String) -> Self {
+    pub fn new(owner_id: AccountId, metadata: NFTContractMetadata, burrito_contract: String, strw_contract: String) -> Self {
         //create a variable of type Self with all the fields initialized. 
         let this = Self {
             //Storage keys are simply the prefixes used for the collections. This helps avoid data collision
@@ -203,7 +200,6 @@ impl Contract {
 
             whitelist_contracts: LookupMap::new(StorageKey::ContractAllowed),
             burrito_contract : burrito_contract,
-            items_contract : items_contract,
             strw_contract : strw_contract
         };
 
@@ -218,10 +214,9 @@ impl Contract {
         self.metadata.set(&metadata);
     }
 
-    pub fn change_contracts(&mut self, burrito_contract: String, items_contract: String, strw_contract: String) {
+    pub fn change_contracts(&mut self, burrito_contract: String, strw_contract: String) {
         self.assert_owner();
         self.burrito_contract = burrito_contract;
-        self.items_contract = items_contract;
         self.strw_contract = strw_contract;
     }
 
@@ -244,7 +239,6 @@ impl Contract {
 
     pub fn show_contracts(&self) {
         log!("burrito_contract: {}",self.burrito_contract);
-        log!("items_contract: {}",self.items_contract);
         log!("strw_contract: {}",self.strw_contract);
     }
 

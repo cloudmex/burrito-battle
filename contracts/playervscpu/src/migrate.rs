@@ -58,7 +58,6 @@ impl Contract {
             battle_rooms: old_state.battle_rooms,
             battle_history: old_state.battle_history,
             burrito_contract: old_state.burrito_contract,
-            items_contract: old_state.items_contract,
             strw_contract: old_state.strw_contract,
             pve_contract: old_state.pve_contract
         }

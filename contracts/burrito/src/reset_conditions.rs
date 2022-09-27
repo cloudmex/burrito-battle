@@ -31,7 +31,7 @@ impl Contract {
         ext_nft::get_balance_and_transfer(
             account_id.clone().to_string(),
             "Reset".to_string(),
-            self.items_contract.parse::<AccountId>().unwrap(),
+            self.strw_contract.parse::<AccountId>().unwrap(),
             deposit,
             MIN_GAS_FOR_NFT_TRANSFER_CALL
         ).then(ext_self::reset_conditions(

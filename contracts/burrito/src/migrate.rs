@@ -63,7 +63,6 @@ impl Contract {
             metadata:old_state.metadata,
             whitelist_contracts: old_state.whitelist_contracts,
             burrito_contract: old_state.burrito_contract,
-            items_contract: old_state.items_contract,
             strw_contract: old_state.strw_contract
         }
     }

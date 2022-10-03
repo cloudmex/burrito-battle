@@ -642,7 +642,7 @@ impl Contract {
     // Minar un nuevo token desde DAO
     #[payable]
     pub fn nft_mint_dao(&mut self,token_owner_id: AccountId, token_metadata: TokenMetadata) -> Burrito {
-        // assert!(env::predecessor_account_id() == self.owner_id);
+        assert!(env::predecessor_account_id() == self.owner_id);
 
         let account_id = env::predecessor_account_id();
         let deposit = env::attached_deposit(); // 0.1 Nears

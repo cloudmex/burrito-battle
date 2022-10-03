@@ -18,11 +18,6 @@ mod xcc;
 mod enumerations;
 mod migrate;
 
-pub const BURRITO_CONTRACT: &str = "bb-burritos.testnet";
-pub const ITEMS_CONTRACT: &str = "bb-items.testnet";
-pub const STRWTOKEN_CONTRACT: &str = "bb-strw.testnet";
-pub const PVE_CONTRACT: &str = "bb-pve.testnet";
-
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Burrito {
@@ -60,16 +55,10 @@ pub struct BattleCPU {
     status : String, // 1 = On Hold , 2 = In Battle , 3 = Finish
     player_id : String,
     burrito_id : String,
-    accesories_attack_b1 : String,
-    accesories_defense_b1 : String,
-    accesories_speed_b1 : String,
     attack_b1 : String,
     defense_b1 : String,
     speed_b1 : String,
     level_b1 : String,
-    accesories_attack_b2 : String,
-    accesories_defense_b2 : String,
-    accesories_speed_b2 : String,
     turn : String, // Player or CPU
     strong_attack_player : String, // 0-3
     shields_player : String, // 0-3
@@ -113,7 +102,11 @@ pub struct OldContract {
     //contract owner
     pub owner_id: AccountId,
     pub battle_rooms: HashMap<String,BattleCPU>,
-    pub battle_history: HashMap<String,BattlesHistory>
+    pub battle_history: HashMap<String,BattlesHistory>,
+
+    pub burrito_contract: String,
+    pub strw_contract: String,
+    pub pve_contract: String
 }
 
 #[near_bindgen]
@@ -122,30 +115,53 @@ pub struct Contract {
     //contract owner
     pub owner_id: AccountId,
     pub battle_rooms: HashMap<String,BattleCPU>,
-    pub battle_history: HashMap<String,BattlesHistory>
+    pub battle_history: HashMap<String,BattlesHistory>,
+
+    pub burrito_contract: String,
+    pub strw_contract: String,
+    pub pve_contract: String
+
 }
 
 #[near_bindgen]
 impl Contract {
     #[init]
-    pub fn init_contract(owner_id: AccountId) -> Self {
+    pub fn init_contract(owner_id: AccountId, burrito_contract: String, strw_contract: String, pve_contract: String) -> Self {
         //calls the other function "new: with some default metadata and the owner_id passed in 
         Self::new(
-            owner_id
+            owner_id,
+            burrito_contract,
+            strw_contract,
+            pve_contract
         )
     }
 
     #[init]
-    pub fn new(owner_id: AccountId) -> Self {
+    pub fn new(owner_id: AccountId, burrito_contract: String, strw_contract: String, pve_contract: String) -> Self {
         //create a variable of type Self with all the fields initialized. 
         let this = Self {
             owner_id,
             battle_rooms:HashMap::new(),
-            battle_history:HashMap::new()
+            battle_history:HashMap::new(),
+            burrito_contract : burrito_contract,
+            strw_contract : strw_contract,
+            pve_contract : pve_contract
         };
 
         //return the Contract object
         this
+    }
+
+    pub fn change_contracts(&mut self, burrito_contract: String, strw_contract: String, pve_contract: String) {
+        self.assert_owner();
+        self.burrito_contract = burrito_contract;
+        self.strw_contract = strw_contract;
+        self.pve_contract = pve_contract;
+    }
+
+    pub fn change_owner(&mut self, owner_id: AccountId) {
+        self.assert_owner();
+        self.owner_id = owner_id;
     }
 
     fn assert_owner(&self) {
@@ -153,11 +169,17 @@ impl Contract {
     }
 
     fn signer_is_owner(&self) -> bool {
-        self.is_owner(&env::signer_account_id())
+        self.is_owner(&env::predecessor_account_id())
     }
 
     fn is_owner(&self, minter: &AccountId) -> bool {
         minter.as_str() == self.owner_id.as_str()
+    }
+
+    pub fn show_contracts(&self) {
+        log!("burrito_contract: {}",self.burrito_contract);
+        log!("strw_contract: {}",self.strw_contract);
+        log!("pve_contract: {}",self.pve_contract);
     }
 
 }

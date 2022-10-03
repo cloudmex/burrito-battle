@@ -29,5 +29,5 @@ trait NonFungibleTokenResolver {
     fn reset_conditions(&mut self,burrito_id: TokenId) -> String;
 
     fn save_burritos_battle_room(&mut self,burrito_id: TokenId,accesorio1_id: TokenId, accesorio2_id: TokenId, accesorio3_id: TokenId) -> String;
-    fn save_battle_player_cpu(&mut self,burrito_id: TokenId,burrito_for_battle: Burrito) -> String;
+    fn save_battle_player_cpu(&mut self,burrito_id: TokenId) -> String;
 }

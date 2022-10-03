@@ -31,12 +31,12 @@ impl Contract {
         ext_nft::get_balance_and_transfer(
             account_id.clone().to_string(),
             "Reset".to_string(),
-            STRWTOKEN_CONTRACT.parse::<AccountId>().unwrap(),
+            self.strw_contract.parse::<AccountId>().unwrap(),
             deposit,
             MIN_GAS_FOR_NFT_TRANSFER_CALL
         ).then(ext_self::reset_conditions(
             burrito_id.to_string(),
-            BURRITO_CONTRACT.parse::<AccountId>().unwrap(), // Contrato de burritos
+            self.burrito_contract.parse::<AccountId>().unwrap(), // Contrato de burritos
             NO_DEPOSIT, // yocto NEAR a ajuntar al callback
             GAS_FOR_NFT_TRANSFER_CALL // gas a ajuntar al callback
         ))

@@ -99,93 +99,147 @@ impl Contract {
                 let mut burrito_image: String = BURRITO1.to_string();
 
                 // Obtener ataque aleatorio
-                if rand_attack > 0 &&  rand_attack <= 70 {
-                    attack = 5;
-                }
-                if rand_attack >= 71 &&  rand_attack <= 130 {
+                if rand_attack > 0 &&  rand_attack <= 30 {
                     attack = 6;
                 }
-                if rand_attack >= 131 &&  rand_attack <= 180 {
+                if rand_attack > 30 &&  rand_attack <= 60 {
                     attack = 7;
                 }
-                if rand_attack >= 181 &&  rand_attack <= 220 {
+                if rand_attack > 60 &&  rand_attack <= 90 {
                     attack = 8;
                 }
-                if rand_attack >= 221 &&  rand_attack <= 250 {
+                if rand_attack > 90 &&  rand_attack <= 120 {
                     attack = 9;
                 }
-                if rand_attack >= 251 &&  rand_attack < 255 {
+                if rand_attack > 120 &&  rand_attack <= 150 {
                     attack = 10;
+                }
+                if rand_attack > 150 &&  rand_attack <= 180 {
+                    attack = 9;
+                }
+                if rand_attack > 180 &&  rand_attack <= 210 {
+                    attack = 8;
+                }
+                if rand_attack > 210 &&  rand_attack <= 240 {
+                    attack = 7;
+                }
+                if rand_attack > 240 &&  rand_attack <= 255 {
+                    attack = 6;
                 }
 
                 // Obtener defensa aleatoria
-                if rand_defense > 0 &&  rand_defense <= 70 {
-                    defense = 5;
-                }
-                if rand_defense >= 71 &&  rand_defense <= 130 {
+                if rand_defense > 0 &&  rand_defense <= 30 {
                     defense = 6;
                 }
-                if rand_defense >= 131 &&  rand_defense <= 180 {
+                if rand_defense > 30 &&  rand_defense <= 60 {
                     defense = 7;
                 }
-                if rand_defense >= 181 &&  rand_defense <= 220 {
+                if rand_defense > 60 &&  rand_defense <= 90 {
                     defense = 8;
                 }
-                if rand_defense >= 221 &&  rand_defense <= 250 {
+                if rand_defense > 90 &&  rand_defense <= 120 {
                     defense = 9;
                 }
-                if rand_defense >= 251 &&  rand_defense < 255 {
+                if rand_defense > 120 &&  rand_defense <= 150 {
                     defense = 10;
+                }
+                if rand_defense > 150 &&  rand_defense <= 180 {
+                    defense = 9;
+                }
+                if rand_defense > 180 &&  rand_defense <= 210 {
+                    defense = 8;
+                }
+                if rand_defense > 210 &&  rand_defense <= 240 {
+                    defense = 7;
+                }
+                if rand_defense > 240 &&  rand_defense <= 255 {
+                    defense = 6;
                 }
 
                 // Obtener velociad aleatoria
-                if rand_speed > 0 &&  rand_speed <= 70 {
-                    speed = 5;
-                }
-                if rand_speed >= 71 &&  rand_speed <= 130 {
+                if rand_speed > 0 &&  rand_speed <= 30 {
                     speed = 6;
                 }
-                if rand_speed >= 131 &&  rand_speed <= 180 {
+                if rand_speed > 30 &&  rand_speed <= 60 {
                     speed = 7;
                 }
-                if rand_speed >= 181 &&  rand_speed <= 220 {
+                if rand_speed > 60 &&  rand_speed <= 90 {
                     speed = 8;
                 }
-                if rand_speed >= 221 &&  rand_speed <= 250 {
+                if rand_speed > 90 &&  rand_speed <= 120 {
                     speed = 9;
                 }
-                if rand_speed >= 251 &&  rand_speed < 255 {
+                if rand_speed > 120 &&  rand_speed <= 150 {
                     speed = 10;
+                }
+                if rand_speed > 150 &&  rand_speed <= 180 {
+                    speed = 9;
+                }
+                if rand_speed > 180 &&  rand_speed <= 210 {
+                    speed = 8;
+                }
+                if rand_speed > 210 &&  rand_speed <= 240 {
+                    speed = 7;
+                }
+                if rand_speed > 240 &&  rand_speed <= 255 {
+                    speed = 6;
                 }
 
                 // Obtener tipo
-                if rand_type > 0 &&  rand_type <= 51 {
+                if rand_type > 0 &&  rand_type <= 24 {
                     burrito_type = "Fuego".to_string();
                 }
-                if rand_type >= 52 &&  rand_type <= 102 {
+                if rand_type > 24 &&  rand_type <= 48 {
                     burrito_type = "Agua".to_string();
                 }
-                if rand_type >= 103 &&  rand_type <= 153 {
+                if rand_type > 48 &&  rand_type <= 72 {
                     burrito_type = "Planta".to_string();
                 }
-                if rand_type >= 154 &&  rand_type <= 204 {
+                if rand_type > 72 &&  rand_type <= 96 {
                     burrito_type = "Eléctrico".to_string();
                 }
-                if rand_type >= 205 &&  rand_type < 255 {
+                if rand_type > 96 &&  rand_type <= 120 {
+                    burrito_type = "Volador".to_string();
+                }
+                if rand_type > 120 &&  rand_type <= 144 {
+                    burrito_type = "Fuego".to_string();
+                }
+                if rand_type > 144 &&  rand_type <= 168 {
+                    burrito_type = "Agua".to_string();
+                }
+                if rand_type > 168 &&  rand_type <= 192 {
+                    burrito_type = "Planta".to_string();
+                }
+                if rand_type > 192 &&  rand_type <= 116 {
+                    burrito_type = "Eléctrico".to_string();
+                }
+                if rand_type > 116 &&  rand_type <= 255 {
                     burrito_type = "Volador".to_string();
                 }
 
                 // Obtener imagen
-                if rand_image > 0 &&  rand_image <= 64 {
+                if rand_image > 0 &&  rand_image <= 30 {
                     burrito_image = BURRITO1.to_string();
                 }
-                if rand_image > 64 &&  rand_image <= 128 {
+                if rand_image > 30 &&  rand_image <= 60 {
                     burrito_image = BURRITO2.to_string();
                 }
-                if rand_image > 128 &&  rand_image <= 192 {
+                if rand_image > 60 &&  rand_image <= 90 {
                     burrito_image = BURRITO3.to_string();
                 }
-                if rand_image > 192 &&  rand_image < 255 {
+                if rand_image > 90 &&  rand_image < 120 {
+                    burrito_image = BURRITO4.to_string();
+                }
+                if rand_image > 120 &&  rand_image <= 150 {
+                    burrito_image = BURRITO1.to_string();
+                }
+                if rand_image > 150 &&  rand_image <= 180 {
+                    burrito_image = BURRITO2.to_string();
+                }
+                if rand_image > 180 &&  rand_image <= 210 {
+                    burrito_image = BURRITO3.to_string();
+                }
+                if rand_image > 210 &&  rand_image < 255 {
                     burrito_image = BURRITO4.to_string();
                 }
 
@@ -676,93 +730,147 @@ impl Contract {
         let mut burrito_image: String = BURRITO1.to_string();
 
         // Obtener ataque aleatorio
-        if rand_attack > 0 &&  rand_attack <= 70 {
-            attack = 5;
-        }
-        if rand_attack >= 71 &&  rand_attack <= 130 {
+        if rand_attack >= 0 &&  rand_attack <= 30 {
             attack = 6;
         }
-        if rand_attack >= 131 &&  rand_attack <= 180 {
+        if rand_attack > 30 &&  rand_attack <= 60 {
             attack = 7;
         }
-        if rand_attack >= 181 &&  rand_attack <= 220 {
+        if rand_attack > 60 &&  rand_attack <= 90 {
             attack = 8;
         }
-        if rand_attack >= 221 &&  rand_attack <= 250 {
+        if rand_attack > 90 &&  rand_attack <= 120 {
             attack = 9;
         }
-        if rand_attack >= 251 &&  rand_attack < 255 {
+        if rand_attack > 120 &&  rand_attack <= 150 {
             attack = 10;
+        }
+        if rand_attack > 150 &&  rand_attack <= 180 {
+            attack = 9;
+        }
+        if rand_attack > 180 &&  rand_attack <= 210 {
+            attack = 8;
+        }
+        if rand_attack > 210 &&  rand_attack <= 240 {
+            attack = 7;
+        }
+        if rand_attack > 240 &&  rand_attack <= 255 {
+            attack = 6;
         }
 
         // Obtener defensa aleatoria
-        if rand_defense > 0 &&  rand_defense <= 70 {
-            defense = 5;
-        }
-        if rand_defense >= 71 &&  rand_defense <= 130 {
+        if rand_defense >= 0 &&  rand_defense <= 30 {
             defense = 6;
         }
-        if rand_defense >= 131 &&  rand_defense <= 180 {
+        if rand_defense > 30 &&  rand_defense <= 60 {
             defense = 7;
         }
-        if rand_defense >= 181 &&  rand_defense <= 220 {
+        if rand_defense > 60 &&  rand_defense <= 90 {
             defense = 8;
         }
-        if rand_defense >= 221 &&  rand_defense <= 250 {
+        if rand_defense > 90 &&  rand_defense <= 120 {
             defense = 9;
         }
-        if rand_defense >= 251 &&  rand_defense < 255 {
+        if rand_defense > 120 &&  rand_defense <= 150 {
             defense = 10;
+        }
+        if rand_defense > 150 &&  rand_defense <= 180 {
+            defense = 9;
+        }
+        if rand_defense > 180 &&  rand_defense <= 210 {
+            defense = 8;
+        }
+        if rand_defense > 210 &&  rand_defense <= 240 {
+            defense = 7;
+        }
+        if rand_defense > 240 &&  rand_defense <= 255 {
+            defense = 6;
         }
 
         // Obtener velociad aleatoria
-        if rand_speed > 0 &&  rand_speed <= 70 {
-            speed = 5;
-        }
-        if rand_speed >= 71 &&  rand_speed <= 130 {
+        if rand_speed >= 0 &&  rand_speed <= 30 {
             speed = 6;
         }
-        if rand_speed >= 131 &&  rand_speed <= 180 {
+        if rand_speed > 30 &&  rand_speed <= 60 {
             speed = 7;
         }
-        if rand_speed >= 181 &&  rand_speed <= 220 {
+        if rand_speed > 60 &&  rand_speed <= 90 {
             speed = 8;
         }
-        if rand_speed >= 221 &&  rand_speed <= 250 {
+        if rand_speed > 90 &&  rand_speed <= 120 {
             speed = 9;
         }
-        if rand_speed >= 251 &&  rand_speed < 255 {
+        if rand_speed > 120 &&  rand_speed <= 150 {
             speed = 10;
+        }
+        if rand_speed > 150 &&  rand_speed <= 180 {
+            speed = 9;
+        }
+        if rand_speed > 180 &&  rand_speed <= 210 {
+            speed = 8;
+        }
+        if rand_speed > 210 &&  rand_speed <= 240 {
+            speed = 7;
+        }
+        if rand_speed > 240 &&  rand_speed <= 255 {
+            speed = 6;
         }
 
         // Obtener tipo
-        if rand_type > 0 &&  rand_type <= 51 {
+        if rand_type >= 0 &&  rand_type <= 24 {
             burrito_type = "Fuego".to_string();
         }
-        if rand_type >= 52 &&  rand_type <= 102 {
+        if rand_type > 24 &&  rand_type <= 48 {
             burrito_type = "Agua".to_string();
         }
-        if rand_type >= 103 &&  rand_type <= 153 {
+        if rand_type > 48 &&  rand_type <= 72 {
             burrito_type = "Planta".to_string();
         }
-        if rand_type >= 154 &&  rand_type <= 204 {
+        if rand_type > 72 &&  rand_type <= 96 {
             burrito_type = "Eléctrico".to_string();
         }
-        if rand_type >= 205 &&  rand_type < 255 {
+        if rand_type > 96 &&  rand_type <= 120 {
+            burrito_type = "Volador".to_string();
+        }
+        if rand_type > 120 &&  rand_type <= 144 {
+            burrito_type = "Fuego".to_string();
+        }
+        if rand_type > 144 &&  rand_type <= 168 {
+            burrito_type = "Agua".to_string();
+        }
+        if rand_type > 168 &&  rand_type <= 192 {
+            burrito_type = "Planta".to_string();
+        }
+        if rand_type > 192 &&  rand_type <= 116 {
+            burrito_type = "Eléctrico".to_string();
+        }
+        if rand_type > 116 &&  rand_type <= 255 {
             burrito_type = "Volador".to_string();
         }
 
         // Obtener imagen
-        if rand_image > 0 &&  rand_image <= 64 {
+        if rand_image >= 0 &&  rand_image <= 30 {
             burrito_image = BURRITO1.to_string();
         }
-        if rand_image > 64 &&  rand_image <= 128 {
+        if rand_image > 30 &&  rand_image <= 60 {
             burrito_image = BURRITO2.to_string();
         }
-        if rand_image > 128 &&  rand_image <= 192 {
+        if rand_image > 60 &&  rand_image <= 90 {
             burrito_image = BURRITO3.to_string();
         }
-        if rand_image > 192 &&  rand_image < 255 {
+        if rand_image > 90 &&  rand_image < 120 {
+            burrito_image = BURRITO4.to_string();
+        }
+        if rand_image > 120 &&  rand_image <= 150 {
+            burrito_image = BURRITO1.to_string();
+        }
+        if rand_image > 150 &&  rand_image <= 180 {
+            burrito_image = BURRITO2.to_string();
+        }
+        if rand_image > 180 &&  rand_image <= 210 {
+            burrito_image = BURRITO3.to_string();
+        }
+        if rand_image > 210 &&  rand_image < 255 {
             burrito_image = BURRITO4.to_string();
         }
 

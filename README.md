@@ -59,7 +59,7 @@ Asignamos el identificador de nuestro contrato desplegado a una constante (Susti
     echo $ID
 
     STRW-TOKEN
-    ID=strw-bb.testnet
+    ID=bb-strw.testnet
     echo $ID
 
     PVE Battle
@@ -86,7 +86,7 @@ Cambiar de owner
 
 Cambiar contratos
 
-    near call $ID change_contracts '{"burrito_contract":"'dev-1663710126378-66907359558484'","items_contract":"'bb-items.testnet'","strw_contract":"'bb-strw.testnet'"}' --accountId $ID
+    near call $ID change_contracts '{"burrito_contract":"'burritos-bb.testnet'","strw_contract":"'bb-strw.testnet'"}' --accountId $ID
 
 Mostrar contratos
 
@@ -94,7 +94,7 @@ Mostrar contratos
 
 Obtener cantidad de burritos creados:
 
-    near view $ID get_number_burritos
+    near view bb-burritos.testnet get_number_burritos
     
 Crear nuevo burrito:
 
@@ -128,9 +128,9 @@ Obtener datos de burritos de un usuario por segmento
 
 Agregar contrato a Whitelist
 
-    near call $ID add_whitelist '{"address_contract":"'bb-burritos.testnet'","contract_name":"'Burritos'"}' --accountId $ID
+    near call $ID add_whitelist '{"address_contract":"'burritos-bb.testnet'","contract_name":"'Burritos'"}' --accountId $ID
 
-    near call $ID add_whitelist '{"address_contract":"'bb-pve.testnet'","contract_name":"'PVE'"}' --accountId $ID
+    near call $ID add_whitelist '{"address_contract":"'pve-bb.testnet'","contract_name":"'PVE'"}' --accountId $ID
 
     near call $ID add_whitelist '{"address_contract":"'bb-incursions.testnet'","contract_name":"'INCURSION'"}' --accountId $ID
 
@@ -149,7 +149,7 @@ Cambiar de owner
 
 Cambiar contratos
 
-    near call $ID change_contracts '{"burrito_contract":"'dev-1663710126378-66907359558484'","strw_contract":"'bb-strw.testnet'" ,"pve_contract":"'dev-1663738468242-76777974943846'"}' --accountId $ID
+    near call $ID change_contracts '{"burrito_contract":"'burritos-bb.testnet'","strw_contract":"'bb-strw.testnet'" ,"pve_contract":"'pve-bb.testnet'"}' --accountId $ID
 
 Mostrar contratos
 
@@ -221,13 +221,13 @@ Cambiar tesorero
 
 Agregar minero
 
-    near call $ID add_minter '{"account_id": "bb-burritos.testnet"}' --accountId bb-strw.testnet
+    near call $ID add_minter '{"account_id": "burritos-bb.testnet"}' --accountId bb-strw.testnet
 
-    near call $ID add_minter '{"account_id": "bb-pve.testnet"}' --accountId bb-strw.testnet
+    near call $ID add_minter '{"account_id": "pve-bb.testnet"}' --accountId bb-strw.testnet
     
-    near call $ID add_minter '{"account_id": "bb-incursions.testnet"}' --accountId bb-strw.testnet
+    near call $ID add_minter '{"account_id": "incursiones-bb.testnet"}' --accountId bb-strw.testnet
 
-    near call $ID add_minter '{"account_id": "bb-hospital.testnet"}' --accountId bb-strw.testnet
+    near call $ID add_minter '{"account_id": "dev-1663091906107-11804226544868"}' --accountId bb-strw.testnet
 
 Remover minero
 
@@ -235,7 +235,7 @@ Remover minero
 
 Minar STRW-Token
 
-    near call $ID mint '{"account_id": "yairnava.testnet", "amount" : "777000000000000000000000000000"}' --accountId strw-bb.testnet
+    near call $ID mint '{"account_id": "timoribus.testnet", "amount" : "1000000000000000000000000000000"}' --accountId bb-strw.testnet
 
 Mostrar STRW-Token en Wallet
 
